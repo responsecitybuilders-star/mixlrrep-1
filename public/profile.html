@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Airvibe | Profile</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { margin: 0; background: #020617; color: white; font-family: 'Plus Jakarta Sans', sans-serif; }
+        .banner { height: 300px; background-size: cover; background-position: center; position: relative; }
+        .user-info { position: absolute; bottom: -60px; left: 50%; transform: translateX(-50%); text-align: center; }
+        .avatar { width: 120px; height: 120px; border-radius: 50%; border: 4px solid #020617; background-color: #333; background-size: cover; margin: 0 auto; }
+        .stats { display: flex; justify-content: center; gap: 40px; margin-top: 70px; }
+        .container { max-width: 800px; margin: 40px auto; padding: 20px; }
+        .card { background: rgba(30,41,59,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 30px; }
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; }
+        .modal-box { background: #1e293b; padding: 30px; width: 400px; border-radius: 16px; }
+        input, textarea { width: 100%; background: #000; border: 1px solid #333; padding: 10px; color: white; margin-bottom: 10px; }
+        button { background: #3b82f6; color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="banner" id="p-banner" style="background-image:url('https://source.unsplash.com/random/1200x400?galaxy')"></div>
+    <div class="user-info">
+        <div class="avatar" id="p-avatar" style="background-image:url('https://source.unsplash.com/random/200x200?face')"></div>
+        <h1 id="p-username">User</h1>
+    </div>
+    <div class="stats">
+        <div><h2 id="p-followers">0</h2><span>Followers</span></div>
+    </div>
+    <div class="container">
+        <button id="edit-btn" onclick="document.querySelector('.modal').style.display='flex'" style="display:none; margin:0 auto 20px auto; display:block;">Edit Profile</button>
+        <div class="card"><h3>About</h3><p id="p-bio">No bio.</p></div>
+    </div>
+
+    <div class="modal">
+        <div class="modal-box">
+            <h3>Edit Profile</h3>
+            <input id="edit-avatar" placeholder="Avatar URL"><input id="edit-banner" placeholder="Banner URL">
+            <textarea id="edit-bio" placeholder="Bio"></textarea>
+            <button onclick="saveProfile()">Save</button>
+            <button onclick="document.querySelector('.modal').style.display='none'" style="background:#333;">Cancel</button>
+        </div>
+    </div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const loggedUser = JSON.parse(localStorage.getItem('mixlr_user'));
+        const targetUser = params.get('user') || (loggedUser ? loggedUser.username : null);
+
+        fetch(`/api/profile/${targetUser}`).then(r=>r.json()).then(data => {
+            if(data.success && data.profile) {
+                const p = data.profile;
+                document.getElementById('p-username').innerText = p.username;
+                document.getElementById('p-followers').innerText = p.followers || 0;
+                if(p.bio) document.getElementById('p-bio').innerText = p.bio;
+                if(p.avatar) document.getElementById('p-avatar').style.backgroundImage = `url('${p.avatar}')`;
+                if(p.banner) document.getElementById('p-banner').style.backgroundImage = `url('${p.banner}')`;
+            }
+            if(loggedUser && loggedUser.username === targetUser) document.getElementById('edit-btn').style.display = 'block';
+            else document.getElementById('edit-btn').style.display = 'none';
+        });
+
+        async function saveProfile() {
+            await fetch('/api/profile/update', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({
+                username: targetUser, bio: document.getElementById('edit-bio').value,
+                avatar: document.getElementById('edit-avatar').value, banner: document.getElementById('edit-banner').value
+            })});
+            location.reload();
+        }
+    </script>
+</body>
+</html>

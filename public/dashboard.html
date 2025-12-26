@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Airvibe | Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&family=Plus+Jakarta+Sans:wght@400;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root { --bg: #020617; --sidebar: #0f172a; --glass: rgba(30, 41, 59, 0.4); --border: rgba(255, 255, 255, 0.08); --primary: #3b82f6; --accent: #8b5cf6; --success: #10b981; --warn: #f59e0b; --danger: #ef4444; --text: #f8fafc; --font-head: 'Outfit', sans-serif; --font-body: 'Plus Jakarta Sans', sans-serif; }
+        * { box-sizing: border-box; }
+        body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font-body); height: 100vh; display: grid; grid-template-columns: 260px 1fr 300px; overflow: hidden; }
+        
+        /* Sidebar */
+        .sidebar { background: var(--sidebar); border-right: 1px solid var(--border); padding: 25px; display: flex; flex-direction: column; gap: 10px; }
+        .logo { font-family: var(--font-head); font-size: 1.5rem; font-weight: 900; margin-bottom: 40px; color: white; display: flex; align-items: center; gap: 10px; } .logo span { color: var(--primary); }
+        .nav-item { padding: 12px 15px; border-radius: 12px; color: #94a3b8; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 15px; transition: 0.2s; }
+        .nav-item:hover, .nav-item.active { background: var(--glass); color: white; border: 1px solid var(--border); }
+        .premium-card { margin-top: auto; background: linear-gradient(135deg, var(--primary), var(--accent)); padding: 20px; border-radius: 16px; }
+        .btn-white { background: white; color: var(--primary); border: none; padding: 8px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; }
+
+        /* Main */
+        .main { padding: 30px; overflow-y: auto; background: radial-gradient(circle at top left, #1e293b 0%, #020617 40%); }
+        .welcome-header h1 { font-family: var(--font-head); font-size: 2rem; margin: 0; }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 30px 0; }
+        .stat-card { background: var(--glass); border: 1px solid var(--border); padding: 20px; border-radius: 16px; display: flex; align-items: center; gap: 15px; }
+        .stat-icon { width: 50px; height: 50px; border-radius: 12px; background: rgba(59, 130, 246, 0.1); color: var(--primary); display: grid; place-items: center; font-size: 1.5rem; }
+        .chart-container { background: var(--glass); border: 1px solid var(--border); border-radius: 16px; padding: 25px; margin-bottom: 30px; height: 300px; }
+        .chart-bars { display: flex; align-items: flex-end; justify-content: space-between; height: 200px; margin-top: 20px; }
+        .bar { width: 8%; background: var(--primary); border-radius: 4px; opacity: 0.5; position: relative; } .bar:hover { opacity: 1; }
+        .stream-item { background: var(--glass); padding: 15px; border-radius: 12px; display: flex; align-items: center; gap: 15px; border: 1px solid var(--border); margin-bottom: 10px; }
+        .stream-thumb { width: 60px; height: 60px; border-radius: 8px; background-size: cover; background-color: #333; }
+
+        /* Right Sidebar */
+        .sidebar-right { background: rgba(15, 23, 42, 0.3); border-left: 1px solid var(--border); padding: 25px; display: flex; flex-direction: column; gap: 30px; overflow-y: auto; }
+        .profile-card { text-align: center; }
+        .profile-avatar { width: 100px; height: 100px; border-radius: 50%; margin: 0 auto 15px; border: 3px solid var(--primary); background-size: cover; background-color: #333; }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: white; padding: 8px; border-radius: 8px; cursor: pointer; margin: 5px; }
+        .wallet-widget { background: rgba(0,0,0,0.3); padding: 20px; border-radius: 16px; border: 1px solid var(--border); }
+        .transaction-row { display: flex; justify-content: space-between; font-size: 0.85rem; padding: 10px 0; border-bottom: 1px solid var(--border); }
+        .t-plus { color: var(--success); } .t-minus { color: var(--danger); }
+        
+        @media (max-width: 1200px) { body { grid-template-columns: 80px 1fr 280px; } .nav-text, .premium-card { display: none; } }
+        @media (max-width: 900px) { body { grid-template-columns: 1fr; } .sidebar, .sidebar-right { display: none; } }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="logo">AIR<span>VIBE</span></div>
+        <div class="nav-item active"><span class="nav-icon">📊</span> <span class="nav-text">Dashboard</span></div>
+        <div class="nav-item" onclick="location.href='/'"><span class="nav-icon">🌍</span> <span class="nav-text">Discover Feed</span></div>
+        <div class="nav-item" onclick="location.href='/studio'"><span class="nav-icon">🎙️</span> <span class="nav-text">Studio</span></div>
+        <div class="nav-item" onclick="location.href='/profile'"><span class="nav-icon">👤</span> <span class="nav-text">My Profile</span></div>
+        <div class="premium-card"><h4>Go Pro 🚀</h4><p>Unlock HD streaming.</p><button class="btn-white">Upgrade Now</button></div>
+    </aside>
+
+    <main class="main">
+        <div class="welcome-header"><h1 id="welcome-msg">Welcome back</h1><p>Here's what's happening today.</p></div>
+        <div class="stats-grid">
+            <div class="stat-card"><div class="stat-icon">👥</div><div><h3 id="stat-followers">0</h3><span>Followers</span></div></div>
+            <div class="stat-card"><div class="stat-icon">💎</div><div><h3 id="stat-coins">0</h3><span>Balance</span></div></div>
+            <div class="stat-card"><div class="stat-icon">⏳</div><div><h3>12h</h3><span>Stream Time</span></div></div>
+        </div>
+        <div class="chart-container"><h3>Activity Overview</h3><div class="chart-bars" id="activity-chart"></div></div>
+        <h3>Recent Streams</h3><div id="recent-list"></div>
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="profile-card">
+            <div class="profile-avatar" id="dash-avatar"></div>
+            <h3 id="dash-username">User</h3>
+            <button class="btn-outline" onclick="location.href='/profile'">Edit Profile</button>
+            <button class="btn-outline" onclick="logout()">Log Out</button>
+        </div>
+        <div class="wallet-widget">
+            <h4>Recent Transactions</h4>
+            <div class="transaction-row"><span>Bought Coins</span><span class="t-minus">-$5.00</span></div>
+            <div class="transaction-row"><span>Gift Received</span><span class="t-plus">+50 💎</span></div>
+        </div>
+    </aside>
+
+    <script>
+        window.onload = () => {
+            const user = JSON.parse(localStorage.getItem('mixlr_user'));
+            if(!user) { window.location.href = '/login'; return; }
+            document.getElementById('welcome-msg').innerText = `Welcome back, ${user.username}`;
+            document.getElementById('dash-username').innerText = user.username;
+            
+            fetch(`/api/profile/${user.username}`).then(r=>r.json()).then(data => {
+                if(data.success && data.profile) {
+                    if(data.profile.avatar) document.getElementById('dash-avatar').style.backgroundImage = `url('${data.profile.avatar}')`;
+                    document.getElementById('stat-followers').innerText = data.profile.followers || 0;
+                    document.getElementById('stat-coins').innerText = Math.floor(Math.random() * 500);
+                }
+            });
+            renderChart(); renderHistory();
+        };
+
+        function renderChart() {
+            const c = document.getElementById('activity-chart');
+            for(let i=0; i<7; i++) c.innerHTML += `<div class="bar" style="height:${Math.floor(Math.random()*80)+20}%"></div>`;
+        }
+        function renderHistory() {
+            const l = document.getElementById('recent-list');
+            ['Chill Radio', 'Tech Talk', 'Jazz Night'].forEach((t,i) => {
+                l.innerHTML += `<div class="stream-item"><div class="stream-thumb" style="background-image:url('https://source.unsplash.com/random/100x100?music&sig=${i}')"></div><b>${t}</b></div>`;
+            });
+        }
+        function logout() { localStorage.removeItem('mixlr_user'); window.location.href = '/login'; }
+    </script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin v6</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { background: #020617; color: #f8fafc; font-family: 'JetBrains Mono'; display: grid; grid-template-columns: 200px 1fr; height: 100vh; margin: 0; }
+        .sidebar { background: #0f172a; padding: 20px; border-right: 1px solid #333; }
+        .main { padding: 20px; overflow-y: auto; }
+        .panel { background: #1e293b; border: 1px solid #333; padding: 20px; margin-bottom: 20px; border-radius: 8px; }
+        table { width: 100%; border-collapse: collapse; } td, th { padding: 10px; border-bottom: 1px solid #333; text-align: left; }
+        button { background: #ef4444; color: white; border: none; padding: 5px 10px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="sidebar"><h3>ADMIN</h3><div>Dashboard</div><div>Users</div><div>Logs</div></div>
+    <div class="main">
+        <h1>Command Center</h1>
+        <div class="panel"><h3>Active Streams</h3><table id="stream-table"></table></div>
+        <div class="panel"><h3>Logs</h3><div id="logs"></div></div>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        socket.on('connect', () => socket.emit('requestData'));
+        socket.on('streamList', streams => {
+            const t = document.getElementById('stream-table'); t.innerHTML = '<tr><th>Host</th><th>Action</th></tr>';
+            Object.values(streams).forEach(s => t.innerHTML += `<tr><td>${s.host}</td><td><button onclick="alert('Killed ${s.id}')">KILL</button></td></tr>`);
+        });
+    </script>
+</body>
+</html>

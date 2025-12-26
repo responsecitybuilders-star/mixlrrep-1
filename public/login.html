@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Airvibe | Gateway</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #020617; --glass: rgba(30, 41, 59, 0.4); --border: rgba(255, 255, 255, 0.1); --primary: #3b82f6; --text: #ffffff; }
+        body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; height: 100vh; display: grid; grid-template-columns: 1fr 450px; overflow: hidden; }
+        
+        .visual-side { display: flex; justify-content: center; align-items: center; position: relative; }
+        .hero-card { width: 400px; height: 500px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 30px; transform: perspective(1000px) rotateY(15deg) rotateX(5deg); position: relative; overflow: hidden; box-shadow: 0 50px 100px rgba(0,0,0,0.5); }
+        .card-art { position: absolute; inset: 0; background: url('https://source.unsplash.com/random/800x1000?concert') center/cover; }
+        .card-content { position: absolute; bottom: 0; padding: 30px; background: linear-gradient(to top, #000, transparent); width: 100%; }
+        
+        .login-side { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(40px); padding: 60px; display: flex; flex-direction: column; justify-content: center; border-left: 1px solid var(--border); }
+        input, select { width: 100%; padding: 15px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 10px; color: white; margin-bottom: 15px; outline: none; }
+        button { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        .toggle-link { color: var(--primary); cursor: pointer; text-align: center; display: block; margin-top: 20px; }
+        
+        @media(max-width:900px){ body{grid-template-columns:1fr} .visual-side{display:none} }
+    </style>
+</head>
+<body>
+    <div class="visual-side">
+        <div class="hero-card"><div class="card-art"></div><div class="card-content"><h1>Experience<br>True Audio.</h1></div></div>
+    </div>
+    <div class="login-side">
+        <h1>AIR<span style="color:var(--primary)">VIBE</span></h1>
+        <div id="form-login">
+            <input id="l-user" placeholder="Username">
+            <input id="l-pass" type="password" placeholder="Password">
+            <button onclick="login()">Enter</button>
+        </div>
+        <div id="form-signup" style="display:none;">
+            <input id="s-user" placeholder="Choose Username">
+            <input id="s-pass" type="password" placeholder="Choose Password">
+            <select id="s-role"><option value="listener">Listener</option><option value="host">Broadcaster</option></select>
+            <button onclick="register()">Create ID</button>
+        </div>
+        <a class="toggle-link" onclick="toggleMode()">Create an account</a>
+    </div>
+    <script>
+        let isRegister = false;
+        function toggleMode() {
+            isRegister = !isRegister;
+            document.getElementById('form-login').style.display = isRegister ? 'none' : 'block';
+            document.getElementById('form-signup').style.display = isRegister ? 'block' : 'none';
+            document.querySelector('.toggle-link').innerText = isRegister ? "Login now" : "Create an account";
+        }
+        async function register() {
+            const u = document.getElementById('s-user').value, p = document.getElementById('s-pass').value, r = document.getElementById('s-role').value;
+            const res = await fetch('/api/register', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({username:u, password:p, role:r}) });
+            const data = await res.json();
+            if(data.success) { alert("ID Created."); toggleMode(); } else alert(data.error);
+        }
+        async function login() {
+            const u = document.getElementById('l-user').value, p = document.getElementById('l-pass').value;
+            const res = await fetch('/api/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({username:u, password:p}) });
+            const data = await res.json();
+            if(data.success) { localStorage.setItem('mixlr_user', JSON.stringify(data.user)); window.location.href = data.user.role==='host'?'/studio':'/'; } else alert(data.error);
+        }
+    </script>
+</body>
+</html>
