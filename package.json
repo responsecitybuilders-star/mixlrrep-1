@@ -1,0 +1,30 @@
+{
+  "name": "mixlrrep",
+  "version": "1.0.0",
+  "description": "One of the best",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/michaelTomiwa/mixlrrep.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/michaelTomiwa/mixlrrep/issues"
+  },
+  "homepage": "https://github.com/michaelTomiwa/mixlrrep#readme",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "compression": "^1.8.1",
+    "cookie-parser": "^1.4.7",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.2.1",
+    "socket.io": "^4.8.3",
+    "sqlite3": "^5.1.7"
+  }
+}

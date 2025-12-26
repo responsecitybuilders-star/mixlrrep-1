@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Airvibe | Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;500;700;800&family=Outfit:wght@300;500;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* === THEME: MIDNIGHT GLASS === */
+        :root {
+            --bg: #020617;
+            --glass: rgba(30, 41, 59, 0.7);
+            --border: rgba(255, 255, 255, 0.08);
+            --primary: #3b82f6;
+            --accent: #8b5cf6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --text: #ffffff;
+            --font: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); overflow: hidden; height: 100vh; }
+        button { font-family: var(--font); cursor: pointer; }
+
+        /* === LAYOUT === */
+        .app-layout { display: grid; grid-template-columns: 240px 1fr 280px; height: 100vh; transition: filter 0.5s; }
+        body.theater-open .app-layout { filter: blur(20px) scale(0.95); pointer-events: none; }
+
+        .sidebar-left { position: relative; z-index: 10; background: rgba(2, 6, 23, 0.95); border-right: 1px solid var(--border); padding: 20px; display: flex; flex-direction: column; }
+        .logo { font-size: 1.5rem; font-weight: 800; color: white; display: flex; align-items: center; gap: 10px; margin-bottom: 40px; cursor: pointer; }
+        .logo span { color: var(--primary); }
+        .nav-item { padding: 12px 15px; border-radius: 12px; color: #94a3b8; cursor: pointer; transition: 0.2s; font-weight: 600; display: flex; align-items: center; gap: 15px; margin-bottom: 5px; }
+        .nav-item:hover, .nav-item.active { background: var(--glass); color: white; }
+        
+        .main-content { overflow-y: auto; padding: 20px 30px; padding-bottom: 120px; }
+        .top-header { display: flex; justify-content: space-between; margin-bottom: 30px; align-items: center; }
+        .search-bar { background: var(--glass); border: 1px solid var(--border); padding: 10px 20px; border-radius: 30px; width: 400px; display: flex; gap: 10px; }
+        .search-input { background: transparent; border: none; color: white; outline: none; width: 100%; }
+        
+        .card { background: var(--glass); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; cursor: pointer; transition: 0.3s; }
+        .card:hover { transform: translateY(-5px); border-color: var(--primary); }
+        .card-img { height: 160px; width: 100%; background-size: cover; background-position: center; position: relative; }
+        .live-tag { position: absolute; top: 10px; left: 10px; background: #ef4444; color: white; font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; font-weight: bold; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
+        
+        .sidebar-right { background: rgba(2, 6, 23, 0.95); border-left: 1px solid var(--border); padding: 25px; display: flex; flex-direction: column; gap: 30px; overflow-y: auto; }
+
+        /* MINI PLAYER */
+        .player-bar {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 600px; height: 70px;
+            background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(20px); border: 1px solid var(--primary); border-radius: 50px;
+            display: none; align-items: center; padding: 0 20px; gap: 15px; z-index: 100; cursor: pointer; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+
+        /* === THEATER MODE === */
+        #theater-mode {
+            position: fixed; top: 100%; left: 0; width: 100%; height: 100%; background: #000; z-index: 5000;
+            transition: top 0.5s cubic-bezier(0.19, 1, 0.22, 1); display: flex; flex-direction: column; overflow: hidden;
+        }
+        #theater-mode.open { top: 0; }
+
+        .immersive-bg { position: absolute; inset: 0; z-index: 0; background: radial-gradient(circle at 50% 50%, #1e1b4b 0%, #000 80%); opacity: 0.8; }
+        .theater-stage { flex: 1; position: relative; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        
+        /* 3D Card */
+        .holo-card {
+            width: 300px; height: 300px; border-radius: 30px; background: #000; position: relative;
+            transform-style: preserve-3d; animation: float3D 6s ease-in-out infinite;
+            box-shadow: 0 0 0 1px rgba(255,255,255,0.1), 0 30px 80px rgba(0,0,0,0.8), 0 0 100px rgba(59, 130, 246, 0.2);
+        }
+        .holo-img { width: 100%; height: 100%; object-fit: cover; border-radius: 30px; }
+        .holo-ring { position: absolute; inset: -20px; border-radius: 40px; border: 2px solid rgba(255,255,255,0.05); animation: spin 20s linear infinite; pointer-events: none; }
+        @keyframes float3D { 0%,100% { transform: translateY(0) rotateX(5deg); } 50% { transform: translateY(-20px) rotateX(0deg); } }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* Floating UI */
+        #float-layer { position: absolute; inset: 0; pointer-events: none; z-index: 50; }
+        .floater { position: absolute; pointer-events: none; animation: heartFloat 2s ease-out forwards; z-index: 100; font-size: 2rem; }
+        @keyframes heartFloat { 0% { transform: translateY(0) scale(1); opacity:1; } 100% { transform: translateY(-300px) scale(1.5) rotate(20deg); opacity:0; } }
+
+        /* Chat Overlay */
+        .theater-ui { height: 45%; z-index: 20; position: relative; background: linear-gradient(to top, #000 0%, rgba(0,0,0,0.8) 80%, transparent 100%); display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 20px; }
+        .chat-stream { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; mask-image: linear-gradient(to bottom, transparent, black 20%); }
+        .chat-bubble { background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); padding: 10px 15px; border-radius: 20px; border-bottom-left-radius: 4px; color: white; font-size: 0.9rem; align-self: flex-start; max-width: 80%; border: 1px solid rgba(255,255,255,0.05); animation: slideIn 0.3s ease; }
+        @keyframes slideIn { from { opacity:0; transform: translateY(20px); } to { opacity:1; transform: translateY(0); } }
+
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 6000; display: none; align-items: center; justify-content: center; }
+        .modal { background: #1e293b; padding: 30px; border-radius: 20px; width: 90%; max-width: 400px; border: 1px solid var(--border); text-align: center; }
+        .hidden-view { display: none; }
+        
+        @media (max-width: 1024px) { .sidebar-right { display: none; } .app-layout { grid-template-columns: 80px 1fr; } .sidebar-left { width: 80px; align-items: center; } .logo span, .nav-text { display: none; } }
+    </style>
+</head>
+<body>
+
+    <div class="modal-overlay" id="wallet-modal">
+        <div class="modal">
+            <h2>💰 Top Up Wallet</h2>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:20px;">
+                <button class="nav-item" style="justify-content:center; background:var(--glass);" onclick="addToWallet(10)">+$10</button>
+                <button class="nav-item" style="justify-content:center; background:var(--glass);" onclick="addToWallet(50)">+$50</button>
+            </div>
+            <button class="nav-item" style="justify-content:center; width:100%; background:#ef4444; color:white;" onclick="closeModals()">Cancel</button>
+        </div>
+    </div>
+
+    <div class="app-layout">
+        <aside class="sidebar-left">
+            <div class="logo" onclick="navigate('home')">AIR<span>VIBE</span></div>
+            <div class="nav-item active" onclick="navigate('home')" id="nav-home"><span class="nav-icon">🏠</span> <span class="nav-text">Home</span></div>
+            <div class="nav-item" onclick="navigate('dashboard')"><span class="nav-icon">📊</span> <span class="nav-text">Dashboard</span></div>
+            <div class="nav-item" onclick="location.href='/studio'"><span class="nav-icon">🎙️</span> <span class="nav-text">Studio</span> <span class="badge">LIVE</span></div>
+            <div class="balance-card"><div style="font-size:0.8rem; opacity:0.8;">Balance</div><div style="font-size:1.5rem; font-weight:800;" id="wallet-display">$0.00</div><button onclick="openModal('wallet-modal')" style="margin-top:10px; width:100%; padding:8px; border:none; border-radius:8px; background:rgba(0,0,0,0.3); color:white; cursor:pointer;">+ Top Up</button></div>
+        </aside>
+
+        <main class="main-content">
+            <div class="top-header">
+                <div class="search-bar"><span>🔍</span><input type="text" class="search-input" placeholder="Search artists..." onkeyup="filterGrid(this.value)"></div>
+                <div class="user-menu">
+                    <div class="user-avatar" onclick="goToProfile()" style="background-image:url('https://source.unsplash.com/random/100x100?face')"></div>
+                </div>
+            </div>
+
+            <div id="view-home">
+                <div class="carousel-container"><div class="slide active" style="background-image: url('https://source.unsplash.com/random/1200x400?concert')"><div class="slide-content"><h1>Global Music Festival</h1><p>Live from Tokyo • 14k Watching</p></div></div></div>
+                <div class="grid" id="live-grid"></div>
+            </div>
+        </main>
+
+        <aside class="sidebar-right">
+            <h3>🏆 Top Creators</h3><div id="top-creators"></div>
+        </aside>
+    </div>
+
+    <div class="player-bar" id="mini-player" onclick="openTheater()">
+        <div id="mp-art" style="width:40px; height:40px; border-radius:8px; background:#333; background-size:cover;"></div>
+        <div style="flex:1;"><div id="mp-title" style="font-weight:700; font-size:0.9rem;">Title</div><div id="mp-host" style="font-size:0.8rem; opacity:0.7;">Host</div></div>
+        <button onclick="event.stopPropagation(); togglePlay()" id="mp-play-btn" style="background:none; border:none; color:white; font-size:1.5rem;">⏸</button>
+    </div>
+
+    <div id="theater-mode" onclick="screenTap(event)">
+        <div class="immersive-bg"></div>
+        <div style="padding:20px; display:flex; justify-content:space-between; align-items:center; z-index:50;">
+            <button onclick="closeTheater()" style="background:none; border:none; color:white; font-size:1.5rem;">⌄</button>
+            <div style="text-align:center;"><div style="font-size:0.7rem; color:var(--primary); font-weight:bold; letter-spacing:1px;">LIVE ON AIR</div><div id="tm-host" style="font-weight:bold;">Host Name</div></div>
+            <button style="background:none; border:none; color:white; font-size:1.5rem;">⋮</button>
+        </div>
+
+        <div class="theater-stage">
+            <div class="holo-card"><div class="holo-ring"></div><img id="tm-art" class="holo-img" src=""></div>
+            <div id="tm-title" style="margin-top:30px; font-size:1.5rem; font-weight:800; text-shadow:0 5px 10px rgba(0,0,0,0.5);">Song Title</div>
+        </div>
+
+        <div id="float-layer"></div>
+
+        <div class="theater-ui" onclick="event.stopPropagation()">
+            <div class="chat-stream" id="tm-chat">
+                <div style="text-align:center; color:rgba(255,255,255,0.4); font-size:0.8rem; margin-top:auto;">✨ Welcome! Tap screen to send hearts.</div>
+            </div>
+            <div style="padding:20px; display:flex; gap:10px; align-items:center;">
+                <input id="tm-chat-input" type="text" placeholder="Send a message..." style="flex:1; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); padding:12px 20px; border-radius:30px; color:white; outline:none;" onkeypress="if(event.key==='Enter') sendChat()">
+                <button onclick="sendGift('❤️')" style="width:50px; height:50px; border-radius:50%; background:linear-gradient(135deg, #ef4444, #be123c); border:none; font-size:1.5rem;">❤️</button>
+                <button onclick="sendGift('🚀')" style="width:50px; height:50px; border-radius:50%; background:linear-gradient(135deg, var(--primary), var(--accent)); border:none; font-size:1.5rem;">🚀</button>
+            </div>
+        </div>
+    </div>
+
+    <audio id="remoteAudio" autoplay></audio>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="broadcast-client.js"></script>
+    <script>
+        const socket = io();
+        let balance = 0, allStreams = [], currentRoomId = null;
+
+        socket.on('connect', () => socket.emit('requestData'));
+        socket.on('streamList', streams => {
+            allStreams = Object.values(streams);
+            renderGrid(allStreams, 'live-grid');
+        });
+
+        function renderGrid(list, elementId) {
+            const grid = document.getElementById(elementId);
+            if(list.length === 0) { grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; opacity:0.5;">No streams found.</div>`; return; }
+            let html = '';
+            list.forEach(s => {
+                const img = s.image || `https://source.unsplash.com/random/400x300?concert&sig=${s.id}`;
+                html += `<div class="card" onclick="playStream('${s.id}', '${s.title}', '${s.host}', '${img}')"><div class="card-img" style="background-image:url('${img}')"><div class="live-tag">LIVE</div></div><div class="card-info"><div class="card-title">${s.title}</div><div style="font-size:0.8rem; color:#aaa;">${s.host}</div></div></div>`;
+            });
+            grid.innerHTML = html;
+        }
+
+        function playStream(id, t, h, img) {
+            currentRoomId = id;
+            document.getElementById('mini-player').style.display = 'flex';
+            document.getElementById('mp-title').innerText = t;
+            document.getElementById('mp-host').innerText = h;
+            document.getElementById('mp-art').style.backgroundImage = `url('${img}')`;
+            
+            document.getElementById('tm-host').innerText = h;
+            document.getElementById('tm-title').innerText = t;
+            document.getElementById('tm-art').src = img;
+            document.getElementById('tm-chat').innerHTML = '<div class="chat-bubble" style="align-self:center; background:rgba(255,255,255,0.1);">Joined Room.</div>';
+
+            socket.emit('joinEvent', id);
+            if(typeof joinStream === 'function') joinStream(id);
+            openTheater();
+        }
+
+        function togglePlay() { const aud = document.getElementById('remoteAudio'); if(aud.paused) aud.play(); else aud.pause(); }
+        function openTheater() { document.getElementById('theater-mode').classList.add('open'); document.body.classList.add('theater-open'); }
+        function closeTheater() { document.getElementById('theater-mode').classList.remove('open'); document.body.classList.remove('theater-open'); }
+
+        function screenTap(e) {
+            if(e.target.closest('input') || e.target.closest('button')) return;
+            spawnFloater('❤️', e.clientX, e.clientY);
+            if(Math.random() > 0.7 && currentRoomId) socket.emit('sendGift', { room: currentRoomId, user: "Anon", gift: '❤️' });
+        }
+
+        function sendChat() {
+            const input = document.getElementById('tm-chat-input');
+            if(!input.value || !currentRoomId) return;
+            socket.emit('chatMessage', { room: currentRoomId, user: "Me", msg: input.value });
+            addBubble("Me", input.value, true);
+            input.value = '';
+        }
+
+        function sendGift(emoji) {
+            if(!currentRoomId) return;
+            socket.emit('sendGift', { room: currentRoomId, user: "Me", gift: emoji });
+            for(let i=0; i<5; i++) setTimeout(() => spawnFloater(emoji, window.innerWidth/2 + (Math.random()*100-50), window.innerHeight-100), i*100);
+            addBubble("System", `You sent ${emoji}`, true);
+        }
+
+        socket.on('chatMessage', data => { if(data.user !== "Me") addBubble(data.user || "User", data.msg, false); });
+        socket.on('giftReceived', data => { if(data.user !== "Me") { spawnFloater(data.gift, Math.random()*window.innerWidth, window.innerHeight-50); addBubble("System", `${data.user} sent ${data.gift}`, false); } });
+
+        function addBubble(user, text, isMe) {
+            const list = document.getElementById('tm-chat');
+            const div = document.createElement('div');
+            div.className = `chat-bubble ${isMe ? 'me' : ''}`;
+            div.innerHTML = `<b>${user}</b> ${text}`;
+            list.appendChild(div);
+            list.scrollTop = list.scrollHeight;
+        }
+
+        function spawnFloater(char, x, y) {
+            const el = document.createElement('div');
+            el.innerText = char; el.className = 'floater';
+            el.style.left = x + 'px'; el.style.top = y + 'px';
+            document.getElementById('float-layer').appendChild(el);
+            setTimeout(() => el.remove(), 2000);
+        }
+
+        function goToProfile() {
+            const u = JSON.parse(localStorage.getItem('mixlr_user'));
+            if(u) window.location.href = `/profile?user=${u.username}`; else window.location.href = '/login';
+        }
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModals() { document.querySelectorAll('.modal-overlay').forEach(el => el.style.display = 'none'); }
+        function addToWallet(amount) { balance += amount; document.getElementById('wallet-display').innerText = `$${balance.toFixed(2)}`; closeModals(); }
+    </script>
+</body>
+</html>

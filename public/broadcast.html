@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Airvibe | Command Deck</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #050507; --glass: rgba(20, 25, 35, 0.7); --border: rgba(255, 255, 255, 0.08); --primary: #3b82f6; --danger: #ef4444; --success: #10b981; --warn: #f59e0b; --text: #e2e8f0; --font-ui: 'Outfit', sans-serif; --font-tech: 'JetBrains Mono', monospace; }
+        body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font-ui); height: 100vh; display: flex; flex-direction: column; overflow: hidden; background-image: radial-gradient(circle at 10% 10%, rgba(59, 130, 246, 0.05) 0%, transparent 40%), radial-gradient(circle at 90% 90%, rgba(139, 92, 246, 0.05) 0%, transparent 40%); }
+        .hud-bar { height: 60px; background: rgba(14, 16, 21, 0.9); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; padding: 0 25px; backdrop-filter: blur(10px); }
+        .brand { font-family: var(--font-tech); font-weight: 800; font-size: 1.2rem; display: flex; align-items: center; gap: 10px; } .brand span { color: var(--primary); }
+        .live-badge { background: #1a1a1a; padding: 5px 12px; border-radius: 4px; font-size: 0.75rem; font-family: var(--font-tech); color: #666; border: 1px solid #333; } .live-badge.on-air { background: rgba(239, 68, 68, 0.2); color: var(--danger); border-color: var(--danger); box-shadow: 0 0 20px rgba(239, 68, 68, 0.2); }
+        .telemetry { display: flex; gap: 20px; font-family: var(--font-tech); font-size: 0.7rem; color: #64748b; } .tele-item b { color: var(--text); }
+        .cockpit { flex: 1; display: grid; grid-template-columns: 320px 1fr 320px; gap: 2px; background: var(--border); }
+        .panel { background: var(--bg); padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 25px; } .panel-c { background: radial-gradient(circle at center, #0f1219 0%, #050507 100%); padding: 30px; position: relative; }
+        .section-title { font-size: 0.7rem; color: #64748b; text-transform: uppercase; font-weight: 700; letter-spacing: 1.5px; margin-bottom: 12px; }
+        .glass-input { width: 100%; background: #0e1015; border: 1px solid var(--border); color: white; padding: 10px 12px; border-radius: 6px; font-family: var(--font-ui); font-size: 0.9rem; outline: none; }
+        .fx-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .fx-btn { background: rgba(255,255,255,0.03); border: 1px solid var(--border); color: #94a3b8; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.8rem; transition: 0.2s; }
+        .fx-btn:hover { background: rgba(255,255,255,0.08); color: white; } .fx-btn.active { background: var(--primary); border-color: var(--primary); color: white; box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); }
+        .monitor-frame { width: 100%; height: 280px; background: #000; border-radius: 16px; border: 2px solid #1e293b; position: relative; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.5); } canvas { width: 100%; height: 100%; }
+        .go-live-btn { width: 140px; height: 140px; border-radius: 50%; background: linear-gradient(145deg, #1a1e29, #0a0c10); border: 4px solid #2d3748; color: #64748b; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 20px 20px 60px #050608; transition: 0.3s; }
+        .go-live-btn.live { background: radial-gradient(circle, #ef4444 0%, #991b1b 100%); border-color: #fca5a5; color: white; box-shadow: 0 0 50px rgba(239, 68, 68, 0.5); animation: pulseBtn 2s infinite; }
+        .chat-container { flex: 1; border: 1px solid var(--border); background: rgba(0,0,0,0.2); border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; }
+        .chat-feed { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .chat-msg { background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; border-left: 2px solid var(--border); }
+        @keyframes pulseBtn { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+    </style>
+</head>
+<body>
+    <header class="hud-bar">
+        <div class="brand"><div style="width:10px; height:10px; background:var(--primary); transform:rotate(45deg);"></div> AIR<span>VIBE</span></div>
+        <div class="telemetry">
+            <div class="tele-item" style="border:1px solid var(--border); padding:5px 10px; border-radius:4px;">👥 LISTENERS: <b id="listener-count" style="color:var(--primary); font-size:1rem;">0</b></div>
+            <div class="tele-item">EARNINGS: <b id="revenue-val" style="color:var(--warn)">$0.00</b></div>
+            <div class="tele-item">CPU: <b id="cpu-load">12%</b></div>
+        </div>
+        <div class="live-badge" id="status-badge">● OFFLINE</div>
+    </header>
+
+    <div class="cockpit">
+        <div class="panel">
+            <div><div class="section-title">BROADCAST INFO</div><input id="showTitle" class="glass-input" placeholder="Show Title"><input id="hostName" class="glass-input" value="Host" style="margin-top:10px;"></div>
+            <div><div class="section-title">AUDIO ENGINE</div><select id="audioSource" class="glass-input" onchange="changeAudioInput()"><option value="default">Default Mic</option></select></div>
+            <div><div class="section-title">FX RACK</div><div class="fx-grid"><button class="fx-btn active" onclick="setVoiceFX('normal', this)">Clean</button><button class="fx-btn" onclick="setVoiceFX('robot', this)">Robot</button><button class="fx-btn" onclick="setVoiceFX('echo', this)">Echo</button><button class="fx-btn" onclick="setVoiceFX('radio', this)">Radio</button></div></div>
+        </div>
+
+        <div class="panel panel-c">
+            <div style="flex:1; display:flex; flex-direction:column;">
+                <div class="monitor-frame"><canvas id="visualizer"></canvas><div style="position:absolute; top:15px; left:15px; color:var(--success); font-size:0.7rem;">VISUAL_CORE_V3</div></div>
+                <div style="text-align:center; font-family:var(--font-tech); font-size:2rem; margin-top:20px; color:var(--text);"><span id="timer">00:00:00</span></div>
+                <div style="display:flex; justify-content:center; align-items:center; gap:30px; margin-top:auto;">
+                    <button class="go-live-btn" id="goLiveBtn" onclick="startBroadcast()"><h2>GO LIVE</h2><span>INITIALIZE</span></button>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="section-title">LIVE CHAT</div>
+            <div class="chat-container"><div class="chat-feed" id="messages"><div class="chat-msg" style="text-align:center; color:#666;">System Ready.</div></div></div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="broadcast-host.js"></script>
+    <script>
+        window.onload = () => { if(window.listAudioInputs) window.listAudioInputs(); const u = JSON.parse(localStorage.getItem('mixlr_user')); if(u) document.getElementById('hostName').value = u.username; };
+        
+        let sessionEarnings = 0;
+        const GIFT_VALUES = { '🚀': 50, '❤️': 10, '💎': 100 };
+
+        window.incomingChat = function(user, msg) { addMsg(user, msg, false); };
+        window.incomingGift = function(user, giftIcon) {
+            const val = GIFT_VALUES[giftIcon] || 10;
+            sessionEarnings += (val * 0.01);
+            document.getElementById('revenue-val').innerText = `$${sessionEarnings.toFixed(2)}`;
+            addMsg("SYSTEM", `${user} sent ${giftIcon}`, true);
+        };
+        window.updateListenerCount = function(count) { document.getElementById('listener-count').innerText = count; };
+        window.incomingLog = function(msg, type) { addMsg("SYSTEM", msg, true); };
+
+        function addMsg(user, text, isSystem) {
+            const feed = document.getElementById('messages');
+            const div = document.createElement('div');
+            div.className = 'chat-msg';
+            div.innerHTML = isSystem ? `<small style="color:var(--warn)">${text}</small>` : `<strong>${user}</strong> ${text}`;
+            feed.appendChild(div);
+            feed.scrollTop = feed.scrollHeight;
+        }
+
+        window.updateUIState = function(isLive) {
+            const btn = document.getElementById('goLiveBtn');
+            const badge = document.getElementById('status-badge');
+            if(isLive) { btn.classList.add('live'); btn.innerHTML = "<h2>END</h2>"; badge.classList.add('on-air'); badge.innerText = "● ON AIR"; startTimer(); } 
+            else { btn.classList.remove('live'); btn.innerHTML = "<h2>GO LIVE</h2>"; badge.classList.remove('on-air'); badge.innerText = "● OFFLINE"; stopTimer(); }
+        }
+
+        let timerInt, seconds=0;
+        function startTimer() { seconds=0; timerInt = setInterval(() => { seconds++; document.getElementById('timer').innerText = new Date(seconds * 1000).toISOString().substr(11, 8); }, 1000); }
+        function stopTimer() { clearInterval(timerInt); }
+    </script>
+</body>
+</html>
