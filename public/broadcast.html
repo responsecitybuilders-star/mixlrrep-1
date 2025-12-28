@@ -3,102 +3,391 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Airvibe | Command Deck</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        :root { --bg: #050507; --glass: rgba(20, 25, 35, 0.7); --border: rgba(255, 255, 255, 0.08); --primary: #3b82f6; --danger: #ef4444; --success: #10b981; --warn: #f59e0b; --text: #e2e8f0; --font-ui: 'Outfit', sans-serif; --font-tech: 'JetBrains Mono', monospace; }
-        body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font-ui); height: 100vh; display: flex; flex-direction: column; overflow: hidden; background-image: radial-gradient(circle at 10% 10%, rgba(59, 130, 246, 0.05) 0%, transparent 40%), radial-gradient(circle at 90% 90%, rgba(139, 92, 246, 0.05) 0%, transparent 40%); }
-        .hud-bar { height: 60px; background: rgba(14, 16, 21, 0.9); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; padding: 0 25px; backdrop-filter: blur(10px); }
-        .brand { font-family: var(--font-tech); font-weight: 800; font-size: 1.2rem; display: flex; align-items: center; gap: 10px; } .brand span { color: var(--primary); }
-        .live-badge { background: #1a1a1a; padding: 5px 12px; border-radius: 4px; font-size: 0.75rem; font-family: var(--font-tech); color: #666; border: 1px solid #333; } .live-badge.on-air { background: rgba(239, 68, 68, 0.2); color: var(--danger); border-color: var(--danger); box-shadow: 0 0 20px rgba(239, 68, 68, 0.2); }
-        .telemetry { display: flex; gap: 20px; font-family: var(--font-tech); font-size: 0.7rem; color: #64748b; } .tele-item b { color: var(--text); }
-        .cockpit { flex: 1; display: grid; grid-template-columns: 320px 1fr 320px; gap: 2px; background: var(--border); }
-        .panel { background: var(--bg); padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 25px; } .panel-c { background: radial-gradient(circle at center, #0f1219 0%, #050507 100%); padding: 30px; position: relative; }
-        .section-title { font-size: 0.7rem; color: #64748b; text-transform: uppercase; font-weight: 700; letter-spacing: 1.5px; margin-bottom: 12px; }
-        .glass-input { width: 100%; background: #0e1015; border: 1px solid var(--border); color: white; padding: 10px 12px; border-radius: 6px; font-family: var(--font-ui); font-size: 0.9rem; outline: none; }
-        .fx-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .fx-btn { background: rgba(255,255,255,0.03); border: 1px solid var(--border); color: #94a3b8; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.8rem; transition: 0.2s; }
-        .fx-btn:hover { background: rgba(255,255,255,0.08); color: white; } .fx-btn.active { background: var(--primary); border-color: var(--primary); color: white; box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); }
-        .monitor-frame { width: 100%; height: 280px; background: #000; border-radius: 16px; border: 2px solid #1e293b; position: relative; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.5); } canvas { width: 100%; height: 100%; }
-        .go-live-btn { width: 140px; height: 140px; border-radius: 50%; background: linear-gradient(145deg, #1a1e29, #0a0c10); border: 4px solid #2d3748; color: #64748b; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 20px 20px 60px #050608; transition: 0.3s; }
-        .go-live-btn.live { background: radial-gradient(circle, #ef4444 0%, #991b1b 100%); border-color: #fca5a5; color: white; box-shadow: 0 0 50px rgba(239, 68, 68, 0.5); animation: pulseBtn 2s infinite; }
-        .chat-container { flex: 1; border: 1px solid var(--border); background: rgba(0,0,0,0.2); border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; }
-        .chat-feed { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-        .chat-msg { background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; border-left: 2px solid var(--border); }
-        @keyframes pulseBtn { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+    <title>Airvibe | Studio Ultimate</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script> <style>
+        /* === THEME: ONYX PRO === */
+        :root {
+            --bg: #09090b;
+            --panel: #18181b;
+            --border: #27272a;
+            --primary: #6366f1;
+            --accent: #a855f7;
+            --danger: #ef4444;
+            --success: #22c55e;
+            --text: #e4e4e7;
+            --font-ui: 'Inter', sans-serif;
+            --font-code: 'JetBrains Mono', monospace;
+        }
+
+        body { background: var(--bg); color: var(--text); font-family: var(--font-ui); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+        
+        /* LAYOUT */
+        .grid-layout { display: grid; grid-template-columns: 320px 1fr 350px; height: 100%; border-top: 1px solid var(--border); }
+        .panel { background: var(--panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+        .scroll-y { overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+        
+        /* COMPONENTS */
+        .glass-header { height: 60px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; background: rgba(9, 9, 11, 0.9); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); }
+        .btn { padding: 8px 16px; border-radius: 6px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: 0.2s; border: 1px solid var(--border); background: #27272a; color: white; display: flex; align-items: center; gap: 8px; justify-content: center; }
+        .btn:hover { background: #3f3f46; }
+        .btn-primary { background: var(--primary); border-color: var(--primary); }
+        .btn-primary:hover { background: #4f46e5; }
+        .btn-danger { background: rgba(239,68,68,0.1); color: var(--danger); border-color: rgba(239,68,68,0.2); }
+        .btn-danger:hover { background: var(--danger); color: white; }
+
+        .control-group { background: #000; padding: 15px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 15px; }
+        .label-sm { font-size: 0.7rem; color: #a1a1aa; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; margin-bottom: 8px; display: block; }
+        
+        /* SLIDERS */
+        input[type=range] { width: 100%; height: 4px; background: #333; border-radius: 2px; accent-color: var(--primary); outline: none; -webkit-appearance: none; }
+        
+        /* VISUALIZER */
+        .viz-container { flex: 1; position: relative; background: radial-gradient(circle at center, #1e1b4b 0%, #000 70%); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        canvas { width: 100%; height: 100%; position: absolute; inset: 0; }
+        
+        /* GO LIVE BUTTON */
+        .big-btn { 
+            width: 140px; height: 140px; border-radius: 50%; background: #111; border: 4px solid #333; 
+            color: #555; display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            cursor: pointer; transition: 0.3s; z-index: 10;
+            box-shadow: 0 0 0 10px rgba(0,0,0,0.5);
+        }
+        .big-btn:hover { transform: scale(1.05); color: white; border-color: var(--primary); }
+        .big-btn.live { background: #ef4444; color: white; border-color: #fca5a5; box-shadow: 0 0 50px rgba(239,68,68,0.4); animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.7); } 70% { box-shadow: 0 0 0 20px rgba(239,68,68,0); } 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); } }
+
+        /* CHAT */
+        .chat-msg { padding: 8px 12px; font-size: 0.85rem; border-bottom: 1px solid #222; }
+        .chat-msg b { color: var(--primary); font-family: var(--font-code); }
+        .chat-msg.sys { border-left: 3px solid var(--warn); background: rgba(245,158,11,0.05); }
+        .chat-msg.tip { border-left: 3px solid var(--success); background: rgba(34,197,94,0.05); }
+
+        /* RESPONSIVE */
+        @media(max-width: 1024px) { .grid-layout { grid-template-columns: 1fr; display: block; overflow-y: auto; } .panel { height: auto; min-height: 400px; border-bottom: 1px solid var(--border); } }
     </style>
 </head>
-<body>
-    <header class="hud-bar">
-        <div class="brand"><div style="width:10px; height:10px; background:var(--primary); transform:rotate(45deg);"></div> AIR<span>VIBE</span></div>
-        <div class="telemetry">
-            <div class="tele-item" style="border:1px solid var(--border); padding:5px 10px; border-radius:4px;">👥 LISTENERS: <b id="listener-count" style="color:var(--primary); font-size:1rem;">0</b></div>
-            <div class="tele-item">EARNINGS: <b id="revenue-val" style="color:var(--warn)">$0.00</b></div>
-            <div class="tele-item">CPU: <b id="cpu-load">12%</b></div>
+<body id="app-body">
+
+    <header class="glass-header">
+        <div style="font-weight:900; font-size:1.2rem; display:flex; align-items:center; gap:10px;">
+            <div style="width:12px; height:12px; background:var(--primary); transform:rotate(45deg);"></div>
+            AIRVIBE <span class="bg-gray-800 text-xs px-2 py-1 rounded text-gray-400">STUDIO PRO</span>
         </div>
-        <div class="live-badge" id="status-badge">● OFFLINE</div>
+        
+        <div class="hidden md:flex gap-6 font-mono text-xs text-gray-400">
+            <span>CPU: <b class="text-white">12%</b></span>
+            <span>NET: <b class="text-green-500">■■■■</b></span>
+            <span class="flex items-center gap-2">💰 EARNED: <b class="text-yellow-400 text-sm" id="revenue-display">$0.00</b></span>
+        </div>
+
+        <div class="flex gap-3">
+            <button class="btn" onclick="toggleCinemaMode()">🔦 Lights</button>
+            <div id="status-pill" class="px-3 py-1 bg-black border border-gray-800 rounded text-xs font-bold text-gray-500">● OFFLINE</div>
+        </div>
     </header>
 
-    <div class="cockpit">
-        <div class="panel">
-            <div><div class="section-title">BROADCAST INFO</div><input id="showTitle" class="glass-input" placeholder="Show Title"><input id="hostName" class="glass-input" value="Host" style="margin-top:10px;"></div>
-            <div><div class="section-title">AUDIO ENGINE</div><select id="audioSource" class="glass-input" onchange="changeAudioInput()"><option value="default">Default Mic</option></select></div>
-            <div><div class="section-title">FX RACK</div><div class="fx-grid"><button class="fx-btn active" onclick="setVoiceFX('normal', this)">Clean</button><button class="fx-btn" onclick="setVoiceFX('robot', this)">Robot</button><button class="fx-btn" onclick="setVoiceFX('echo', this)">Echo</button><button class="fx-btn" onclick="setVoiceFX('radio', this)">Radio</button></div></div>
+    <div class="grid-layout">
+        
+        <div class="panel p-5 scroll-y">
+            
+            <div class="mb-5">
+                <span class="label-sm">BROADCAST META</span>
+                <input id="stream-title" class="w-full bg-black border border-gray-700 rounded p-2 text-sm text-white mb-2" placeholder="Stream Title" value="My Epic Live Session">
+                <div class="flex gap-2">
+                    <button class="btn flex-1" onclick="copyLink()">🔗 Share</button>
+                    <button class="btn btn-danger flex-1" onclick="location.reload()">⚠ Reset</button>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <div class="flex justify-between mb-2"><span class="label-sm">MICROPHONE</span> <span id="mic-val" class="text-xs text-blue-400">100%</span></div>
+                <select id="audio-source" class="w-full bg-zinc-900 border border-zinc-700 rounded p-2 text-xs mb-4 text-white"></select>
+                <input type="range" min="0" max="200" value="100" oninput="updateGain(this.value)">
+                
+                <div class="flex justify-between mt-4 mb-2"><span class="label-sm">NOISE GATE</span> <span class="text-xs text-gray-500">-50dB</span></div>
+                <input type="range" min="-100" max="0" value="-50">
+            </div>
+
+            <div class="control-group">
+                <span class="label-sm">VOICE FX RACK</span>
+                <div class="grid grid-cols-2 gap-2">
+                    <button class="btn bg-zinc-900" onclick="setFX('normal')">🎙️ Clean</button>
+                    <button class="btn bg-zinc-900" onclick="setFX('radio')">📻 Radio</button>
+                    <button class="btn bg-zinc-900" onclick="setFX('robot')">🤖 Robot</button>
+                    <button class="btn bg-zinc-900" onclick="setFX('echo')">📢 Echo</button>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <span class="label-sm">MUSIC BED</span>
+                <div class="flex items-center gap-2 mb-2 p-2 bg-zinc-900 rounded cursor-pointer" onclick="document.getElementById('bgmFile').click()">
+                    <span class="text-xl">🎵</span>
+                    <div class="overflow-hidden"><div class="text-xs font-bold truncate" id="bgm-name">Select Track...</div></div>
+                </div>
+                <input type="file" id="bgmFile" class="hidden" onchange="loadBGM(this)">
+                
+                <div class="flex gap-2 mb-2">
+                    <button class="btn flex-1 text-xs" onclick="toggleBGM()">⏯ Play/Pause</button>
+                    <button class="btn flex-1 text-xs" onclick="toggleDuck()">🦆 Ducking</button>
+                </div>
+                <input type="range" min="0" max="100" value="50" oninput="setBGMVol(this.value)">
+            </div>
+
         </div>
 
-        <div class="panel panel-c">
-            <div style="flex:1; display:flex; flex-direction:column;">
-                <div class="monitor-frame"><canvas id="visualizer"></canvas><div style="position:absolute; top:15px; left:15px; color:var(--success); font-size:0.7rem;">VISUAL_CORE_V3</div></div>
-                <div style="text-align:center; font-family:var(--font-tech); font-size:2rem; margin-top:20px; color:var(--text);"><span id="timer">00:00:00</span></div>
-                <div style="display:flex; justify-content:center; align-items:center; gap:30px; margin-top:auto;">
-                    <button class="go-live-btn" id="goLiveBtn" onclick="startBroadcast()"><h2>GO LIVE</h2><span>INITIALIZE</span></button>
+        <div class="viz-container">
+            <canvas id="visualizer"></canvas>
+            
+            <div class="absolute top-5 left-5 font-mono text-xs text-green-500 opacity-50">
+                <div>AUD_CTX: ACTIVE</div>
+                <div>RES: 1080p</div>
+                <div>BITRATE: <span id="bitrate-disp">0</span> kbps</div>
+            </div>
+
+            <div class="absolute top-5 right-5 text-right">
+                <div class="text-4xl font-black text-white tracking-tighter" id="session-timer">00:00:00</div>
+                <div class="text-xs text-gray-500 font-mono tracking-widest">SESSION TIME</div>
+            </div>
+
+            <div class="z-10 flex flex-col items-center gap-6">
+                <button id="go-live-btn" class="big-btn" onclick="startBroadcast()">
+                    <div class="text-2xl font-black">GO</div>
+                    <div class="text-xs font-bold tracking-widest">LIVE</div>
+                </button>
+
+                <div class="flex gap-4">
+                    <button class="w-12 h-12 rounded-full bg-zinc-900 border border-zinc-700 flex items-center justify-center hover:bg-white hover:text-black transition" onclick="toggleMute()" title="Mute Mic">🔇</button>
+                    <button class="w-12 h-12 rounded-full bg-zinc-900 border border-zinc-700 flex items-center justify-center hover:bg-red-500 hover:text-white transition" onclick="toggleRecording()" title="Record">🔴</button>
+                </div>
+            </div>
+
+            <div class="absolute bottom-10 font-mono text-xs text-gray-600">
+                <span id="rec-status" class="hidden text-red-500 mr-4">● RECORDING (24MB)</span>
+                <span>listeners: <b class="text-white" id="listener-count">0</b></span>
+            </div>
+        </div>
+
+        <div class="panel bg-black border-l border-zinc-800 flex flex-col">
+            
+            <div class="p-4 border-b border-zinc-800 bg-zinc-900/50">
+                <span class="label-sm">🏆 TOP SUPPORTER</span>
+                <div class="flex items-center gap-3 mt-2">
+                    <div class="w-8 h-8 rounded-full bg-yellow-500 flex items-center justify-center text-black font-bold">1</div>
+                    <div>
+                        <div class="text-sm font-bold text-white">Guest-9281</div>
+                        <div class="text-xs text-yellow-500">500 Coins</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-3 border-b border-zinc-800 flex justify-between items-center">
+                <span class="label-sm">LIVE CHAT</span>
+                <button class="text-xs text-gray-500 hover:text-white" onclick="clearChat()">Clear</button>
+            </div>
+
+            <div class="flex-1 scroll-y p-0" id="chat-feed">
+                <div class="p-4 text-center text-xs text-gray-600 mt-10">
+                    System initialized.<br>Waiting for connection...
+                </div>
+            </div>
+
+            <div class="p-3 border-t border-zinc-800 bg-zinc-900">
+                <div class="flex gap-2">
+                    <input id="chat-input" class="flex-1 bg-black border border-zinc-700 rounded p-2 text-sm text-white focus:border-blue-500" placeholder="Type message..." onkeypress="if(event.key==='Enter') sendHostMessage()">
+                    <button class="btn btn-primary" onclick="sendHostMessage()">Send</button>
+                </div>
+                <div class="flex gap-2 mt-2">
+                    <button class="btn flex-1 text-xs py-1" onclick="runPoll()">📊 Poll</button>
+                    <button class="btn flex-1 text-xs py-1" onclick="toggleSlowMode()">🐢 Slow</button>
                 </div>
             </div>
         </div>
 
-        <div class="panel">
-            <div class="section-title">LIVE CHAT</div>
-            <div class="chat-container"><div class="chat-feed" id="messages"><div class="chat-msg" style="text-align:center; color:#666;">System Ready.</div></div></div>
-        </div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
-    <script src="broadcast-host.js"></script>
     <script>
-        window.onload = () => { if(window.listAudioInputs) window.listAudioInputs(); const u = JSON.parse(localStorage.getItem('mixlr_user')); if(u) document.getElementById('hostName').value = u.username; };
-        
-        let sessionEarnings = 0;
-        const GIFT_VALUES = { '🚀': 50, '❤️': 10, '💎': 100 };
+        const socket = io();
+        let isLive = false;
+        let audioCtx, micSource, micGain, bgmSource, bgmGain;
+        let bgmAudio = new Audio(); bgmAudio.loop = true;
+        let revenue = 0;
+        let timerInterval, seconds = 0;
 
-        window.incomingChat = function(user, msg) { addMsg(user, msg, false); };
-        window.incomingGift = function(user, giftIcon) {
-            const val = GIFT_VALUES[giftIcon] || 10;
-            sessionEarnings += (val * 0.01);
-            document.getElementById('revenue-val').innerText = `$${sessionEarnings.toFixed(2)}`;
-            addMsg("SYSTEM", `${user} sent ${giftIcon}`, true);
-        };
-        window.updateListenerCount = function(count) { document.getElementById('listener-count').innerText = count; };
-        window.incomingLog = function(msg, type) { addMsg("SYSTEM", msg, true); };
+        // --- 1. CORE BROADCAST ENGINE ---
+        async function startBroadcast() {
+            if (isLive) return stopBroadcast(); // Toggle logic
 
-        function addMsg(user, text, isSystem) {
-            const feed = document.getElementById('messages');
+            try {
+                // Audio Context Init
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContext();
+                
+                // Get Mic
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                
+                // Audio Graph: Mic -> Gain -> Destination
+                micSource = audioCtx.createMediaStreamSource(stream);
+                micGain = audioCtx.createGain();
+                micSource.connect(micGain);
+                // Note: In real WebRTC, we connect this destination to the PeerConnection
+                
+                // Visualizer
+                setupVisualizer(micGain);
+
+                // Server Signal
+                const title = document.getElementById('stream-title').value;
+                socket.emit('broadcaster', { title: title, host: 'Host' });
+
+                // UI Updates
+                isLive = true;
+                const btn = document.getElementById('go-live-btn');
+                btn.classList.add('live');
+                btn.innerHTML = '<div class="text-2xl font-black">END</div><div class="text-xs font-bold tracking-widest">STREAM</div>';
+                document.getElementById('status-pill').className = "px-3 py-1 bg-red-500/20 border border-red-500/50 rounded text-xs font-bold text-red-500 animate-pulse";
+                document.getElementById('status-pill').innerText = "● ON AIR";
+                
+                // Timer
+                seconds = 0;
+                timerInterval = setInterval(() => {
+                    seconds++;
+                    document.getElementById('session-timer').innerText = new Date(seconds * 1000).toISOString().substr(11, 8);
+                    // Fake Bitrate fluctuation
+                    document.getElementById('bitrate-disp').innerText = Math.floor(Math.random() * (320 - 280) + 280);
+                }, 1000);
+
+                addLog("System", "Broadcast started successfully.", "sys");
+
+            } catch (err) {
+                alert("Microphone Access Denied! Please allow microphone permissions.");
+                console.error(err);
+            }
+        }
+
+        function stopBroadcast() {
+            isLive = false;
+            socket.emit('disconnect'); // Or custom stop event
+            location.reload(); // Simple reset
+        }
+
+        // --- 2. AUDIO TOOLS ---
+        function updateGain(val) {
+            if(micGain) micGain.gain.value = val / 100;
+            document.getElementById('mic-val').innerText = val + '%';
+        }
+
+        function loadBGM(input) {
+            if(input.files[0]) {
+                const file = input.files[0];
+                document.getElementById('bgm-name').innerText = file.name;
+                bgmAudio.src = URL.createObjectURL(file);
+                addLog("System", `Loaded track: ${file.name}`, "sys");
+            }
+        }
+
+        function toggleBGM() {
+            if(bgmAudio.paused) bgmAudio.play(); else bgmAudio.pause();
+        }
+
+        function setBGMVol(val) { bgmAudio.volume = val / 100; }
+
+        // --- 3. VISUALIZER ---
+        function setupVisualizer(sourceNode) {
+            const canvas = document.getElementById('visualizer');
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.parentElement.offsetWidth;
+            canvas.height = canvas.parentElement.offsetHeight;
+
+            const analyser = audioCtx.createAnalyser();
+            analyser.fftSize = 256;
+            sourceNode.connect(analyser);
+
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+
+            function draw() {
+                if(!isLive) return;
+                requestAnimationFrame(draw);
+                analyser.getByteFrequencyData(dataArray);
+                
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                const barWidth = (canvas.width / bufferLength) * 2.5;
+                let barHeight;
+                let x = 0;
+
+                for(let i = 0; i < bufferLength; i++) {
+                    barHeight = dataArray[i] / 1.5; // Scale height
+                    
+                    // Gradient color
+                    const gradient = ctx.createLinearGradient(0, canvas.height, 0, canvas.height - barHeight);
+                    gradient.addColorStop(0, '#6366f1');
+                    gradient.addColorStop(1, '#a855f7');
+                    
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+                    x += barWidth + 1;
+                }
+            }
+            draw();
+        }
+
+        // --- 4. SOCIAL & CHAT ---
+        function sendHostMessage() {
+            const input = document.getElementById('chat-input');
+            const text = input.value;
+            if(!text) return;
+            
+            // Local add
+            addLog("HOST", text);
+            // Emit
+            socket.emit('chatMessage', { room: socket.id, user: 'HOST', msg: text });
+            input.value = '';
+        }
+
+        function addLog(user, text, type='') {
+            const feed = document.getElementById('chat-feed');
             const div = document.createElement('div');
-            div.className = 'chat-msg';
-            div.innerHTML = isSystem ? `<small style="color:var(--warn)">${text}</small>` : `<strong>${user}</strong> ${text}`;
+            div.className = `chat-msg ${type}`;
+            div.innerHTML = `<b>${user}:</b> ${text}`;
             feed.appendChild(div);
             feed.scrollTop = feed.scrollHeight;
         }
 
-        window.updateUIState = function(isLive) {
-            const btn = document.getElementById('goLiveBtn');
-            const badge = document.getElementById('status-badge');
-            if(isLive) { btn.classList.add('live'); btn.innerHTML = "<h2>END</h2>"; badge.classList.add('on-air'); badge.innerText = "● ON AIR"; startTimer(); } 
-            else { btn.classList.remove('live'); btn.innerHTML = "<h2>GO LIVE</h2>"; badge.classList.remove('on-air'); badge.innerText = "● OFFLINE"; stopTimer(); }
+        // Socket Listeners for Interaction
+        socket.on('chatMessage', data => addLog(data.user || 'Guest', data.msg));
+        socket.on('giftReceived', data => {
+            const val = data.gift === '🚀' ? 5 : 1;
+            revenue += val;
+            document.getElementById('revenue-display').innerText = `$${revenue.toFixed(2)}`;
+            addLog("SYSTEM", `${data.user} sent ${data.gift} (+$${val})`, "tip");
+        });
+        socket.on('roomLog', data => {
+            if(data.type === 'join') document.getElementById('listener-count').innerText = data.count;
+        });
+
+        // --- 5. UTILS ---
+        function toggleCinemaMode() {
+            document.getElementById('app-body').classList.toggle('brightness-50');
+        }
+        function copyLink() {
+            navigator.clipboard.writeText(window.location.origin);
+            alert("Studio Link Copied!");
+        }
+        function clearChat() {
+            document.getElementById('chat-feed').innerHTML = '<div class="p-4 text-center text-xs text-gray-600 mt-10">Chat cleared by Host.</div>';
         }
 
-        let timerInt, seconds=0;
-        function startTimer() { seconds=0; timerInt = setInterval(() => { seconds++; document.getElementById('timer').innerText = new Date(seconds * 1000).toISOString().substr(11, 8); }, 1000); }
-        function stopTimer() { clearInterval(timerInt); }
+        // Populate Audio Inputs
+        navigator.mediaDevices.enumerateDevices().then(devices => {
+            const select = document.getElementById('audio-source');
+            devices.filter(d => d.kind === 'audioinput').forEach(d => {
+                const opt = document.createElement('option');
+                opt.text = d.label || `Microphone ${select.length + 1}`;
+                select.add(opt);
+            });
+        });
     </script>
 </body>
 </html>
