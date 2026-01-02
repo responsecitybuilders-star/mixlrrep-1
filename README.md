@@ -1,25 +1,20 @@
-# Airvibe Audio Platform
-### The Ultimate Social Audio Experience
+# 🚀 Airvibe - Next Gen Broadcast Platform
 
-**Version:** 6.0 (Titanium Edition)
+Airvibe is a full-stack audio streaming ecosystem featuring real-time chat, virtual gifting economy, and an immersive "Theater Mode" experience.
 
-**Features:**
-- 🎧 **Immersive Theater Mode:** Holographic vinyl art & living backgrounds.
-- 🎙️ **Command Deck Studio:** Professional broadcasting tools with FX & EQ.
-- 📊 **Live Telemetry:** Real-time listener counts and earnings.
-- 💸 **Economy System:** Built-in wallet, gifting, and revenue tracking.
-- 👤 **Glass Identity:** Advanced user profiles and dashboards.
+## ✨ Features (v25.0)
+- **🎙️ Studio Pro:** WebRTC broadcasting with visualizers.
+- **🎧 Listener Hub:** Immersive dashboard with "Ghost Mode" & "Offline Vault".
+- **🪙 Coin Economy:** Real-time gifting system (Faith, Classic, Luxury tiers).
+- **💬 Live Chat:** WebSocket-powered instant messaging.
+- **📱 Theater Mode:** TikTok-style immersive live room overlay.
 
-**Tech Stack:** Node.js, Socket.io, WebRTC, SQLite, CSS Glassmorphism. # Airvibe Audio Platform
-### The Ultimate Social Audio Experience
+## 🛠️ Tech Stack
+- **Backend:** Node.js, Express, Socket.io, SQLite (WAL Mode).
+- **Frontend:** HTML5, Tailwind CSS, Canvas API.
+- **Audio:** Web Audio API, WebRTC.
 
-**Version:** 6.0 (Titanium Edition)
-
-**Features:**
-- 🎧 **Immersive Theater Mode:** Holographic vinyl art & living backgrounds.
-- 🎙️ **Command Deck Studio:** Professional broadcasting tools with FX & EQ.
-- 📊 **Live Telemetry:** Real-time listener counts and earnings.
-- 💸 **Economy System:** Built-in wallet, gifting, and revenue tracking.
-- 👤 **Glass Identity:** Advanced user profiles and dashboards.
-
-**Tech Stack:** Node.js, Socket.io, WebRTC, SQLite, CSS Glassmorphism.
+## 🚀 How to Run
+1. Install dependencies:
+   ```bash
+   npm install

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Airvibe | Access</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { theme: { extend: { colors: { bg: '#020617', glass: 'rgba(30, 41, 59, 0.6)', primary: '#6366f1' } } } }
+    </script>
+    <style>
+        body { background: #020617; color: white; font-family: 'Plus Jakarta Sans', sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
+        .glass-panel { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); }
+        .input-field { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); width: 100%; padding: 12px; border-radius: 12px; color: white; outline: none; transition: 0.3s; }
+        .input-field:focus { border-color: #6366f1; }
+        .orb { position: fixed; border-radius: 50%; filter: blur(100px); opacity: 0.2; z-index: -1; }
+    </style>
+</head>
+<body class="relative">
+
+    <div class="orb w-96 h-96 bg-indigo-600 top-0 left-0 animate-pulse"></div>
+    <div class="orb w-96 h-96 bg-purple-600 bottom-0 right-0 animate-pulse"></div>
+
+    <div class="glass-panel w-full max-w-md p-8 rounded-3xl relative z-10 text-center shadow-2xl">
+        <div class="text-3xl font-black tracking-tighter mb-2">AIR<span class="text-indigo-500">VIBE</span></div>
+        <p class="text-gray-400 text-sm mb-8">Broadcast your vibe to the world.</p>
+
+        <div class="flex bg-black/20 p-1 rounded-xl mb-6">
+            <button onclick="toggleForm('login')" id="tab-login" class="flex-1 py-2 text-sm font-bold rounded-lg bg-indigo-600 text-white transition">Login</button>
+            <button onclick="toggleForm('register')" id="tab-register" class="flex-1 py-2 text-sm font-bold rounded-lg text-gray-400 hover:text-white transition">Register</button>
+        </div>
+
+        <form id="form-login" onsubmit="handleLogin(event)" class="space-y-4">
+            <input type="text" id="l-user" placeholder="Username" class="input-field" required>
+            <input type="password" id="l-pass" placeholder="Password" class="input-field" required>
+            <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-bold transition shadow-lg shadow-indigo-500/20">ENTER STUDIO</button>
+        </form>
+
+        <form id="form-register" onsubmit="handleRegister(event)" class="space-y-4 hidden">
+            <input type="text" id="r-user" placeholder="Choose Username" class="input-field" required>
+            <select id="r-role" class="input-field">
+                <option value="listener">I am a Listener</option>
+                <option value="host">I am a Creator</option>
+            </select>
+            <input type="password" id="r-pass" placeholder="Create Password" class="input-field" required>
+            <button type="submit" class="w-full py-3 bg-white text-black hover:bg-gray-200 rounded-xl font-bold transition">CREATE ACCOUNT</button>
+        </form>
+
+        <div id="msg-box" class="mt-4 text-xs font-bold text-red-400 h-4"></div>
+    </div>
+
+    <script>
+        function toggleForm(mode) {
+            const lForm = document.getElementById('form-login');
+            const rForm = document.getElementById('form-register');
+            const lTab = document.getElementById('tab-login');
+            const rTab = document.getElementById('tab-register');
+
+            if(mode === 'login') {
+                lForm.classList.remove('hidden'); rForm.classList.add('hidden');
+                lTab.classList.add('bg-indigo-600', 'text-white'); lTab.classList.remove('text-gray-400');
+                rTab.classList.remove('bg-indigo-600', 'text-white'); rTab.classList.add('text-gray-400');
+            } else {
+                rForm.classList.remove('hidden'); lForm.classList.add('hidden');
+                rTab.classList.add('bg-indigo-600', 'text-white'); rTab.classList.remove('text-gray-400');
+                lTab.classList.remove('bg-indigo-600', 'text-white'); lTab.classList.add('text-gray-400');
+            }
+        }
+
+        async function handleRegister(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            const ogText = btn.innerText;
+            btn.innerText = "Creating...";
+            
+            const res = await fetch('/api/register', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    username: document.getElementById('r-user').value,
+                    password: document.getElementById('r-pass').value,
+                    role: document.getElementById('r-role').value
+                })
+            });
+            const data = await res.json();
+            btn.innerText = ogText;
+
+            if(data.success) {
+                alert("Account created! Please login.");
+                toggleForm('login');
+            } else {
+                document.getElementById('msg-box').innerText = data.error || "Registration failed";
+            }
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            const ogText = btn.innerText;
+            btn.innerText = "Authenticating...";
+
+            const res = await fetch('/api/login', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    username: document.getElementById('l-user').value,
+                    password: document.getElementById('l-pass').value
+                })
+            });
+            const data = await res.json();
+            btn.innerText = ogText;
+
+            if(data.success) {
+                const target = data.user.role === 'host' ? '/studio' : '/dashboard';
+                window.location.href = target;
+            } else {
+                document.getElementById('msg-box').innerText = data.error || "Invalid credentials";
+            }
+        }
+    </script>
+</body>
+</html>

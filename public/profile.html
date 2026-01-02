@@ -2,201 +2,286 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Airvibe | Profile</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;800&family=Plus+Jakarta+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Airvibe | Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
     
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { main: ['Plus Jakarta Sans', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
+                    colors: { bg: '#020617', glass: 'rgba(30, 41, 59, 0.4)', primary: '#6366f1' }
+                }
+            }
+        }
+    </script>
+
     <style>
-        :root {
-            --bg: #020617;
-            --glass: rgba(30, 41, 59, 0.6);
-            --border: rgba(255, 255, 255, 0.1);
-            --primary: #3b82f6;
-            --text: #ffffff;
-            --font-head: 'Outfit', sans-serif;
-            --font-body: 'Plus Jakarta Sans', sans-serif;
-        }
-
-        body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font-body); overflow-x: hidden; }
-
-        /* HEADER & BANNER */
-        .nav-bar {
-            position: fixed; top: 0; width: 100%; height: 70px; background: rgba(2,6,23,0.8);
-            backdrop-filter: blur(10px); border-bottom: 1px solid var(--border);
-            display: flex; align-items: center; justify-content: space-between; padding: 0 30px; z-index: 100;
-        }
-        .logo { font-family: var(--font-head); font-weight: 800; font-size: 1.2rem; cursor: pointer; }
+        body { background: #020617; color: white; font-family: 'Plus Jakarta Sans', sans-serif; overflow: hidden; }
         
-        .profile-header { position: relative; margin-bottom: 80px; }
-        .banner {
-            height: 300px; width: 100%; background-size: cover; background-position: center;
-            mask-image: linear-gradient(to bottom, black 80%, transparent);
-        }
-        .user-info {
-            position: absolute; bottom: -50px; left: 50%; transform: translateX(-50%);
-            text-align: center;
-        }
-        .avatar {
-            width: 120px; height: 120px; border-radius: 50%; border: 4px solid var(--bg);
-            background-size: cover; background-color: #333; margin: 0 auto;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-        .username { font-family: var(--font-head); font-size: 2rem; font-weight: 800; margin: 10px 0 5px 0; }
-        .role-tag { 
-            background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 20px; 
-            font-size: 0.8rem; border: 1px solid var(--border); color: #94a3b8;
-        }
+        /* FX */
+        .orb { position: fixed; border-radius: 50%; filter: blur(100px); opacity: 0.2; z-index: -1; }
+        .orb-1 { top: -10%; left: -10%; width: 40vw; height: 40vw; background: #6366f1; animation: float 10s infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(20px); } }
 
-        /* STATS GRID */
-        .stats-bar { display: flex; justify-content: center; gap: 40px; margin-bottom: 30px; }
-        .stat-item { text-align: center; }
-        .stat-val { font-size: 1.2rem; font-weight: 800; font-family: var(--font-head); }
-        .stat-label { font-size: 0.8rem; color: #94a3b8; }
-
-        /* CONTENT */
-        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
-        .card { background: var(--glass); border: 1px solid var(--border); border-radius: 16px; padding: 30px; margin-bottom: 20px; }
+        /* Components */
+        .glass-panel { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); }
         
-        .bio-text { line-height: 1.6; color: #cbd5e1; }
-        
-        .action-btn {
-            background: var(--primary); color: white; border: none; padding: 10px 20px;
-            border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s;
-        }
-        .action-btn.secondary { background: rgba(255,255,255,0.1); }
-        .action-btn:hover { transform: translateY(-2px); }
+        /* Sidebar Link Active State */
+        .nav-link.active { background: rgba(99, 102, 241, 0.15); border-right: 3px solid #6366f1; color: white; }
+        .nav-link:hover:not(.active) { background: rgba(255,255,255,0.05); }
 
-        /* MODAL */
-        .modal-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 200;
-            display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px);
-        }
-        .modal { background: #1e293b; padding: 30px; border-radius: 16px; width: 400px; border: 1px solid var(--border); }
-        input, textarea {
-            width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border);
-            padding: 10px; color: white; border-radius: 8px; margin-bottom: 15px; font-family: inherit;
-        }
+        /* Toggle Switch */
+        .toggle-checkbox:checked { right: 0; border-color: #6366f1; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #6366f1; }
+        
+        /* Table */
+        td, th { padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        tr:last-child td { border-bottom: none; }
     </style>
 </head>
-<body>
+<body class="flex h-screen">
 
-    <div class="modal-overlay" id="edit-modal">
-        <div class="modal">
-            <h2 style="margin-top:0;">Edit Profile</h2>
-            <label style="font-size:0.8rem; color:#aaa;">Bio</label>
-            <textarea id="edit-bio" rows="4"></textarea>
-            
-            <label style="font-size:0.8rem; color:#aaa;">Avatar URL</label>
-            <input id="edit-avatar" type="text">
-            
-            <label style="font-size:0.8rem; color:#aaa;">Banner URL</label>
-            <input id="edit-banner" type="text">
-            
-            <div style="display:flex; gap:10px;">
-                <button class="action-btn" style="flex:1;" onclick="saveProfile()">Save</button>
-                <button class="action-btn secondary" style="flex:1;" onclick="document.getElementById('edit-modal').style.display='none'">Cancel</button>
+    <div class="orb orb-1"></div>
+
+    <aside class="w-64 glass-panel border-r border-white/5 flex flex-col z-20">
+        <div class="h-20 flex items-center px-8 border-b border-white/5">
+            <div class="text-xl font-black tracking-tighter">AIR<span class="text-indigo-500">VIBE</span></div>
+        </div>
+
+        <nav class="flex-1 py-6 space-y-1" id="sidebar-nav">
+            </nav>
+
+        <div class="p-4 border-t border-white/5">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 p-[2px]">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=King" class="rounded-full bg-black">
+                </div>
+                <div>
+                    <div class="text-sm font-bold" id="user-name-disp">Loading...</div>
+                    <div class="text-[10px] text-gray-400 uppercase tracking-wider" id="user-plan-disp">FREE</div>
+                </div>
             </div>
         </div>
-    </div>
+    </aside>
 
-    <nav class="nav-bar">
-        <div class="logo" onclick="location.href='/'">AIR<span style="color:var(--primary)">VIBE</span></div>
-        <button class="action-btn secondary" onclick="location.href='/'">Back to Home</button>
-    </nav>
+    <main class="flex-1 flex flex-col relative overflow-hidden">
+        
+        <header class="h-20 border-b border-white/5 flex items-center justify-between px-8 bg-black/20 backdrop-blur">
+            <h2 class="text-xl font-bold" id="page-title">Overview</h2>
+            <div class="flex gap-4">
+                <a href="/profile" class="px-4 py-2 rounded-lg border border-white/10 text-xs font-bold hover:bg-white/5 transition">VIEW PROFILE</a>
+                <a href="/studio" class="px-4 py-2 rounded-lg bg-indigo-600 text-white text-xs font-bold hover:bg-indigo-500 transition shadow-lg shadow-indigo-500/20">OPEN STUDIO</a>
+            </div>
+        </header>
 
-    <header class="profile-header">
-        <div class="banner" id="p-banner" style="background-image: url('https://source.unsplash.com/random/1200x400?galaxy');"></div>
-        <div class="user-info">
-            <div class="avatar" id="p-avatar" style="background-image: url('https://source.unsplash.com/random/200x200?face');"></div>
-            <div class="username" id="p-username">Loading...</div>
-            <span class="role-tag" id="p-role">Host</span>
-        </div>
-    </header>
+        <div class="flex-1 overflow-y-auto p-8" id="content-area">
+            </div>
 
-    <div class="stats-bar">
-        <div class="stat-item">
-            <div class="stat-val" id="p-followers">0</div>
-            <div class="stat-label">Followers</div>
-        </div>
-        <div class="stat-item">
-            <div class="stat-val">0</div>
-            <div class="stat-label">Streams</div>
-        </div>
-    </div>
+    </main>
 
-    <div class="container">
-        <div style="display:flex; justify-content:center; margin-bottom:30px;">
-            <button id="edit-btn" class="action-btn" style="display:none;" onclick="openEdit()">Edit Profile</button>
-            <button id="follow-btn" class="action-btn">Follow</button>
-        </div>
-
-        <div class="card">
-            <h3 style="margin-top:0;">About</h3>
-            <p class="bio-text" id="p-bio">No bio yet.</p>
+    <template id="tpl-host">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="glass-panel p-6 rounded-2xl">
+                <div class="text-xs text-gray-400 font-bold mb-2">TOTAL REVENUE</div>
+                <div class="text-3xl font-mono font-bold text-green-400">₦<span id="stat-rev">0</span></div>
+            </div>
+            <div class="glass-panel p-6 rounded-2xl">
+                <div class="text-xs text-gray-400 font-bold mb-2">PEAK LISTENERS</div>
+                <div class="text-3xl font-mono font-bold text-white"><span id="stat-listeners">0</span></div>
+            </div>
+            <div class="glass-panel p-6 rounded-2xl">
+                <div class="text-xs text-gray-400 font-bold mb-2">STREAM TIME</div>
+                <div class="text-3xl font-mono font-bold text-indigo-400">45<span class="text-sm">h</span> 20<span class="text-sm">m</span></div>
+            </div>
         </div>
 
-        <div class="card">
-            <h3 style="margin-top:0;">Recent Activity</h3>
-            <div style="text-align:center; padding:20px; color:#666;">No recent streams.</div>
+        <div class="glass-panel rounded-2xl p-6 mb-8">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-lg font-bold">🎙️ The Vault (Recordings)</h3>
+                <span class="text-xs px-2 py-1 bg-indigo-500/20 text-indigo-300 rounded border border-indigo-500/30">PRO FEATURE</span>
+            </div>
+            <table class="w-full text-left text-sm text-gray-400">
+                <thead><tr><th>TITLE</th><th>DATE</th><th>SIZE</th><th>ACTION</th></tr></thead>
+                <tbody id="vault-list"></tbody>
+            </table>
         </div>
-    </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="glass-panel p-6 rounded-2xl">
+                <h3 class="font-bold mb-4">🤖 Noise Assassin AI</h3>
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-gray-400">Remove background noise from streams.</span>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" class="sr-only peer" checked>
+                        <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="tpl-business">
+        <div class="glass-panel p-6 rounded-2xl mb-8 border border-emerald-500/30">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h3 class="text-xl font-bold text-emerald-400">Empire Control Center</h3>
+                    <p class="text-sm text-gray-400">Manage your station brand and team.</p>
+                </div>
+                <button class="px-4 py-2 bg-emerald-600 text-black font-bold rounded-lg text-sm">Download Report</button>
+            </div>
+        </div>
+
+        <div class="glass-panel p-6 rounded-2xl mb-8">
+            <h3 class="font-bold mb-4">📢 Ad Injection Manager</h3>
+            <div class="border-2 border-dashed border-white/10 rounded-xl p-8 text-center hover:border-emerald-500/50 transition cursor-pointer">
+                <div class="text-2xl mb-2">📂</div>
+                <div class="text-sm text-gray-400">Upload MP3 Audio Ads here.<br>We will auto-insert them every 15 mins.</div>
+            </div>
+        </div>
+
+        <div class="glass-panel p-6 rounded-2xl">
+            <h3 class="font-bold mb-4">👥 Team Access</h3>
+            <div id="team-list" class="space-y-3"></div>
+        </div>
+    </template>
+
+    <template id="tpl-listener">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div class="glass-panel p-6 rounded-2xl flex items-center justify-between">
+                <div>
+                    <h3 class="font-bold text-purple-400">👻 Ghost Mode</h3>
+                    <p class="text-xs text-gray-400">Listen without appearing in user lists.</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-700 rounded-full peer peer-checked:bg-purple-600 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
+                </label>
+            </div>
+            
+            <div class="glass-panel p-6 rounded-2xl">
+                <h3 class="font-bold text-yellow-400">💾 Offline Library</h3>
+                <div class="text-xs text-gray-400 mt-1">12 Streams Downloaded (450MB Used)</div>
+            </div>
+        </div>
+
+        <div class="glass-panel p-6 rounded-2xl">
+            <h3 class="font-bold mb-4">❤️ Favorite Stations</h3>
+            <div class="flex gap-4">
+                <div class="w-24 h-24 bg-gray-800 rounded-lg"></div>
+                <div class="w-24 h-24 bg-gray-800 rounded-lg"></div>
+                <div class="w-24 h-24 bg-gray-800 rounded-lg border-2 border-dashed border-white/10 flex items-center justify-center text-2xl">+</div>
+            </div>
+        </div>
+    </template>
 
     <script>
-        // 1. DETERMINE USER
-        const params = new URLSearchParams(window.location.search);
-        const loggedUser = JSON.parse(localStorage.getItem('mixlr_user'));
-        
-        // Default to logged in user if no query param
-        const targetUser = params.get('user') || (loggedUser ? loggedUser.username : null);
+        // MOCK USER STATE (Replace with API Call)
+        // Change 'role' to 'listener', 'host', or 'business' to see different dashboards
+        const currentUser = { 
+            name: "Tomiwa", 
+            role: "host", 
+            plan: "Creator Pro" 
+        };
 
-        if(!targetUser) {
-            alert("No user specified.");
-            window.location.href = '/login';
-        }
+        // NAV ITEMS CONFIG
+        const navItems = {
+            listener: [
+                { icon: "🏠", label: "Home", active: true },
+                { icon: "❤️", label: "Favorites" },
+                { icon: "💾", label: "Downloads" },
+                { icon: "⚙️", label: "Settings" }
+            ],
+            host: [
+                { icon: "📊", label: "Overview", active: true },
+                { icon: "🎙️", label: "My Studio" },
+                { icon: "📂", label: "The Vault" },
+                { icon: "💰", label: "Monetization" }
+            ],
+            business: [
+                { icon: "🏢", label: "HQ Overview", active: true },
+                { icon: "📢", label: "Ad Manager" },
+                { icon: "👥", label: "Team" },
+                { icon: "🔌", label: "API Keys" }
+            ]
+        };
 
-        // 2. FETCH DATA
-        fetch(`/api/profile/${targetUser}`)
-            .then(r => r.json())
-            .then(data => {
-                if(data.success && data.profile) {
-                    const p = data.profile;
-                    document.getElementById('p-username').innerText = p.username;
-                    document.getElementById('p-role').innerText = p.role.toUpperCase();
-                    document.getElementById('p-followers').innerText = p.followers || 0;
-                    
-                    if(p.bio) document.getElementById('p-bio').innerText = p.bio;
-                    if(p.avatar) document.getElementById('p-avatar').style.backgroundImage = `url('${p.avatar}')`;
-                    if(p.banner) document.getElementById('p-banner').style.backgroundImage = `url('${p.banner}')`;
-                } else {
-                    document.getElementById('p-username').innerText = targetUser; // Fallback
-                }
+        function init() {
+            // 1. Set User Info
+            document.getElementById('user-name-disp').innerText = currentUser.name;
+            document.getElementById('user-plan-disp').innerText = currentUser.plan;
 
-                // Show Edit button if own profile
-                if(loggedUser && loggedUser.username === targetUser) {
-                    document.getElementById('edit-btn').style.display = 'block';
-                    document.getElementById('follow-btn').style.display = 'none';
-                }
+            // 2. Build Sidebar
+            const nav = document.getElementById('sidebar-nav');
+            navItems[currentUser.role].forEach(item => {
+                nav.innerHTML += `
+                    <a href="#" class="nav-link flex items-center px-8 py-3 text-sm font-medium text-gray-400 transition ${item.active ? 'active' : ''}">
+                        <span class="mr-4 text-lg">${item.icon}</span> ${item.label}
+                    </a>
+                `;
             });
 
-        // 3. EDIT LOGIC
-        function openEdit() {
-            document.getElementById('edit-modal').style.display = 'flex';
-            document.getElementById('edit-bio').value = document.getElementById('p-bio').innerText;
+            // 3. Load Content Template
+            const templateId = `tpl-${currentUser.role}`;
+            const template = document.getElementById(templateId);
+            const clone = template.content.cloneNode(true);
+            document.getElementById('content-area').appendChild(clone);
+
+            // 4. Fetch & Fill Data (Based on Role)
+            if(currentUser.role === 'host') loadHostData();
+            if(currentUser.role === 'business') loadBusinessData();
         }
 
-        async function saveProfile() {
-            const bio = document.getElementById('edit-bio').value;
-            const avatar = document.getElementById('edit-avatar').value;
-            const banner = document.getElementById('edit-banner').value;
+        async function loadHostData() {
+            // Fetch Stats
+            const resStats = await fetch('/api/dashboard/stats');
+            const dataStats = await resStats.json();
+            
+            // Animate Numbers
+            document.getElementById('stat-rev').innerText = dataStats.stats.total_revenue.toLocaleString();
+            document.getElementById('stat-listeners').innerText = dataStats.stats.listeners_peak.toLocaleString();
 
-            await fetch('/api/profile/update', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ username: targetUser, bio, avatar, banner })
+            // Fetch Vault
+            const resVault = await fetch('/api/dashboard/vault');
+            const vaultData = await resVault.json();
+            const list = document.getElementById('vault-list');
+            
+            vaultData.forEach(file => {
+                list.innerHTML += `
+                    <tr class="hover:bg-white/5 transition">
+                        <td class="font-bold text-white">${file.title}</td>
+                        <td>${file.date}</td>
+                        <td>${file.size}</td>
+                        <td><button class="text-indigo-400 hover:text-white hover:underline">Download</button></td>
+                    </tr>
+                `;
             });
-
-            location.reload();
         }
+
+        async function loadBusinessData() {
+            const res = await fetch('/api/dashboard/team');
+            const team = await res.json();
+            const container = document.getElementById('team-list');
+            
+            team.forEach(member => {
+                container.innerHTML += `
+                    <div class="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-emerald-900 flex items-center justify-center font-bold text-emerald-400">${member.name[0]}</div>
+                            <div>
+                                <div class="text-sm font-bold text-white">${member.name}</div>
+                                <div class="text-[10px] text-gray-500 uppercase">${member.role}</div>
+                            </div>
+                        </div>
+                        <span class="text-xs text-green-400">● ${member.status}</span>
+                    </div>
+                `;
+            });
+        }
+
+        init();
     </script>
 </body>
 </html>

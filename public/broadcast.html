@@ -3,391 +3,383 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Airvibe | Studio Ultimate</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script> <style>
-        /* === THEME: ONYX PRO === */
-        :root {
-            --bg: #09090b;
-            --panel: #18181b;
-            --border: #27272a;
-            --primary: #6366f1;
-            --accent: #a855f7;
-            --danger: #ef4444;
-            --success: #22c55e;
-            --text: #e4e4e7;
-            --font-ui: 'Inter', sans-serif;
-            --font-code: 'JetBrains Mono', monospace;
-        }
-
-        body { background: var(--bg); color: var(--text); font-family: var(--font-ui); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
-        
-        /* LAYOUT */
-        .grid-layout { display: grid; grid-template-columns: 320px 1fr 350px; height: 100%; border-top: 1px solid var(--border); }
-        .panel { background: var(--panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
-        .scroll-y { overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
-        
-        /* COMPONENTS */
-        .glass-header { height: 60px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; background: rgba(9, 9, 11, 0.9); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); }
-        .btn { padding: 8px 16px; border-radius: 6px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: 0.2s; border: 1px solid var(--border); background: #27272a; color: white; display: flex; align-items: center; gap: 8px; justify-content: center; }
-        .btn:hover { background: #3f3f46; }
-        .btn-primary { background: var(--primary); border-color: var(--primary); }
-        .btn-primary:hover { background: #4f46e5; }
-        .btn-danger { background: rgba(239,68,68,0.1); color: var(--danger); border-color: rgba(239,68,68,0.2); }
-        .btn-danger:hover { background: var(--danger); color: white; }
-
-        .control-group { background: #000; padding: 15px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 15px; }
-        .label-sm { font-size: 0.7rem; color: #a1a1aa; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; margin-bottom: 8px; display: block; }
-        
-        /* SLIDERS */
-        input[type=range] { width: 100%; height: 4px; background: #333; border-radius: 2px; accent-color: var(--primary); outline: none; -webkit-appearance: none; }
-        
-        /* VISUALIZER */
-        .viz-container { flex: 1; position: relative; background: radial-gradient(circle at center, #1e1b4b 0%, #000 70%); display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        canvas { width: 100%; height: 100%; position: absolute; inset: 0; }
-        
-        /* GO LIVE BUTTON */
-        .big-btn { 
-            width: 140px; height: 140px; border-radius: 50%; background: #111; border: 4px solid #333; 
-            color: #555; display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            cursor: pointer; transition: 0.3s; z-index: 10;
-            box-shadow: 0 0 0 10px rgba(0,0,0,0.5);
-        }
-        .big-btn:hover { transform: scale(1.05); color: white; border-color: var(--primary); }
-        .big-btn.live { background: #ef4444; color: white; border-color: #fca5a5; box-shadow: 0 0 50px rgba(239,68,68,0.4); animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.7); } 70% { box-shadow: 0 0 0 20px rgba(239,68,68,0); } 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); } }
-
-        /* CHAT */
-        .chat-msg { padding: 8px 12px; font-size: 0.85rem; border-bottom: 1px solid #222; }
-        .chat-msg b { color: var(--primary); font-family: var(--font-code); }
-        .chat-msg.sys { border-left: 3px solid var(--warn); background: rgba(245,158,11,0.05); }
-        .chat-msg.tip { border-left: 3px solid var(--success); background: rgba(34,197,94,0.05); }
-
-        /* RESPONSIVE */
-        @media(max-width: 1024px) { .grid-layout { grid-template-columns: 1fr; display: block; overflow-y: auto; } .panel { height: auto; min-height: 400px; border-bottom: 1px solid var(--border); } }
+    <title>Airvibe Studio | Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { theme: { extend: { colors: { bg: '#030712', panel: '#111827', primary: '#6366f1', accent: '#a855f7' } } } }
+    </script>
+    <style>
+        body { background: #030712; color: #f9fafb; font-family: 'Space Grotesk', sans-serif; overflow: hidden; height: 100vh; }
+        .glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        .btn-icon { @apply p-2 rounded-lg hover:bg-white/10 transition active:scale-95; }
+        .pulse-live { animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 #6366f1; } 70% { box-shadow: 0 0 0 15px transparent; } }
+        .gold-msg { border-left: 2px solid #fbbf24; background: linear-gradient(90deg, rgba(251, 191, 36, 0.1), transparent); }
+        .countdown-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(20px); }
+        .count-num { font-size: 15rem; font-weight: 900; color: #6366f1; font-family: 'JetBrains Mono'; }
+        .grid-layout { display: grid; grid-template-columns: 280px 1fr 320px; height: calc(100vh - 64px); }
+        @media (max-width: 1024px) { .grid-layout { grid-template-columns: 1fr; } .sidebar { display: none; } }
     </style>
 </head>
-<body id="app-body">
+<body class="flex flex-col">
 
-    <header class="glass-header">
-        <div style="font-weight:900; font-size:1.2rem; display:flex; align-items:center; gap:10px;">
-            <div style="width:12px; height:12px; background:var(--primary); transform:rotate(45deg);"></div>
-            AIRVIBE <span class="bg-gray-800 text-xs px-2 py-1 rounded text-gray-400">STUDIO PRO</span>
-        </div>
-        
-        <div class="hidden md:flex gap-6 font-mono text-xs text-gray-400">
-            <span>CPU: <b class="text-white">12%</b></span>
-            <span>NET: <b class="text-green-500">■■■■</b></span>
-            <span class="flex items-center gap-2">💰 EARNED: <b class="text-yellow-400 text-sm" id="revenue-display">$0.00</b></span>
-        </div>
+    <div id="pre-live-overlay" class="hidden countdown-overlay">
+        <div class="text-white text-xl font-bold tracking-[0.5em] mb-4">GOING LIVE IN</div>
+        <div id="countdown-val" class="count-num">15</div>
+        <button onclick="cancelLive()" class="mt-10 px-6 py-2 border border-white/20 text-white/50 hover:text-white rounded-full transition">CANCEL</button>
+    </div>
 
-        <div class="flex gap-3">
-            <button class="btn" onclick="toggleCinemaMode()">🔦 Lights</button>
-            <div id="status-pill" class="px-3 py-1 bg-black border border-gray-800 rounded text-xs font-bold text-gray-500">● OFFLINE</div>
+    <header class="h-16 border-b border-white/10 flex items-center justify-between px-6 z-20 bg-panel shrink-0">
+        <div class="flex items-center gap-4">
+            <h1 class="text-xl font-bold tracking-tighter">AIRVIBE <span class="text-primary text-xs align-top">PRO</span></h1>
+            <div class="hidden md:flex gap-4 text-xs font-mono text-gray-500 bg-black/30 p-2 rounded border border-white/10">
+                <span class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-green-500"></div> BITRATE: <b class="text-white">320 KBPS</b></span>
+                <span class="flex items-center gap-2 border-l border-white/10 pl-4">⏱ TIME: <b class="text-white" id="session-timer">00:00:00</b></span>
+            </div>
+        </div>
+        <div class="flex-1 mx-10 hidden md:flex items-center gap-4 justify-center">
+             <div class="text-xs font-bold bg-black/40 px-3 py-1 rounded border border-white/10 flex items-center gap-2">
+                💰 EARNINGS: <span class="text-primary text-sm" id="earnings-val">₦0.00</span>
+             </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <div id="status-badge" class="px-3 py-1 bg-red-900/20 border border-red-500 text-red-500 rounded text-xs font-bold hidden">● ON AIR</div>
         </div>
     </header>
 
     <div class="grid-layout">
-        
-        <div class="panel p-5 scroll-y">
-            
-            <div class="mb-5">
-                <span class="label-sm">BROADCAST META</span>
-                <input id="stream-title" class="w-full bg-black border border-gray-700 rounded p-2 text-sm text-white mb-2" placeholder="Stream Title" value="My Epic Live Session">
-                <div class="flex gap-2">
-                    <button class="btn flex-1" onclick="copyLink()">🔗 Share</button>
-                    <button class="btn btn-danger flex-1" onclick="location.reload()">⚠ Reset</button>
+        <div class="bg-panel border-r border-white/10 p-4 hidden lg:flex flex-col gap-6 overflow-y-auto z-20">
+            <div>
+                <label class="text-xs font-bold text-gray-500 mb-2 block">MIC CHECK</label>
+                <div class="h-2 bg-black rounded overflow-hidden">
+                    <div class="h-full bg-green-500 transition-all duration-75" id="mic-meter" style="width: 0%"></div>
                 </div>
+                <input type="range" class="w-full mt-4 accent-primary" min="0" max="200" value="100" oninput="setGain(this.value)">
             </div>
-
-            <div class="control-group">
-                <div class="flex justify-between mb-2"><span class="label-sm">MICROPHONE</span> <span id="mic-val" class="text-xs text-blue-400">100%</span></div>
-                <select id="audio-source" class="w-full bg-zinc-900 border border-zinc-700 rounded p-2 text-xs mb-4 text-white"></select>
-                <input type="range" min="0" max="200" value="100" oninput="updateGain(this.value)">
-                
-                <div class="flex justify-between mt-4 mb-2"><span class="label-sm">NOISE GATE</span> <span class="text-xs text-gray-500">-50dB</span></div>
-                <input type="range" min="-100" max="0" value="-50">
+            <div class="p-3 bg-black/20 border border-white/10 rounded-lg">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-xs font-bold text-primary">🦆 AUTO DUCKING</span>
+                    <input type="checkbox" class="accent-primary" onchange="toggleDucking()">
+                </div>
+                <p class="text-[10px] text-gray-500">Lowers music when you speak.</p>
             </div>
-
-            <div class="control-group">
-                <span class="label-sm">VOICE FX RACK</span>
+            <div>
+                <label class="text-xs font-bold text-gray-500 mb-2 block">SOUNDBOARD</label>
                 <div class="grid grid-cols-2 gap-2">
-                    <button class="btn bg-zinc-900" onclick="setFX('normal')">🎙️ Clean</button>
-                    <button class="btn bg-zinc-900" onclick="setFX('radio')">📻 Radio</button>
-                    <button class="btn bg-zinc-900" onclick="setFX('robot')">🤖 Robot</button>
-                    <button class="btn bg-zinc-900" onclick="setFX('echo')">📢 Echo</button>
+                    <button class="p-3 bg-white/5 rounded hover:bg-primary hover:text-black transition font-bold text-xs" onclick="playSFX('AIRHORN')">📣 HORN</button>
+                    <button class="p-3 bg-white/5 rounded hover:bg-primary hover:text-black transition font-bold text-xs" onclick="playSFX('LAUGH')">😂 LAUGH</button>
+                    <button class="p-3 bg-white/5 rounded hover:bg-primary hover:text-black transition font-bold text-xs" onclick="playSFX('APPLAUSE')">👏 CLAP</button>
+                    <button class="p-3 bg-white/5 rounded hover:bg-primary hover:text-black transition font-bold text-xs" onclick="playSFX('RIMSHOT')">🥁 RIM</button>
                 </div>
-            </div>
-
-            <div class="control-group">
-                <span class="label-sm">MUSIC BED</span>
-                <div class="flex items-center gap-2 mb-2 p-2 bg-zinc-900 rounded cursor-pointer" onclick="document.getElementById('bgmFile').click()">
-                    <span class="text-xl">🎵</span>
-                    <div class="overflow-hidden"><div class="text-xs font-bold truncate" id="bgm-name">Select Track...</div></div>
-                </div>
-                <input type="file" id="bgmFile" class="hidden" onchange="loadBGM(this)">
-                
-                <div class="flex gap-2 mb-2">
-                    <button class="btn flex-1 text-xs" onclick="toggleBGM()">⏯ Play/Pause</button>
-                    <button class="btn flex-1 text-xs" onclick="toggleDuck()">🦆 Ducking</button>
-                </div>
-                <input type="range" min="0" max="100" value="50" oninput="setBGMVol(this.value)">
-            </div>
-
-        </div>
-
-        <div class="viz-container">
-            <canvas id="visualizer"></canvas>
-            
-            <div class="absolute top-5 left-5 font-mono text-xs text-green-500 opacity-50">
-                <div>AUD_CTX: ACTIVE</div>
-                <div>RES: 1080p</div>
-                <div>BITRATE: <span id="bitrate-disp">0</span> kbps</div>
-            </div>
-
-            <div class="absolute top-5 right-5 text-right">
-                <div class="text-4xl font-black text-white tracking-tighter" id="session-timer">00:00:00</div>
-                <div class="text-xs text-gray-500 font-mono tracking-widest">SESSION TIME</div>
-            </div>
-
-            <div class="z-10 flex flex-col items-center gap-6">
-                <button id="go-live-btn" class="big-btn" onclick="startBroadcast()">
-                    <div class="text-2xl font-black">GO</div>
-                    <div class="text-xs font-bold tracking-widest">LIVE</div>
-                </button>
-
-                <div class="flex gap-4">
-                    <button class="w-12 h-12 rounded-full bg-zinc-900 border border-zinc-700 flex items-center justify-center hover:bg-white hover:text-black transition" onclick="toggleMute()" title="Mute Mic">🔇</button>
-                    <button class="w-12 h-12 rounded-full bg-zinc-900 border border-zinc-700 flex items-center justify-center hover:bg-red-500 hover:text-white transition" onclick="toggleRecording()" title="Record">🔴</button>
-                </div>
-            </div>
-
-            <div class="absolute bottom-10 font-mono text-xs text-gray-600">
-                <span id="rec-status" class="hidden text-red-500 mr-4">● RECORDING (24MB)</span>
-                <span>listeners: <b class="text-white" id="listener-count">0</b></span>
             </div>
         </div>
 
-        <div class="panel bg-black border-l border-zinc-800 flex flex-col">
-            
-            <div class="p-4 border-b border-zinc-800 bg-zinc-900/50">
-                <span class="label-sm">🏆 TOP SUPPORTER</span>
-                <div class="flex items-center gap-3 mt-2">
-                    <div class="w-8 h-8 rounded-full bg-yellow-500 flex items-center justify-center text-black font-bold">1</div>
+        <div class="relative flex flex-col justify-between p-6 overflow-hidden">
+            <canvas id="visualizer" class="absolute inset-0 w-full h-full"></canvas>
+            <div class="absolute top-4 right-4 z-10 opacity-50 hover:opacity-100 transition text-center">
+                <div class="w-24 h-24 rounded-full border border-primary relative animate-[spin_10s_linear_infinite] mx-auto"></div>
+                <div class="text-[10px] mt-1 tracking-widest text-primary font-bold">LISTENERS: <span id="listener-count" class="text-white text-lg block">0</span></div>
+            </div>
+            <div id="alert-box" class="absolute top-1/4 left-1/2 -translate-x-1/2 z-20 hidden w-max">
+                <div class="glass px-6 py-3 rounded-full flex items-center gap-3 animate-bounce shadow-xl shadow-primary/20">
+                    <span class="text-2xl">💰</span>
                     <div>
-                        <div class="text-sm font-bold text-white">Guest-9281</div>
-                        <div class="text-xs text-yellow-500">500 Coins</div>
+                        <div class="text-xs font-bold text-primary">NEW DONATION</div>
+                        <div class="font-bold text-white alert-text">User just tipped!</div>
                     </div>
                 </div>
             </div>
-
-            <div class="p-3 border-b border-zinc-800 flex justify-between items-center">
-                <span class="label-sm">LIVE CHAT</span>
-                <button class="text-xs text-gray-500 hover:text-white" onclick="clearChat()">Clear</button>
+            <div class="absolute bottom-32 left-0 right-0 text-center px-10 pointer-events-none z-10">
+                <div id="captions" class="text-xl font-bold text-white/80 text-shadow-lg transition-all duration-200 min-h-[30px]"></div>
             </div>
+            
+            <div class="glass rounded-2xl p-3 flex items-center justify-center gap-4 mx-auto z-30 mb-4 max-w-2xl w-full dock absolute bottom-4 left-1/2 -translate-x-1/2">
+                <button class="btn-icon text-gray-400" onclick="document.getElementById('bgm-file').click()">🎵</button>
+                <input type="file" id="bgm-file" hidden onchange="loadBGM(this)">
+                
+                <button id="main-btn" class="btn-action h-14 w-44 rounded-xl shadow-[0_0_20px_var(--primary)] hover:scale-105 transition text-lg shrink-0" onclick="initiateGoLive()">GO LIVE</button>
 
-            <div class="flex-1 scroll-y p-0" id="chat-feed">
-                <div class="p-4 text-center text-xs text-gray-600 mt-10">
-                    System initialized.<br>Waiting for connection...
-                </div>
-            </div>
-
-            <div class="p-3 border-t border-zinc-800 bg-zinc-900">
-                <div class="flex gap-2">
-                    <input id="chat-input" class="flex-1 bg-black border border-zinc-700 rounded p-2 text-sm text-white focus:border-blue-500" placeholder="Type message..." onkeypress="if(event.key==='Enter') sendHostMessage()">
-                    <button class="btn btn-primary" onclick="sendHostMessage()">Send</button>
-                </div>
-                <div class="flex gap-2 mt-2">
-                    <button class="btn flex-1 text-xs py-1" onclick="runPoll()">📊 Poll</button>
-                    <button class="btn flex-1 text-xs py-1" onclick="toggleSlowMode()">🐢 Slow</button>
-                </div>
+                <button class="btn-icon text-red-500" onclick="toggleRecording()" id="rec-btn" title="Record Session">🔴</button>
+                
+                <button class="btn-icon text-blue-400" onclick="shareBroadcast()" title="Share Link">🔗</button>
             </div>
         </div>
 
+        <aside class="bg-panel border-l border-white/10 flex flex-col z-20 sidebar">
+            <div class="flex border-b border-white/10 text-xs font-bold">
+                <button class="flex-1 p-3 border-b-2 border-primary">CHAT</button>
+                <button class="flex-1 p-3 text-gray-500">Q&A</button>
+            </div>
+            <div class="flex-1 overflow-hidden relative">
+                <div id="tab-chat" class="absolute inset-0 flex flex-col p-4 overflow-y-auto">
+                    <div class="text-center text-xs text-gray-600 mt-4">Welcome to the chat room.</div>
+                    <div id="chat-feed" class="flex flex-col gap-2 mt-4 pb-20"></div>
+                </div>
+            </div>
+            <div class="p-3 border-t border-white/10 bg-black/20">
+                <form onsubmit="sendChat(event)" class="flex gap-2">
+                    <input id="chat-input" class="w-full bg-black border border-white/10 rounded p-2 text-sm text-white focus:border-primary outline-none" placeholder="Type..." autocomplete="off">
+                    <button type="submit" class="bg-primary text-white px-3 rounded font-bold">➤</button>
+                </form>
+            </div>
+        </aside>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
-        let isLive = false;
-        let audioCtx, micSource, micGain, bgmSource, bgmGain;
+        let audioCtx, micSource, micGain, bgmSource, bgmGain, masterDest, analyser, noiseFilter;
+        let isLive = false, isRecording = false, isDucking = false;
+        let mediaRecorder, recordedChunks = [];
         let bgmAudio = new Audio(); bgmAudio.loop = true;
-        let revenue = 0;
-        let timerInterval, seconds = 0;
+        let countdownTimer, sessionTimer;
+        let currentEarnings = 0;
+        let startTime = 0;
 
-        // --- 1. CORE BROADCAST ENGINE ---
-        async function startBroadcast() {
-            if (isLive) return stopBroadcast(); // Toggle logic
+        window.onload = initAudioEngine;
 
+        async function initAudioEngine() {
             try {
-                // Audio Context Init
                 const AudioContext = window.AudioContext || window.webkitAudioContext;
                 audioCtx = new AudioContext();
-                
-                // Get Mic
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 
-                // Audio Graph: Mic -> Gain -> Destination
+                // Visualizer Setup
                 micSource = audioCtx.createMediaStreamSource(stream);
                 micGain = audioCtx.createGain();
+                bgmGain = audioCtx.createGain(); bgmGain.gain.value = 0.3;
+                masterDest = audioCtx.createMediaStreamDestination();
+                analyser = audioCtx.createAnalyser();
+
                 micSource.connect(micGain);
-                // Note: In real WebRTC, we connect this destination to the PeerConnection
+                micGain.connect(analyser); 
+                // Do NOT connect to masterDest here, MediaRecorder handles it.
+
+                startVisualizer();
+
+                // === SERVER RELAY AUDIO ENGINE (Robust Logic) ===
+                let mimeType = 'audio/webm;codecs=opus';
+                if (!MediaRecorder.isTypeSupported(mimeType)) {
+                    mimeType = 'audio/webm'; 
+                    if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'audio/mp4'; 
+                }
+
+                mediaRecorder = new MediaRecorder(stream, { mimeType });
                 
-                // Visualizer
-                setupVisualizer(micGain);
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0 && isLive) {
+                        socket.emit('audioStream', { room: socket.id, chunk: event.data });
+                    }
+                };
 
-                // Server Signal
-                const title = document.getElementById('stream-title').value;
-                socket.emit('broadcaster', { title: title, host: 'Host' });
-
-                // UI Updates
-                isLive = true;
-                const btn = document.getElementById('go-live-btn');
-                btn.classList.add('live');
-                btn.innerHTML = '<div class="text-2xl font-black">END</div><div class="text-xs font-bold tracking-widest">STREAM</div>';
-                document.getElementById('status-pill').className = "px-3 py-1 bg-red-500/20 border border-red-500/50 rounded text-xs font-bold text-red-500 animate-pulse";
-                document.getElementById('status-pill').innerText = "● ON AIR";
-                
-                // Timer
-                seconds = 0;
-                timerInterval = setInterval(() => {
-                    seconds++;
-                    document.getElementById('session-timer').innerText = new Date(seconds * 1000).toISOString().substr(11, 8);
-                    // Fake Bitrate fluctuation
-                    document.getElementById('bitrate-disp').innerText = Math.floor(Math.random() * (320 - 280) + 280);
-                }, 1000);
-
-                addLog("System", "Broadcast started successfully.", "sys");
-
-            } catch (err) {
-                alert("Microphone Access Denied! Please allow microphone permissions.");
-                console.error(err);
+                console.log("✅ Audio Engine Ready (Relay Mode)");
+            } catch (e) {
+                console.error("Mic Blocked", e);
+                alert("Microphone access is required.");
             }
+        }
+
+        function initiateGoLive() {
+            if (isLive) {
+                stopBroadcast();
+            } else {
+                if(audioCtx.state === 'suspended') audioCtx.resume();
+                document.getElementById('pre-live-overlay').classList.remove('hidden');
+                let count = 15;
+                document.getElementById('countdown-val').innerText = count;
+                countdownTimer = setInterval(() => {
+                    count--;
+                    document.getElementById('countdown-val').innerText = count;
+                    if(count <= 0) {
+                        clearInterval(countdownTimer);
+                        document.getElementById('pre-live-overlay').classList.add('hidden');
+                        goLiveReal();
+                    }
+                }, 1000);
+            }
+        }
+
+        function cancelLive() {
+            clearInterval(countdownTimer);
+            document.getElementById('pre-live-overlay').classList.add('hidden');
+        }
+
+        function goLiveReal() {
+            socket.emit('broadcaster', { title: "My Show", host: "Host" });
+            isLive = true;
+            
+            // START SENDING AUDIO
+            if(mediaRecorder && mediaRecorder.state === "inactive") {
+                mediaRecorder.start(250); // 250ms chunks
+            }
+            
+            const btn = document.getElementById('main-btn');
+            btn.innerText = "END STREAM";
+            btn.classList.add('bg-red-600', 'pulse-live');
+            document.getElementById('status-badge').classList.remove('hidden');
+            addLog('SYSTEM', '🚀 YOU ARE LIVE (Server Relay Mode)!', {isPriority: true});
+            
+            startTime = Date.now();
+            sessionTimer = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                const h = String(Math.floor(elapsed / 3600)).padStart(2, '0');
+                const m = String(Math.floor((elapsed % 3600) / 60)).padStart(2, '0');
+                const s = String(elapsed % 60).padStart(2, '0');
+                document.getElementById('session-timer').innerText = `${h}:${m}:${s}`;
+            }, 1000);
         }
 
         function stopBroadcast() {
+            if(isRecording) toggleRecording();
             isLive = false;
-            socket.emit('disconnect'); // Or custom stop event
-            location.reload(); // Simple reset
-        }
-
-        // --- 2. AUDIO TOOLS ---
-        function updateGain(val) {
-            if(micGain) micGain.gain.value = val / 100;
-            document.getElementById('mic-val').innerText = val + '%';
-        }
-
-        function loadBGM(input) {
-            if(input.files[0]) {
-                const file = input.files[0];
-                document.getElementById('bgm-name').innerText = file.name;
-                bgmAudio.src = URL.createObjectURL(file);
-                addLog("System", `Loaded track: ${file.name}`, "sys");
-            }
-        }
-
-        function toggleBGM() {
-            if(bgmAudio.paused) bgmAudio.play(); else bgmAudio.pause();
-        }
-
-        function setBGMVol(val) { bgmAudio.volume = val / 100; }
-
-        // --- 3. VISUALIZER ---
-        function setupVisualizer(sourceNode) {
-            const canvas = document.getElementById('visualizer');
-            const ctx = canvas.getContext('2d');
-            canvas.width = canvas.parentElement.offsetWidth;
-            canvas.height = canvas.parentElement.offsetHeight;
-
-            const analyser = audioCtx.createAnalyser();
-            analyser.fftSize = 256;
-            sourceNode.connect(analyser);
-
-            const bufferLength = analyser.frequencyBinCount;
-            const dataArray = new Uint8Array(bufferLength);
-
-            function draw() {
-                if(!isLive) return;
-                requestAnimationFrame(draw);
-                analyser.getByteFrequencyData(dataArray);
-                
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                
-                const barWidth = (canvas.width / bufferLength) * 2.5;
-                let barHeight;
-                let x = 0;
-
-                for(let i = 0; i < bufferLength; i++) {
-                    barHeight = dataArray[i] / 1.5; // Scale height
-                    
-                    // Gradient color
-                    const gradient = ctx.createLinearGradient(0, canvas.height, 0, canvas.height - barHeight);
-                    gradient.addColorStop(0, '#6366f1');
-                    gradient.addColorStop(1, '#a855f7');
-                    
-                    ctx.fillStyle = gradient;
-                    ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
-                    x += barWidth + 1;
-                }
-            }
-            draw();
-        }
-
-        // --- 4. SOCIAL & CHAT ---
-        function sendHostMessage() {
-            const input = document.getElementById('chat-input');
-            const text = input.value;
-            if(!text) return;
+            if(mediaRecorder && mediaRecorder.state !== "inactive") mediaRecorder.stop();
             
-            // Local add
-            addLog("HOST", text);
-            // Emit
-            socket.emit('chatMessage', { room: socket.id, user: 'HOST', msg: text });
+            socket.emit('stopBroadcast');
+            clearInterval(sessionTimer);
+            
+            const btn = document.getElementById('main-btn');
+            btn.innerText = "GO LIVE";
+            btn.classList.remove('bg-red-600', 'pulse-live');
+            document.getElementById('status-badge').classList.add('hidden');
+            addLog('SYSTEM', '🛑 Broadcast Ended');
+            setTimeout(() => location.reload(), 1500);
+        }
+
+        // === SHARE FUNCTION (New) ===
+        function shareBroadcast() {
+            if(!isLive) return alert("Go Live first to generate a link!");
+            const link = `${window.location.origin}/dashboard?room=${socket.id}`;
+            navigator.clipboard.writeText(link).then(() => {
+                addLog("SYSTEM", "🔗 Link Copied!", {isPriority: true});
+                alert("Copied! Share this with fans:\n" + link);
+            });
+        }
+
+        // === CHAT & LOGS ===
+        function sendChat(event) {
+            if(event) event.preventDefault();
+            const input = document.getElementById('chat-input');
+            const msg = input.value.trim();
+            if(!msg) return;
+            addLog("HOST", msg);
+            socket.emit('chatMessage', { room: socket.id, user: 'HOST', msg: msg });
             input.value = '';
         }
 
-        function addLog(user, text, type='') {
-            const feed = document.getElementById('chat-feed');
+        function addLog(user, txt, meta = {}) {
             const div = document.createElement('div');
-            div.className = `chat-msg ${type}`;
-            div.innerHTML = `<b>${user}:</b> ${text}`;
+            let classes = "text-sm p-2 rounded mb-2 border border-white/5 animate-slide-up ";
+            if (meta.isGold) { classes += "gold-msg "; user = `👑 ${user}`; } 
+            else if (meta.isPriority) { classes += "border-l-2 border-primary bg-white/10 "; }
+            else { classes += "bg-white/5 "; }
+            
+            div.className = classes;
+            const nameColor = meta.isGold ? "text-yellow-400" : "text-primary";
+            div.innerHTML = `<span class="font-bold ${nameColor}">${user}:</span> ${txt}`;
+            const feed = document.getElementById('chat-feed');
             feed.appendChild(div);
             feed.scrollTop = feed.scrollHeight;
         }
 
-        // Socket Listeners for Interaction
-        socket.on('chatMessage', data => addLog(data.user || 'Guest', data.msg));
+        // === SOCKET LISTENERS ===
+        socket.on('roomLog', data => { 
+            if(data.type === 'join') {
+                addLog("🔔", "A user joined");
+                document.getElementById('listener-count').innerText = data.count;
+            }
+        });
+        socket.on('chatMessage', data => addLog(data.user, data.msg, data));
         socket.on('giftReceived', data => {
-            const val = data.gift === '🚀' ? 5 : 1;
-            revenue += val;
-            document.getElementById('revenue-display').innerText = `$${revenue.toFixed(2)}`;
-            addLog("SYSTEM", `${data.user} sent ${data.gift} (+$${val})`, "tip");
-        });
-        socket.on('roomLog', data => {
-            if(data.type === 'join') document.getElementById('listener-count').innerText = data.count;
+            let val = 0;
+            if(data.gift === '🚀') val = 5000;
+            else if(data.gift === '❤️') val = 500;
+            else val = 100;
+            currentEarnings += val;
+            document.getElementById('earnings-val').innerText = "₦" + currentEarnings.toLocaleString();
+            const box = document.getElementById('alert-box');
+            box.querySelector('.alert-text').innerText = `${data.user} tipped ₦${val}!`;
+            box.classList.remove('hidden');
+            setTimeout(() => box.classList.add('hidden'), 4000);
+            addLog("SYSTEM", `${data.user} sent ${data.gift} (₦${val})`, {isGold: true});
         });
 
-        // --- 5. UTILS ---
-        function toggleCinemaMode() {
-            document.getElementById('app-body').classList.toggle('brightness-50');
+        // === UTILS ===
+        function setGain(val) { if(micGain) micGain.gain.value = val/100; }
+        function playSFX(name) { addLog("SYSTEM", `🔊 SFX: ${name}`); }
+        function toggleCinema() { document.querySelector('aside').classList.toggle('hidden'); }
+        function loadBGM(input) {
+            if(input.files[0]) {
+                bgmAudio.src = URL.createObjectURL(input.files[0]);
+                if(audioCtx && !bgmSource) {
+                    bgmSource = audioCtx.createMediaElementSource(bgmAudio);
+                    bgmSource.connect(bgmGain).connect(masterDest);
+                }
+                addLog("SYSTEM", `🎵 Track: ${input.files[0].name}`);
+            }
         }
-        function copyLink() {
-            navigator.clipboard.writeText(window.location.origin);
-            alert("Studio Link Copied!");
-        }
-        function clearChat() {
-            document.getElementById('chat-feed').innerHTML = '<div class="p-4 text-center text-xs text-gray-600 mt-10">Chat cleared by Host.</div>';
+        
+        function toggleRecording() {
+            if(!isLive) return alert("Go LIVE first!");
+            if (!isRecording) {
+                // For local file recording
+                recordedChunks = [];
+                const destRec = audioCtx.createMediaStreamDestination();
+                micGain.connect(destRec); 
+                window.fileRecorder = new MediaRecorder(destRec.stream);
+                window.fileRecorder.ondataavailable = e => recordedChunks.push(e.data);
+                window.fileRecorder.onstop = saveRecording;
+                window.fileRecorder.start();
+                isRecording = true;
+                document.getElementById('rec-btn').classList.add('animate-pulse', 'text-white');
+                addLog("SYSTEM", "🔴 REC Started");
+            } else {
+                window.fileRecorder.stop();
+                isRecording = false;
+                document.getElementById('rec-btn').classList.remove('animate-pulse', 'text-white');
+            }
         }
 
-        // Populate Audio Inputs
-        navigator.mediaDevices.enumerateDevices().then(devices => {
-            const select = document.getElementById('audio-source');
-            devices.filter(d => d.kind === 'audioinput').forEach(d => {
-                const opt = document.createElement('option');
-                opt.text = d.label || `Microphone ${select.length + 1}`;
-                select.add(opt);
-            });
-        });
+        function saveRecording() {
+            const blob = new Blob(recordedChunks, { type: 'audio/webm' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `rec_${Date.now()}.webm`;
+            a.click();
+            addLog("SYSTEM", "💾 Saved");
+        }
+
+        function startVisualizer() {
+            const canvas = document.getElementById('visualizer');
+            const ctx = canvas.getContext('2d');
+            const dataArray = new Uint8Array(analyser.frequencyBinCount);
+            function draw() {
+                requestAnimationFrame(draw);
+                analyser.getByteTimeDomainData(dataArray);
+                canvas.width = canvas.parentElement.offsetWidth;
+                canvas.height = canvas.parentElement.offsetHeight;
+                ctx.clearRect(0,0,canvas.width,canvas.height);
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#6366f1';
+                ctx.beginPath();
+                const slice = canvas.width * 1.0 / dataArray.length;
+                let x = 0;
+                for(let i=0; i<dataArray.length; i++) {
+                    const v = dataArray[i] / 128.0;
+                    const y = v * canvas.height/2;
+                    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+                    x+=slice;
+                }
+                ctx.lineTo(canvas.width, canvas.height/2);
+                ctx.stroke();
+                
+                let sum = 0;
+                for(let i=0; i<dataArray.length; i++) sum += Math.abs(dataArray[i]-128);
+                document.getElementById('mic-meter').style.width = Math.min(100, (sum/dataArray.length)*10) + '%';
+            }
+            draw();
+        }
     </script>
 </body>
 </html>
