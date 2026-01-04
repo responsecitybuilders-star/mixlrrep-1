@@ -17,271 +17,134 @@
         body { background: #020617; color: white; font-family: 'Plus Jakarta Sans', sans-serif; overflow: hidden; }
         
         /* === UI UTILITIES === */
-        .glass-panel { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); }
+        .glass-panel { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); }
         .hide-scroll::-webkit-scrollbar { display: none; }
         .nav-link.active { background: rgba(99, 102, 241, 0.15); border-right: 3px solid #6366f1; color: white; }
+        .nav-link-mobile.active { color: #6366f1; }
         .fade-in { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        /* === COIN GLOW EFFECT === */
         .coin-glow:active { animation: glowPop 0.3s ease-out; }
-        @keyframes glowPop { 0% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.7); transform: scale(1); } 50% { transform: scale(1.2); } 100% { box-shadow: 0 0 50px 20px rgba(251, 191, 36, 0); transform: scale(1); } }
+        @keyframes glowPop { 0% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.7); transform: scale(1); } 100% { box-shadow: 0 0 50px 20px rgba(251, 191, 36, 0); transform: scale(1); } }
 
-        /* === LOCKED FEATURES === */
-        .locked-feat { position: relative; overflow: hidden; cursor: pointer; filter: grayscale(0.8); transition: 0.3s; }
-        .locked-feat::after {
-            content: '🔒 CLICK TO UNLOCK'; position: absolute; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px);
-            display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 11px; letter-spacing: 1px; color: #fbbf24;
-            opacity: 0; transition: 0.3s; z-index: 10;
-        }
-        .locked-feat:hover::after { opacity: 1; }
-
-        /* === THEATER MODE (From Index) === */
-        .theater-overlay {
-            position: fixed; inset: 0; background: #000; z-index: 5000;
-            transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-            display: flex; flex-direction: column; overflow: hidden;
-        }
+        /* === THEATER MODE (Responsive) === */
+        .theater-overlay { position: fixed; inset: 0; background: #000; z-index: 5000; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1); display: flex; flex-direction: column; overflow: hidden; }
         .theater-overlay.active { transform: translateY(0); }
 
-        .room-bg { position: absolute; inset: 0; z-index: 0; background: radial-gradient(circle at center, #1e1b4b 0%, #000000 80%); }
-        .pulse-ring {
-            position: absolute; width: 300px; height: 300px; border-radius: 50%;
-            border: 1px solid rgba(99, 102, 241, 0.3); top: 50%; left: 50%; transform: translate(-50%, -50%);
-            animation: ripple 3s infinite;
-        }
+        /* Audio Start Overlay */
+        #audio-start-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.8); z-index: 6000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        #audio-start-overlay.show { display: flex; }
+
+        .pulse-ring { position: absolute; width: 300px; height: 300px; border-radius: 50%; border: 1px solid rgba(99, 102, 241, 0.3); top: 50%; left: 50%; transform: translate(-50%, -50%); animation: ripple 3s infinite; }
         .pulse-ring:nth-child(2) { animation-delay: 1s; }
-        .pulse-ring:nth-child(3) { animation-delay: 2s; }
         @keyframes ripple { 0% { width: 300px; height: 300px; opacity: 1; } 100% { width: 800px; height: 800px; opacity: 0; } }
 
-        .floater { position: absolute; font-size: 2.5rem; animation: floatUp 2.5s ease-out forwards; pointer-events: none; z-index: 6000; text-shadow: 0 0 20px rgba(255,0,100,0.6); }
-        @keyframes floatUp { 0% { transform: translateY(0) scale(0.5); opacity:0; } 10% { opacity:1; } 100% { transform: translateY(-500px) scale(1.5) rotate(20deg); opacity:0; } }
+        .floater { position: absolute; font-size: 2.5rem; animation: floatUp 2.5s ease-out forwards; pointer-events: none; z-index: 6000; }
+        @keyframes floatUp { 0% { transform: translateY(0) scale(0.5); opacity:0; } 100% { transform: translateY(-500px) scale(1.5) rotate(20deg); opacity:0; } }
 
-        /* === COMPONENTS === */
-        .coin-btn {
-            background: linear-gradient(135deg, #fbbf24, #d97706); color: black; font-weight: 800; 
-            padding: 6px 14px; border-radius: 20px; display: flex; align-items: center; gap: 6px;
-            box-shadow: 0 0 15px rgba(251, 191, 36, 0.3); transition: 0.2s; cursor: pointer;
-        }
-        .coin-btn:hover { transform: scale(1.05); filter: brightness(1.1); }
-
-        .gift-tab { padding: 6px 12px; font-size: 11px; color: #94a3b8; border-radius: 12px; cursor: pointer; transition: 0.2s; background: rgba(255,255,255,0.05); }
+        .coin-btn { background: linear-gradient(135deg, #fbbf24, #d97706); color: black; font-weight: 800; padding: 6px 14px; border-radius: 20px; display: flex; align-items: center; gap: 6px; }
         .gift-tab.active { background: #6366f1; color: white; font-weight: bold; }
-        
         .gift-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding-top: 10px; }
-        .gift-item { 
-            display: flex; flex-direction: column; align-items: center; padding: 8px; 
-            border-radius: 10px; cursor: pointer; transition: 0.2s; border: 1px solid transparent; 
-        }
-        .gift-item:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.1); transform: translateY(-2px); }
+        .gift-item { display: flex; flex-direction: column; align-items: center; padding: 8px; border-radius: 10px; cursor: pointer; transition: 0.2s; }
         .gift-item:active { transform: scale(0.95); }
 
-        /* === MODALS === */
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 9000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
         .modal.open { display: flex; animation: popIn 0.3s; }
-        @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
-        /* Car Mode */
         .car-mode { position: fixed; inset: 0; background: #000; z-index: 8000; display: none; flex-direction: column; padding: 40px; }
         .car-mode.active { display: flex; }
         .big-btn { background: #222; border: 2px solid #444; border-radius: 24px; flex: 1; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 800; transition: 0.2s; }
-        .big-btn:active { background: #444; transform: scale(0.98); }
     </style>
 </head>
-<body class="flex h-screen">
+<body class="flex flex-col md:flex-row h-screen">
 
-    <audio id="remoteAudio" autoplay></audio>
+    <audio id="remoteAudio" playsinline></audio>
     <div id="float-layer" class="fixed inset-0 pointer-events-none z-[6000]"></div>
 
-    <aside class="w-64 glass-panel border-r border-white/5 flex flex-col z-20 hidden md:flex">
-        <div class="h-20 flex items-center px-8 border-b border-white/5">
-            <div class="text-xl font-black tracking-tighter">AIR<span class="text-indigo-500">VIBE</span></div>
-        </div>
+    <aside class="w-64 glass-panel border-r border-white/5 flex-col z-20 hidden md:flex">
+        <div class="h-20 flex items-center px-8 border-b border-white/5 text-xl font-black tracking-tighter">AIR<span class="text-indigo-500">VIBE</span></div>
         <nav class="flex-1 py-6 space-y-1">
-            <button onclick="switchView('home')" id="nav-home" class="nav-link active w-full flex items-center px-8 py-3 text-sm font-medium text-gray-400 transition hover:bg-white/5 text-left">
-                <span class="mr-4">🏠</span> Home
-            </button>
-            <button onclick="switchView('live')" id="nav-live" class="nav-link w-full flex items-center px-8 py-3 text-sm font-medium text-gray-400 transition hover:bg-white/5 text-red-400 text-left">
-                <span class="mr-4">🔴</span> Join Live
-            </button>
-            <button onclick="switchView('following')" id="nav-following" class="nav-link w-full flex items-center px-8 py-3 text-sm font-medium text-gray-400 transition hover:bg-white/5 text-left">
-                <span class="mr-4">❤️</span> Following
-            </button>
-            <button onclick="switchView('library')" id="nav-library" class="nav-link w-full flex items-center px-8 py-3 text-sm font-medium text-gray-400 transition hover:bg-white/5 text-left">
-                <span class="mr-4">📂</span> Library
-            </button>
-            
+            <button onclick="switchView('home')" id="nav-home" class="nav-link active w-full flex items-center px-8 py-3 text-sm font-medium text-gray-400 hover:bg-white/5 text-left"><span class="mr-4">🏠</span> Home</button>
+            <button onclick="switchView('live')" id="nav-live" class="nav-link w-full flex items-center px-8 py-3 text-sm font-medium text-gray-400 hover:bg-white/5 text-left"><span class="mr-4">🔴</span> Live</button>
+            <button onclick="switchView('library')" id="nav-library" class="nav-link w-full flex items-center px-8 py-3 text-sm font-medium text-gray-400 hover:bg-white/5 text-left"><span class="mr-4">📂</span> Library</button>
             <div class="pt-6 pb-2 px-8 text-[10px] font-bold text-gray-500 tracking-widest">TOOLS</div>
-            <button onclick="openCarMode()" class="nav-link w-full flex items-center px-8 py-3 text-sm font-medium text-gray-400 transition hover:bg-white/5 text-left">
-                <span class="mr-4">🚗</span> Car Mode
-            </button>
-            <button onclick="toggleDataSaver()" class="nav-link w-full flex items-center px-8 py-3 text-sm font-medium text-gray-400 transition hover:bg-white/5 text-left">
-                <span class="mr-4">⚡</span> Data Saver <span id="ds-badge" class="ml-auto text-[10px] text-green-500 hidden">ON</span>
-            </button>
+            <button onclick="openCarMode()" class="nav-link w-full flex items-center px-8 py-3 text-sm font-medium text-gray-400 hover:bg-white/5 text-left"><span class="mr-4">🚗</span> Car Mode</button>
         </nav>
         <div class="p-4 border-t border-white/5">
-            <div class="bg-indigo-600/20 p-4 rounded-xl border border-indigo-500/30 text-center mb-4 cursor-pointer hover:bg-indigo-600/30 transition coin-glow" onclick="triggerCheckout('Ultra Vibe', '1,450')">
-                <div class="text-xs font-bold text-indigo-300">UPGRADE PLAN</div>
-                <div class="text-[10px] text-gray-400">Unlock Ghost Mode</div>
-            </div>
             <div class="flex items-center gap-3">
-                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=King" class="w-10 h-10 rounded-full bg-black border border-white/10">
-                <div>
-                    <div class="text-sm font-bold" id="user-name-disp">Guest</div>
-                    <div class="text-[10px] text-gray-400 uppercase" id="user-plan-disp">Free Tier</div>
-                </div>
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Guest" class="w-10 h-10 rounded-full bg-black border border-white/10">
+                <div><div class="text-sm font-bold" id="user-name-disp">Guest</div><div class="text-[10px] text-gray-400" id="user-plan-disp">FREE</div></div>
             </div>
         </div>
     </aside>
 
-    <main class="flex-1 flex flex-col relative overflow-hidden bg-[#020617]">
-        
-        <header class="h-20 border-b border-white/5 flex items-center justify-between px-8 bg-black/20 backdrop-blur shrink-0">
-            <h2 class="text-xl font-bold" id="page-title">Discover</h2>
-            <div class="flex gap-4 items-center">
-                <button class="coin-btn coin-glow" onclick="openCoinModal()">
-                    <span>🪙</span> <span id="coin-bal">0</span>
-                </button>
-                <button class="relative p-2 hover:bg-white/10 rounded-full transition coin-glow" onclick="alert('No new notifications')">
-                    🔔 <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
-                </button>
-                <a href="/profile" class="hidden md:block px-4 py-2 rounded-lg border border-white/10 text-xs font-bold hover:bg-white/5 transition">PROFILE</a>
+    <main class="flex-1 flex flex-col relative overflow-hidden bg-[#020617] pb-16 md:pb-0">
+        <header class="h-16 border-b border-white/5 flex items-center justify-between px-4 md:px-8 bg-black/20 backdrop-blur shrink-0">
+            <h2 class="text-lg font-bold">Discover</h2>
+            <div class="flex gap-3 items-center">
+                <button class="coin-btn coin-glow text-xs" onclick="openCoinModal()"><span>🪙</span> <span id="coin-bal">0</span></button>
+                <a href="/profile" class="hidden md:block px-3 py-1 rounded border border-white/10 text-xs font-bold">PROFILE</a>
             </div>
         </header>
 
-        <div class="flex-1 overflow-y-auto p-8 pb-32 space-y-8 hide-scroll" id="content-area">
-            
+        <div class="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 hide-scroll" id="content-area">
             <div id="view-home" class="fade-in">
-                <section class="glass-panel p-6 rounded-2xl mb-8">
-                    <div class="flex justify-between items-end mb-4">
-                        <div>
-                            <h3 class="font-bold text-lg">Weekly Listening</h3>
-                            <p class="text-xs text-gray-400">You've tuned in for <span class="text-indigo-400 font-bold">12h 45m</span>.</p>
-                        </div>
-                    </div>
-                    <div class="flex items-end justify-between h-24 gap-2">
-                        <div class="w-full bg-white/5 rounded-t h-full flex flex-col justify-end"><div class="w-full bg-indigo-600 rounded-t h-[40%]"></div></div>
-                        <div class="w-full bg-white/5 rounded-t h-full flex flex-col justify-end"><div class="w-full bg-indigo-600 rounded-t h-[70%]"></div></div>
-                        <div class="w-full bg-white/5 rounded-t h-full flex flex-col justify-end"><div class="w-full bg-indigo-600 rounded-t h-[30%]"></div></div>
-                        <div class="w-full bg-white/5 rounded-t h-full flex flex-col justify-end"><div class="w-full bg-indigo-600 rounded-t h-[90%]"></div></div>
-                        <div class="w-full bg-white/5 rounded-t h-full flex flex-col justify-end"><div class="w-full bg-indigo-600 rounded-t h-[50%]"></div></div>
-                        <div class="w-full bg-white/5 rounded-t h-full flex flex-col justify-end"><div class="w-full bg-indigo-600 rounded-t h-[20%]"></div></div>
-                        <div class="w-full bg-white/5 rounded-t h-full flex flex-col justify-end"><div class="w-full bg-indigo-600 rounded-t h-[60%]"></div></div>
-                    </div>
-                </section>
-
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="font-bold text-lg">🔴 Live Now</h3>
-                    <button onclick="switchView('live')" class="text-xs text-indigo-400 font-bold hover:underline">View All</button>
+                <div class="flex justify-between items-center mb-2"><h3 class="font-bold">🔴 Live Now</h3></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="home-live-grid">
+                    <div class="p-8 text-center text-gray-600 glass-panel rounded-xl">Loading...</div>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="home-live-grid">
-                    <div class="p-10 text-center text-gray-600 glass-panel rounded-xl col-span-full">Loading live feeds...</div>
-                </div>
-
-                <h3 class="font-bold text-lg mt-8 mb-4">💎 Power Features</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <div class="glass-panel p-6 rounded-2xl locked-feat" onclick="triggerCheckout('Ghost Mode', '1,450')">
-                        <div class="flex justify-between mb-2"><span class="text-2xl">👻</span> <span class="text-[10px] border border-purple-500 text-purple-400 px-2 rounded">ULTRA</span></div>
-                        <h4 class="font-bold">Ghost Mode</h4>
-                        <p class="text-xs text-gray-400">Join streams invisibly.</p>
-                    </div>
-                    <div class="glass-panel p-6 rounded-2xl locked-feat" onclick="triggerCheckout('Downloads', '990')">
-                        <div class="flex justify-between mb-2"><span class="text-2xl">💾</span> <span class="text-[10px] border border-blue-500 text-blue-400 px-2 rounded">SUPER</span></div>
-                        <h4 class="font-bold">Offline Vault</h4>
-                        <p class="text-xs text-gray-400">Save streams to device.</p>
-                    </div>
-                    <div class="glass-panel p-6 rounded-2xl locked-feat" onclick="triggerCheckout('Voice DM', '1,450')">
-                        <div class="flex justify-between mb-2"><span class="text-2xl">🎤</span> <span class="text-[10px] border border-pink-500 text-pink-400 px-2 rounded">ULTRA</span></div>
-                        <h4 class="font-bold">Voice DMs</h4>
-                        <p class="text-xs text-gray-400">Speak directly to host.</p>
-                    </div>
+                <h3 class="font-bold mt-6 mb-2">💎 Features</h3>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    <div class="glass-panel p-4 rounded-xl locked-feat" onclick="triggerCheckout('Ghost Mode', '1,450')"><div class="text-2xl mb-1">👻</div><div class="text-xs font-bold">Ghost Mode</div></div>
+                    <div class="glass-panel p-4 rounded-xl locked-feat" onclick="triggerCheckout('Downloads', '990')"><div class="text-2xl mb-1">💾</div><div class="text-xs font-bold">Vault</div></div>
                 </div>
             </div>
-
-            <div id="view-live" class="hidden fade-in">
-                <h3 class="font-bold text-lg mb-4">🔴 All Active Broadcasts</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="live-grid-full"></div>
-            </div>
-
-            <div id="view-following" class="hidden fade-in">
-                <h3 class="font-bold text-lg mb-4">You Follow</h3>
-                <div class="space-y-3">
-                    <div class="glass-panel p-4 rounded-xl flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Pastor" class="w-10 h-10 rounded-full bg-white/10">
-                            <div><div class="font-bold">Pastor Jerry</div><div class="text-xs text-green-400">● Live Now</div></div>
-                        </div>
-                        <button class="px-4 py-2 bg-white/10 rounded-full text-xs font-bold" onclick="joinRoom('room3', 'Midnight Prayers', 'Pastor Jerry')">Join</button>
-                    </div>
-                    <div class="glass-panel p-4 rounded-xl flex items-center justify-between opacity-50">
-                        <div class="flex items-center gap-3">
-                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Tomiwa" class="w-10 h-10 rounded-full bg-white/10">
-                            <div><div class="font-bold">Tomiwa</div><div class="text-xs text-gray-400">Offline</div></div>
-                        </div>
-                        <button class="px-4 py-2 bg-white/5 rounded-full text-xs font-bold text-gray-500">Profile</button>
-                    </div>
-                </div>
-            </div>
-
-            <div id="view-library" class="hidden fade-in">
-                <h3 class="font-bold text-lg mb-4">Saved Streams</h3>
-                <div class="glass-panel p-10 rounded-2xl text-center border-dashed border-2 border-white/10">
-                    <div class="text-6xl mb-4">🔒</div>
-                    <h4 class="text-2xl font-bold text-white">Unlock The Vault</h4>
-                    <p class="text-gray-400 mb-6 mt-2">Upgrade to Super Fan to save streams offline and listen anywhere.</p>
-                    <button class="px-8 py-3 bg-indigo-600 rounded-full font-bold shadow-lg shadow-indigo-500/20 hover:scale-105 transition" onclick="triggerCheckout('Super Fan', '990')">UPGRADE - ₦990</button>
-                </div>
-            </div>
-
+            <div id="view-live" class="hidden fade-in"><h3 class="font-bold mb-4">All Broadcasts</h3><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="live-grid-full"></div></div>
+            <div id="view-library" class="hidden fade-in"><div class="glass-panel p-10 rounded-2xl text-center border-dashed border-2 border-white/10"><div class="text-4xl mb-2">🔒</div><button class="px-6 py-2 bg-primary rounded-full font-bold" onclick="triggerCheckout('Super Fan', '990')">Upgrade</button></div></div>
         </div>
-
     </main>
 
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 h-16 glass-panel border-t border-white/10 flex justify-around items-center z-40 pb-safe">
+        <button onclick="switchView('home')" id="mob-home" class="nav-link-mobile active flex flex-col items-center text-gray-500 w-full h-full justify-center"><span class="text-xl mb-0.5">🏠</span><span class="text-[10px]">Home</span></button>
+        <button onclick="switchView('live')" id="mob-live" class="nav-link-mobile flex flex-col items-center text-gray-500 w-full h-full justify-center"><span class="text-xl mb-0.5">🔴</span><span class="text-[10px]">Live</span></button>
+        <button onclick="switchView('library')" id="mob-library" class="nav-link-mobile flex flex-col items-center text-gray-500 w-full h-full justify-center"><span class="text-xl mb-0.5">📂</span><span class="text-[10px]">Lib</span></button>
+    </nav>
+
     <div id="live-room" class="theater-overlay">
-        <div class="room-bg"></div>
-        <div class="pulse-ring"></div>
-        <div class="pulse-ring"></div>
-        
-        <div class="relative z-10 h-16 flex items-center justify-between px-6 border-b border-white/10 bg-black/40 backdrop-blur-md">
-            <div class="flex items-center gap-4">
-                <div class="w-10 h-10 rounded-full bg-indigo-500 border-2 border-white/20 overflow-hidden">
-                    <img id="room-avatar" src="" class="w-full h-full object-cover">
-                </div>
-                <div>
-                    <h2 class="font-bold leading-tight text-white" id="room-title">Loading...</h2>
-                    <p class="text-xs text-indigo-300 font-mono" id="room-host">@Host</p>
-                </div>
+        <div class="h-14 flex items-center justify-between px-4 bg-black/60 backdrop-blur z-20 shrink-0 border-b border-white/5">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-primary border border-white/20 overflow-hidden"><img id="room-avatar" class="w-full h-full object-cover"></div>
+                <div><h2 class="font-bold text-sm leading-tight" id="room-title">...</h2><p class="text-[10px] text-primary">@<span id="room-host">User</span></p></div>
             </div>
-            <button onclick="leaveRoom()" class="w-10 h-10 rounded-full bg-white/10 hover:bg-red-500 hover:text-white flex items-center justify-center transition shadow-lg">✕</button>
+            <button onclick="leaveRoom()" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">✕</button>
         </div>
 
-        <div class="relative z-10 flex-1 flex flex-col md:flex-row overflow-hidden">
-            <div class="flex-1 flex flex-col items-center justify-center relative">
-                <button onclick="toggleMuteRoom()" id="room-mute-btn" class="absolute top-6 left-6 p-3 bg-black/50 rounded-full text-white border border-white/10 hover:bg-white/20">🔊</button>
-                <div class="w-64 h-64 rounded-full border-4 border-indigo-500/30 relative animate-pulse flex items-center justify-center shadow-[0_0_50px_rgba(99,102,241,0.3)]">
-                    <img id="room-art" src="" class="w-60 h-60 rounded-full object-cover">
-                </div>
-                <div class="mt-8 px-4 py-2 bg-black/40 rounded-full border border-white/10 backdrop-blur text-sm text-gray-300">
-                    👥 Listeners: <span id="room-listeners" class="font-bold text-white">0</span>
+        <div class="flex-1 flex flex-col md:flex-row overflow-hidden relative">
+            <div id="audio-start-overlay" onclick="startAudioManually()">
+                <div class="bg-primary text-white font-bold py-4 px-8 rounded-full animate-bounce shadow-[0_0_30px_var(--primary)] cursor-pointer">
+                    🔊 TAP TO JOIN AUDIO
                 </div>
             </div>
 
-            <div class="w-full md:w-96 bg-gray-900/80 border-l border-white/10 flex flex-col backdrop-blur-xl">
-                <div class="p-3 border-b border-white/5 font-bold text-xs text-gray-400 bg-black/20">LIVE CHAT</div>
-                <div id="room-chat" class="flex-1 overflow-y-auto p-4 space-y-3"></div>
+            <div class="relative w-full h-[35vh] md:h-auto md:flex-1 bg-gradient-to-b from-[#1e1b4b] to-black flex items-center justify-center shrink-0">
+                <div class="pulse-ring"></div>
+                <img id="room-art" class="w-32 h-32 md:w-60 md:h-60 rounded-full border-4 border-primary/30 shadow-[0_0_30px_rgba(99,102,241,0.4)] relative z-10 animate-pulse object-cover">
+                <div class="absolute bottom-4 right-4 bg-black/50 px-3 py-1 rounded-full text-[10px] backdrop-blur border border-white/10">👥 <span id="room-listeners">0</span></div>
+            </div>
 
-                <div class="flex gap-2 px-3 pt-3 border-t border-white/5 bg-black/30 overflow-x-auto hide-scroll">
-                    <button class="gift-tab active" onclick="switchGiftTab('faith', this)">✝️ Faith</button>
-                    <button class="gift-tab" onclick="switchGiftTab('classic', this)">🎁 Classic</button>
-                    <button class="gift-tab" onclick="switchGiftTab('luxury', this)">💎 Luxury</button>
+            <div class="flex-1 bg-gray-900/90 flex flex-col overflow-hidden w-full md:w-96 md:border-l md:border-white/10 backdrop-blur-xl">
+                <div class="p-2 border-b border-white/5 font-bold text-[10px] text-gray-400 bg-black/20 text-center">LIVE CHAT</div>
+                <div id="room-chat" class="flex-1 overflow-y-auto p-4 space-y-2 bg-black/20"></div>
+
+                <div class="h-14 border-t border-white/5 bg-black/40 flex items-center gap-2 px-2 overflow-x-auto hide-scroll shrink-0">
+                    <button onclick="attemptGift('❤️', 10)" class="shrink-0 px-3 py-1.5 bg-white/5 rounded-full text-xs border border-white/5 hover:bg-primary">❤️ 10</button>
+                    <button onclick="attemptGift('🔥', 100)" class="shrink-0 px-3 py-1.5 bg-white/5 rounded-full text-xs border border-white/5 hover:bg-primary">🔥 100</button>
+                    <button onclick="attemptGift('🚀', 5000)" class="shrink-0 px-3 py-1.5 bg-white/5 rounded-full text-xs border border-white/5 text-gold">🚀 5k</button>
+                    <button onclick="attemptGift('💎', 10000)" class="shrink-0 px-3 py-1.5 bg-white/5 rounded-full text-xs border border-white/5 text-blue-300">💎 10k</button>
                 </div>
-                
-                <div id="gift-container" class="p-3 bg-black/30 h-40 overflow-y-auto hide-scroll border-b border-white/5"></div>
 
-                <div class="p-4 bg-black/40">
+                <div class="p-3 bg-black/60 shrink-0 pb-6 md:pb-3 border-t border-white/5">
                     <form onsubmit="sendRoomChat(event)" class="flex gap-2">
-                        <input id="chat-msg" type="text" class="flex-1 bg-white/5 border border-white/10 rounded-full px-4 py-2 text-sm outline-none focus:border-indigo-500 transition text-white" placeholder="Say something..." autocomplete="off">
-                        <button type="submit" class="w-10 h-10 bg-indigo-600 rounded-full hover:bg-indigo-500 flex items-center justify-center text-white transition transform active:scale-95 shadow-lg">➤</button>
+                        <input id="chat-msg" type="text" class="flex-1 bg-white/10 border-0 rounded-full px-4 py-3 text-sm text-white focus:ring-1 focus:ring-primary outline-none" placeholder="Chat..." autocomplete="off">
+                        <button type="submit" class="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white shadow-lg">➤</button>
                     </form>
                 </div>
             </div>
@@ -289,49 +152,29 @@
     </div>
 
     <div id="coin-modal" class="modal">
-        <div class="bg-gray-900 w-full max-w-sm rounded-3xl border border-yellow-500/30 p-8 text-center relative shadow-2xl">
-            <button onclick="document.getElementById('coin-modal').classList.remove('open')" class="absolute top-4 right-4 text-gray-500 hover:text-white">✕</button>
-            <div class="text-4xl mb-2 coin-glow">🪙</div>
-            <h3 class="text-2xl font-bold text-white mb-1">Top Up Coins</h3>
-            <p class="text-sm text-gray-400 mb-6">Bless your favorite creators.</p>
+        <div class="bg-gray-900 w-80 rounded-2xl p-6 text-center border border-white/10 relative">
+            <button onclick="document.getElementById('coin-modal').classList.remove('open')" class="absolute top-4 right-4 text-gray-500">✕</button>
+            <h3 class="text-xl font-bold mb-4">Get Coins</h3>
             <div class="grid grid-cols-2 gap-3">
-                <button onclick="buyCoins(100, 500)" class="p-4 bg-white/5 rounded-xl hover:bg-white/10 border border-white/10 coin-glow"><div class="text-xl font-bold text-yellow-400">100</div><div class="text-xs text-gray-400">₦500</div></button>
-                <button onclick="buyCoins(1000, 4500)" class="p-4 bg-white/5 rounded-xl hover:bg-white/10 border border-white/10 ring-1 ring-yellow-500 coin-glow"><div class="text-xl font-bold text-yellow-400">1,000</div><div class="text-xs text-gray-400">₦4,500</div></button>
-                <button onclick="buyCoins(10000, 40000)" class="p-4 bg-white/5 rounded-xl hover:bg-white/10 border border-white/10 coin-glow"><div class="text-xl font-bold text-yellow-400">10k</div><div class="text-xs text-gray-400">₦40k</div></button>
-                <button onclick="buyCoins(50000, 180000)" class="p-4 bg-white/5 rounded-xl hover:bg-white/10 border border-white/10 coin-glow"><div class="text-xl font-bold text-yellow-400">50k</div><div class="text-xs text-gray-400">₦180k</div></button>
+                <button onclick="buyCoins(100, 500)" class="p-3 bg-white/5 rounded-xl border border-white/10"><div class="font-bold text-gold">100</div><div class="text-[10px]">₦500</div></button>
+                <button onclick="buyCoins(1000, 4500)" class="p-3 bg-white/5 rounded-xl border border-white/10"><div class="font-bold text-gold">1k</div><div class="text-[10px]">₦4.5k</div></button>
             </div>
-        </div>
-    </div>
-
-    <div id="car-mode" class="car-mode">
-        <div class="flex justify-between items-center mb-10">
-            <h1 class="text-4xl font-black text-white">DRIVE MODE</h1>
-            <button onclick="closeCarMode()" class="text-2xl text-gray-400 border border-gray-600 px-6 py-2 rounded-full">EXIT</button>
-        </div>
-        <div class="flex-1 flex flex-col gap-4">
-            <div class="big-btn text-green-400">▶ PLAY / PAUSE</div>
-            <div class="flex gap-4 flex-1">
-                <div class="big-btn text-white">⏮ PREV</div>
-                <div class="big-btn text-white">NEXT ⏭</div>
-            </div>
-            <div class="big-btn text-red-400" onclick="alert('Mic Active')">🎤 VOICE</div>
         </div>
     </div>
 
     <div id="checkout-modal" class="modal">
-        <div class="bg-gray-900 w-full max-w-sm rounded-3xl border border-indigo-500/30 p-8 relative shadow-2xl">
-            <button onclick="document.getElementById('checkout-modal').classList.remove('open')" class="absolute top-4 right-4 text-gray-500 hover:text-white">✕</button>
-            <div class="text-center mb-6">
-                <div class="w-16 h-16 bg-indigo-600/20 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">🚀</div>
-                <h3 class="text-xl font-bold">Upgrade to <span id="chk-plan" class="text-indigo-400">Pro</span></h3>
-                <p class="text-gray-400 text-sm">Unlock premium features instantly.</p>
-            </div>
-            <div class="bg-black/50 p-4 rounded-xl mb-6 flex justify-between items-center border border-white/10">
-                <span class="text-sm font-bold text-gray-300">Total Price:</span>
-                <span class="text-2xl font-black text-white">₦<span id="chk-price">0.00</span></span>
-            </div>
-            <button onclick="processPayment()" class="w-full py-4 bg-green-500 hover:bg-green-400 text-black font-bold rounded-xl transition shadow-lg flex items-center justify-center gap-2">🔒 Pay Securely</button>
+        <div class="bg-gray-900 w-80 rounded-2xl p-6 text-center border border-white/10">
+            <h3 class="font-bold text-xl mb-1">Upgrade</h3>
+            <p class="text-xs text-gray-400 mb-4" id="chk-plan">Pro Plan</p>
+            <div class="bg-black p-3 rounded mb-4 font-bold text-xl">₦<span id="chk-price">0</span></div>
+            <button onclick="processPayment()" class="w-full py-3 bg-green-500 text-black font-bold rounded-xl">Pay Now</button>
+            <button onclick="document.getElementById('checkout-modal').classList.remove('open')" class="mt-4 text-xs text-gray-500">Cancel</button>
         </div>
+    </div>
+
+    <div id="car-mode" class="car-mode">
+        <div class="flex justify-between items-center mb-10"><h1 class="text-4xl font-black text-white">DRIVE</h1><button onclick="closeCarMode()" class="text-2xl text-gray-400 border border-gray-600 px-6 py-2 rounded-full">EXIT</button></div>
+        <div class="flex-1 flex flex-col gap-4"><div class="big-btn text-green-400">▶ PLAY</div><div class="flex gap-4 flex-1"><div class="big-btn text-white">⏮</div><div class="big-btn text-white">⏭</div></div><div class="big-btn text-red-400" onclick="alert('Mic')">🎤</div></div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
@@ -340,258 +183,200 @@
         let currentUser = { username: "Guest", plan: "Free", coins: 0 };
         let liveStreams = [];
         let currentRoomId = null;
-        
-        // AUDIO VARIABLES
-        let mediaSource;
-        let sourceBuffer;
-        let queue = [];
-        let isUpdating = false;
+        let mediaSource, sourceBuffer, queue = [], isUpdating = false;
 
-        // 1. INIT
         async function init() {
             try {
                 const res = await fetch('/api/user/me');
                 const data = await res.json();
                 currentUser = data.user;
                 document.getElementById('user-name-disp').innerText = currentUser.username;
-                document.getElementById('user-plan-disp').innerText = currentUser.plan.toUpperCase();
                 document.getElementById('coin-bal').innerText = currentUser.coins.toLocaleString();
             } catch(e) {}
-
             socket.emit('requestData');
-            renderGiftGrid('faith');
         }
 
-        // 2. LIVE FEED
         socket.on('streamList', streams => {
             liveStreams = Object.values(streams);
             renderLiveGrids();
-            
             const params = new URLSearchParams(window.location.search);
             const roomToJoin = params.get('room');
-            
             if(roomToJoin && liveStreams.length > 0) {
                 const stream = liveStreams.find(s => s.id === roomToJoin);
-                if(stream && currentRoomId !== roomToJoin) {
-                    const img = `https://api.dicebear.com/7.x/avataaars/svg?seed=${stream.host}`;
-                    joinRoom(stream.id, stream.title, stream.host, img);
-                    window.history.replaceState({}, document.title, "/dashboard");
-                }
+                if(stream && currentRoomId !== roomToJoin) joinRoom(stream.id, stream.title, stream.host);
             }
         });
 
         function renderLiveGrids() {
-            const gridFull = document.getElementById('live-grid-full');
-            const gridHome = document.getElementById('home-live-grid');
-            
-            if(liveStreams.length === 0) {
-                const empty = `<div class="p-8 text-center text-gray-500 col-span-full border border-white/5 rounded-xl">No one is live right now. Be the first!</div>`;
-                gridFull.innerHTML = empty;
-                gridHome.innerHTML = empty;
-                return;
-            }
-
-            const generateCard = (s) => {
-                const img = `https://api.dicebear.com/7.x/avataaars/svg?seed=${s.host}`;
-                return `
-                <div onclick="joinRoom('${s.id}', '${s.title}', '${s.host}', '${img}')" class="glass-panel p-4 rounded-xl hover:bg-white/5 cursor-pointer transition group border border-white/5 hover:border-indigo-500">
-                    <div class="flex justify-between mb-4">
-                        <div class="flex items-center gap-3">
-                            <img src="${img}" class="w-10 h-10 rounded-full bg-black border border-white/10">
-                            <div><div class="font-bold text-sm text-white">${s.host}</div><div class="text-[10px] text-gray-400">Broadcaster</div></div>
-                        </div>
-                        <span class="text-[10px] bg-red-900/50 text-red-400 px-2 py-1 rounded h-fit animate-pulse">● LIVE</span>
+            const html = liveStreams.length ? liveStreams.map(s => `
+                <div onclick="joinRoom('${s.id}','${s.title}','${s.host}')" class="glass-panel p-4 rounded-xl flex items-center justify-between cursor-pointer active:scale-95 transition">
+                    <div class="flex items-center gap-3">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${s.host}" class="w-10 h-10 rounded-full bg-black border border-white/10">
+                        <div><div class="font-bold text-sm text-white">${s.title}</div><div class="text-[10px] text-gray-400">@${s.host}</div></div>
                     </div>
-                    <h4 class="font-bold group-hover:text-indigo-400 transition text-lg mb-1">${s.title}</h4>
-                    <p class="text-xs text-gray-500 mt-1">${s.listeners} Listening</p>
-                </div>`;
-            };
-
-            gridFull.innerHTML = liveStreams.map(s => generateCard(s)).join('');
-            gridHome.innerHTML = liveStreams.slice(0, 2).map(s => generateCard(s)).join(''); 
+                    <div class="text-[10px] bg-red-900/50 text-red-400 px-2 py-1 rounded border border-red-500/20 animate-pulse">● LIVE</div>
+                </div>
+            `).join('') : '<div class="p-6 text-center text-gray-500 text-sm">No live streams.</div>';
+            document.getElementById('home-live-grid').innerHTML = html;
+            document.getElementById('live-grid-full').innerHTML = html;
         }
 
-        // 3. JOIN LIVE ROOM (With Audio Fix)
-        function joinRoom(id, title, host, img) {
+        // === JOIN ROOM & AUDIO INIT ===
+        function joinRoom(id, title, host) {
             currentRoomId = id;
             document.getElementById('room-title').innerText = title;
-            document.getElementById('room-host').innerText = "@" + host;
-            document.getElementById('room-avatar').src = img || `https://api.dicebear.com/7.x/avataaars/svg?seed=${host}`;
-            document.getElementById('room-art').src = img || `https://api.dicebear.com/7.x/avataaars/svg?seed=${host}`;
-            document.getElementById('room-chat').innerHTML = '<div class="text-center text-xs text-gray-500 mt-4 mb-4">Welcome to the room!</div>';
-
+            document.getElementById('room-host').innerText = host;
+            document.getElementById('room-avatar').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${host}`;
+            document.getElementById('room-art').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${host}`;
+            document.getElementById('room-chat').innerHTML = '<div class="text-center text-[10px] text-gray-500 my-4">Joined Room</div>';
             document.getElementById('live-room').classList.add('active');
+            
             socket.emit('joinEvent', { targetId: id, user: currentUser });
-
-            // Initialize Audio Logic
+            
+            // Audio Setup
             initAudioReceiver();
         }
 
         function initAudioReceiver() {
             const audio = document.getElementById('remoteAudio');
             
-            // Cleanup previous MediaSource if exists
-            if (mediaSource && mediaSource.readyState === 'open') {
-                try { mediaSource.endOfStream(); } catch(e){}
-            }
-            
+            // Reset MediaSource
+            if (mediaSource && mediaSource.readyState === 'open') try{ mediaSource.endOfStream(); } catch(e){}
             mediaSource = new MediaSource();
             audio.src = URL.createObjectURL(mediaSource);
             
-            // Force play to overcome browser autoplay policies
-            audio.play().catch(e => console.log("⚠️ Click interaction needed for audio"));
+            // Try to play automatically
+            const playPromise = audio.play();
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    // Autoplay started!
+                    document.getElementById('audio-start-overlay').classList.remove('show');
+                }).catch(error => {
+                    // Autoplay was prevented -> Show Overlay
+                    console.log("Autoplay blocked. Waiting for user interaction.");
+                    document.getElementById('audio-start-overlay').classList.add('show');
+                });
+            }
 
             mediaSource.addEventListener('sourceopen', () => {
-                // Try OPUS first, fallback if needed
+                // Determine mime type
                 const mime = MediaSource.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/webm';
                 try {
                     sourceBuffer = mediaSource.addSourceBuffer(mime);
                     sourceBuffer.mode = 'sequence';
-                    sourceBuffer.addEventListener('updateend', () => {
-                        isUpdating = false;
-                        if (queue.length > 0) processAudioQueue();
-                    });
-                } catch (e) { console.error("SourceBuffer Error:", e); }
+                    sourceBuffer.addEventListener('updateend', () => { isUpdating=false; if(queue.length>0) processQueue(); });
+                } catch(e) { console.error("SourceBuffer Error", e); }
+            });
+        }
+
+        // Called when user taps the overlay
+        function startAudioManually() {
+            const audio = document.getElementById('remoteAudio');
+            audio.play().then(() => {
+                document.getElementById('audio-start-overlay').classList.remove('show');
             });
         }
 
         function leaveRoom() {
             document.getElementById('live-room').classList.remove('active');
             currentRoomId = null;
-            // Stop audio memory leak
             const audio = document.getElementById('remoteAudio');
-            audio.pause();
-            audio.src = "";
+            audio.pause(); audio.src = "";
         }
 
-        // 4. AUDIO DATA HANDLER (Robust Version)
         socket.on('audioBuffer', async (data) => {
             try {
-                // Convert Blob to ArrayBuffer if needed
-                let buffer;
-                if (data instanceof Blob) {
-                    buffer = await data.arrayBuffer();
-                } else {
-                    buffer = data;
-                }
-
-                // Push to queue
-                queue.push(buffer);
-                
-                // If the buffer is stuck or not updating, kickstart it
-                if (!isUpdating) {
-                    processAudioQueue();
-                }
-            } catch (e) {
-                console.error("Audio Convert Error:", e);
-            }
+                let buf = (data instanceof Blob) ? await data.arrayBuffer() : data;
+                queue.push(buf);
+                if(!isUpdating) processQueue();
+            } catch(e){}
         });
 
-        function processAudioQueue() {
-            if (!sourceBuffer || isUpdating || queue.length === 0) return;
-            if (sourceBuffer.updating) return; // Double check
-
-            try {
-                isUpdating = true;
-                sourceBuffer.appendBuffer(queue.shift());
-            } catch (e) {
-                // If QuotaExceeded, we need to clear buffer (live stream catch-up)
-                if (e.name === 'QuotaExceededError') {
-                    // Remove old buffer to free up space
+        function processQueue() {
+            if(!sourceBuffer || isUpdating || queue.length===0) return;
+            try { 
+                isUpdating=true; 
+                sourceBuffer.appendBuffer(queue.shift()); 
+            } catch(e) { 
+                // Buffer Cleanup Logic (Important for long streams)
+                if(e.name==='QuotaExceededError') { 
                     const removeEnd = sourceBuffer.buffered.length > 0 ? sourceBuffer.buffered.end(0) - 5 : 0;
-                    if (removeEnd > 0) {
-                        sourceBuffer.remove(0, removeEnd);
-                    }
-                    isUpdating = false; // Reset flag to allow next try
-                } else {
-                    console.log("Buffer error:", e);
-                    isUpdating = false;
+                    if(removeEnd > 0) sourceBuffer.remove(0, removeEnd);
+                    isUpdating=false; 
                 }
             }
         }
 
-        // 5. CHAT
-        function sendRoomChat(event) {
-            event.preventDefault();
-            const input = document.getElementById('chat-msg');
-            const txt = input.value.trim();
-            
-            if(!txt) return; 
-            if(!currentRoomId) return alert("You are not connected to a room.");
+        // Buffer Maintenance (Every 30s)
+        setInterval(() => {
+            if(sourceBuffer && sourceBuffer.buffered.length > 0 && !sourceBuffer.updating) {
+                const end = sourceBuffer.buffered.end(0);
+                if(end > 30) { 
+                    try { sourceBuffer.remove(0, end - 20); } catch(e){} 
+                }
+            }
+        }, 30000);
 
+        function sendRoomChat(e) {
+            e.preventDefault();
+            const inp = document.getElementById('chat-msg');
+            const txt = inp.value.trim();
+            if(!txt || !currentRoomId) return;
             socket.emit('chatMessage', { room: currentRoomId, user: currentUser.username, msg: txt });
             addChatLog(currentUser.username, txt, true);
-            input.value = '';
-            input.focus();
+            inp.value = ''; inp.focus();
         }
 
-        // 6. GIFTING & UTILS
-        const giftData = {
-            faith: [{icon:'🕊️',name:'Dove',cost:50},{icon:'🕯️',name:'Light',cost:100},{icon:'📖',name:'Word',cost:200},{icon:'⛪',name:'Church',cost:500},{icon:'🙏',name:'Pray',cost:1000},{icon:'🌊',name:'River',cost:5000}],
-            classic: [{icon:'❤️',name:'Heart',cost:10},{icon:'🌹',name:'Rose',cost:50},{icon:'🔥',name:'Fire',cost:100},{icon:'🚀',name:'Rocket',cost:5000},{icon:'🦁',name:'Lion',cost:10000},{icon:'🪐',name:'Planet',cost:20000}],
-            luxury: [{icon:'💎',name:'Diamond',cost:10000},{icon:'🚗',name:'Lambo',cost:25000},{icon:'🏰',name:'Castle',cost:40000},{icon:'👑',name:'Throne',cost:50000}]
-        };
-
-        function switchGiftTab(category, btn) {
-            document.querySelectorAll('.gift-tab').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            renderGiftGrid(category);
+        function addChatLog(user, txt, isMe) {
+            const div = document.createElement('div');
+            div.className = `p-2 rounded-xl text-xs w-fit max-w-[85%] break-words mb-2 ${isMe ? 'ml-auto bg-primary text-white' : 'mr-auto bg-white/10 text-gray-200'}`;
+            div.innerHTML = `<span class="font-bold opacity-50 block text-[9px]">${user}</span>${txt}`;
+            const box = document.getElementById('room-chat');
+            box.appendChild(div); box.scrollTop = box.scrollHeight;
         }
 
-        function renderGiftGrid(category) {
-            const container = document.getElementById('gift-container');
-            const items = giftData[category];
-            let html = `<div class="gift-grid">`;
-            items.forEach(g => {
-                const colorClass = g.cost >= 5000 ? 'text-gold' : 'text-gray-400';
-                html += `<div class="gift-item coin-glow" onclick="attemptGift('${g.icon}', ${g.cost})"><div class="text-2xl mb-1">${g.icon}</div><div class="text-[9px] ${colorClass} font-bold">${g.cost.toLocaleString()}</div></div>`;
-            });
-            html += `</div>`;
-            container.innerHTML = html;
-        }
-
-        function attemptGift(emoji, cost) {
+        function attemptGift(icon, cost) {
             if(currentUser.coins < cost) { document.getElementById('coin-modal').classList.add('open'); return; }
             currentUser.coins -= cost;
             document.getElementById('coin-bal').innerText = currentUser.coins.toLocaleString();
-            socket.emit('sendGift', { room: currentRoomId, user: currentUser.username, gift: emoji });
-            spawnFloater(emoji);
-            addChatLog("System", `Sent ${emoji}`, true);
+            socket.emit('sendGift', { room: currentRoomId, user: currentUser.username, gift: icon });
+            addChatLog("System", `Sent ${icon}`, true);
+            spawnFloat(icon);
+        }
+
+        function spawnFloat(char) {
+            const el = document.createElement('div');
+            el.innerText = char; el.className = 'floater';
+            el.style.left = '50%'; el.style.top = '70%';
+            document.getElementById('float-layer').appendChild(el);
+            setTimeout(()=>el.remove(), 2000);
+        }
+
+        async function buyCoins(a, p) {
+            const res = await fetch('/api/wallet/buy-coins', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({amount:a,cost:p})});
+            if(res.ok) { currentUser.coins += a; document.getElementById('coin-bal').innerText = currentUser.coins.toLocaleString(); document.getElementById('coin-modal').classList.remove('open'); confetti(); }
+        }
+
+        function switchView(v) {
+            ['home','live','library'].forEach(id => {
+                document.getElementById('view-'+id).classList.add('hidden');
+                if(document.getElementById('nav-'+id)) document.getElementById('nav-'+id).classList.remove('active');
+                if(document.getElementById('mob-'+id)) document.getElementById('mob-'+id).classList.remove('active');
+            });
+            document.getElementById('view-'+v).classList.remove('hidden');
+            if(document.getElementById('nav-'+v)) document.getElementById('nav-'+v).classList.add('active');
+            if(document.getElementById('mob-'+v)) document.getElementById('mob-'+v).classList.add('active');
         }
 
         function openCoinModal() { document.getElementById('coin-modal').classList.add('open'); }
-        async function buyCoins(a, p) { const res=await fetch('/api/wallet/buy-coins',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({amount:a,cost:p})}); const d=await res.json(); if(d.success){currentUser.coins+=a; document.getElementById('coin-bal').innerText=currentUser.coins.toLocaleString(); document.getElementById('coin-modal').classList.remove('open'); confetti({particleCount:100}); alert(`🎉 +${a} Coins!`);} }
-
-        function addChatLog(user, text, isMe) {
-            const list = document.getElementById('room-chat');
-            const div = document.createElement('div');
-            const color = isMe ? 'bg-indigo-600/50 border-indigo-500/30' : 'bg-white/5 border-white/5';
-            const align = isMe ? 'ml-auto' : 'mr-auto';
-            div.className = `chat-pill ${color} p-2 rounded-2xl text-sm mb-2 w-fit max-w-[80%] border text-white ${align} break-words`;
-            div.innerHTML = `<span class="font-bold text-[10px] block mb-0.5 opacity-60">${user}</span> ${text}`;
-            list.appendChild(div); list.scrollTop = list.scrollHeight;
-        }
-
-        function spawnFloater(char) {
-            const el = document.createElement('div');
-            el.innerText = char; el.className = 'floater';
-            el.style.left = (window.innerWidth / 2) + (Math.random()*100 - 50) + 'px';
-            el.style.top = (window.innerHeight - 100) + 'px';
-            document.getElementById('float-layer').appendChild(el);
-            setTimeout(() => el.remove(), 2500);
-        }
-
-        function toggleMuteRoom() { const a=document.getElementById('remoteAudio'); a.muted=!a.muted; document.getElementById('room-mute-btn').innerText=a.muted?'🔇':'🔊'; }
-        function switchView(viewName) { ['home', 'following', 'library', 'live'].forEach(v => document.getElementById(`view-${v}`).classList.add('hidden')); document.getElementById(`view-${viewName}`).classList.remove('hidden'); document.getElementById(`view-${viewName}`).classList.add('fade-in'); document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active')); document.getElementById(`nav-${viewName}`).classList.add('active'); }
-        function toggleDataSaver() { document.getElementById('ds-badge').classList.toggle('hidden'); alert('Data Saver Toggled'); }
         function openCarMode() { document.getElementById('car-mode').classList.add('active'); }
         function closeCarMode() { document.getElementById('car-mode').classList.remove('active'); }
         function triggerCheckout(p, pr) { document.getElementById('chk-plan').innerText=p; document.getElementById('chk-price').innerText=pr; document.getElementById('checkout-modal').classList.add('open'); }
-        function processPayment() { const b=document.querySelector('#checkout-modal button'); b.innerText="Processing..."; setTimeout(()=>{ document.getElementById('checkout-modal').classList.remove('open'); confetti({particleCount:150}); alert("🎉 Success!"); b.innerText="🔒 Pay Securely"; }, 2000); }
+        function processPayment() { document.getElementById('checkout-modal').classList.remove('open'); confetti(); alert("Success!"); }
 
-        socket.on('chatMessage', data => { if(data.user !== currentUser.username) addChatLog(data.user, data.msg, false); });
-        socket.on('giftReceived', data => { if(data.user !== currentUser.username) { spawnFloater(data.gift); addChatLog("System", `${data.user} sent ${data.gift}`, false); } });
-        socket.on('roomLog', data => { if(data.type === 'join') document.getElementById('room-listeners').innerText = data.count; });
+        socket.on('chatMessage', d => { if(d.user !== currentUser.username) addChatLog(d.user, d.msg, false); });
+        socket.on('giftReceived', d => { if(d.user !== currentUser.username) { addChatLog("System", `${d.user} sent ${d.gift}`, false); spawnFloat(d.gift); }});
+        socket.on('roomLog', d => { if(d.type==='join') document.getElementById('room-listeners').innerText = d.count; });
 
         init();
     </script>
