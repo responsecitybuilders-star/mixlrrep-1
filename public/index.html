@@ -1,580 +1,307 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Airvibe | Platform</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Outfit:wght@300;500;900&display=swap" rel="stylesheet">
-    
-    <style>
-        /* === THEME: MIDNIGHT GLASS === */
-        :root {
-            --bg: #020617;
-            --glass: rgba(30, 41, 59, 0.7);
-            --glass-hover: rgba(51, 65, 85, 0.8);
-            --border: rgba(255, 255, 255, 0.08);
-            --primary: #3b82f6;
-            --accent: #8b5cf6;
-            --danger: #ef4444;
-            --text: #ffffff;
-            --font-main: 'Plus Jakarta Sans', sans-serif;
-            --font-display: 'Outfit', sans-serif;
-        }
-
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font-main); overflow: hidden; height: 100vh; }
-        button { font-family: var(--font-main); cursor: pointer; }
-
-        /* === 1. LAYOUT === */
-        .app-layout { display: grid; grid-template-columns: 240px 1fr 280px; height: 100vh; transition: 0.5s; }
-        body.theater-open .app-layout { transform: scale(0.95); opacity: 0.5; pointer-events: none; filter: blur(10px); }
-
-        /* SIDEBAR LEFT */
-        .sidebar-left {
-            position: relative; z-index: 10; background: rgba(2, 6, 23, 0.95); 
-            border-right: 1px solid var(--border); padding: 20px; display: flex; flex-direction: column;
-        }
-        .logo { font-size: 1.5rem; font-weight: 800; display: flex; align-items: center; gap: 10px; margin-bottom: 40px; font-family: var(--font-display); letter-spacing: -1px; }
-        .logo span { color: var(--primary); }
-
-        .nav-item {
-            padding: 12px 15px; border-radius: 12px; color: #94a3b8; cursor: pointer;
-            transition: 0.2s; font-weight: 600; display: flex; align-items: center; gap: 15px; margin-bottom: 5px;
-        }
-        .nav-item:hover, .nav-item.active { background: var(--glass); color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
-        .nav-icon { font-size: 1.2rem; }
-
-        /* BALANCE CARD */
-        .balance-card {
-            margin-top: auto; padding: 20px; background: linear-gradient(135deg, var(--primary), var(--accent));
-            border-radius: 16px; color: white; position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
-        }
-        .balance-card::after { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(transparent, rgba(255,255,255,0.2), transparent); transform: rotate(45deg); animation: shine 6s infinite; }
-
-        /* CENTER MAIN */
-        .main-content { overflow-y: auto; padding: 30px; padding-bottom: 120px; }
-
-        /* HEADER */
-        .top-header { display: flex; justify-content: space-between; margin-bottom: 30px; align-items: center; }
-        .search-bar {
-            background: var(--glass); border: 1px solid var(--border); padding: 12px 20px;
-            border-radius: 30px; color: white; width: 400px; display: flex; align-items: center; gap: 10px;
-            transition: 0.3s;
-        }
-        .search-bar:focus-within { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); }
-        .search-input { background: transparent; border: none; color: white; outline: none; width: 100%; font-family: var(--font-main); }
-        
-        .user-menu { display: flex; gap: 15px; align-items: center; }
-        .icon-btn { 
-            background: var(--glass); border: 1px solid var(--border); width: 45px; height: 45px; border-radius: 50%; 
-            display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; position: relative; 
-        }
-        .icon-btn:hover { background: var(--glass-hover); color: white; transform: translateY(-2px); }
-        .user-avatar { width: 45px; height: 45px; border-radius: 50%; background: #333; background-size: cover; cursor: pointer; border: 2px solid var(--border); }
-
-        /* CAROUSEL */
-        .carousel-container {
-            width: 100%; height: 320px; border-radius: 24px; overflow: hidden;
-            position: relative; margin-bottom: 40px; border: 1px solid var(--border);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-        }
-        .slide { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0; transition: 0.5s; transform: scale(1.05); }
-        .slide.active { opacity: 1; transform: scale(1); }
-        .slide-content { 
-            position: absolute; bottom: 0; left: 0; padding: 40px; width: 100%;
-            background: linear-gradient(to top, #020617 10%, transparent);
-        }
-        .slide h1 { font-family: var(--font-display); font-size: 3rem; margin: 0; line-height: 1; text-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-
-        /* GRID */
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 25px; }
-        .card { 
-            background: var(--glass); border: 1px solid var(--border); border-radius: 20px; overflow: hidden; 
-            cursor: pointer; transition: 0.3s; position: relative;
-        }
-        .card:hover { transform: translateY(-8px); border-color: var(--primary); box-shadow: 0 15px 30px rgba(0,0,0,0.3); }
-        .card-img { height: 180px; width: 100%; background-size: cover; background-position: center; position: relative; }
-        .live-tag { 
-            position: absolute; top: 15px; left: 15px; background: rgba(239, 68, 68, 0.9); 
-            color: white; font-size: 0.65rem; padding: 4px 10px; border-radius: 20px; font-weight: 800; letter-spacing: 1px;
-            backdrop-filter: blur(4px);
-        }
-        .card-info { padding: 20px; }
-        .card-title { font-weight: 700; margin-bottom: 8px; font-size: 1.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-        /* SIDEBAR RIGHT */
-        .sidebar-right {
-            background: rgba(2, 6, 23, 0.95); border-left: 1px solid var(--border);
-            padding: 30px; display: flex; flex-direction: column; gap: 30px; overflow-y: auto;
-        }
-        .tag-cloud { display: flex; flex-wrap: wrap; gap: 10px; }
-        .tag { 
-            background: var(--glass); padding: 8px 14px; border-radius: 20px; font-size: 0.8rem; 
-            border: 1px solid var(--border); cursor: pointer; transition: 0.2s; font-weight: 600;
-        }
-        .tag:hover { border-color: var(--primary); color: var(--primary); background: rgba(59, 130, 246, 0.1); }
-
-        /* === 2. MINI PLAYER === */
-        .player-bar {
-            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-            width: 90%; max-width: 600px; height: 80px; background: rgba(15, 23, 42, 0.9);
-            backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px;
-            display: none; align-items: center; padding: 0 20px; gap: 20px; z-index: 100;
-            cursor: pointer; box-shadow: 0 20px 60px rgba(0,0,0,0.6); transition: transform 0.2s;
-        }
-        .player-bar:hover { transform: translateX(-50%) scale(1.02); border-color: var(--primary); }
-
-        /* ====================================================
-           🎭 3. THEATER MODE (HOLOGRAPHIC STAGE EDITION)
-           ==================================================== */
-        #theater-mode {
-            position: fixed; top: 100%; left: 0; width: 100%; height: 100%;
-            background: #000; z-index: 5000; transition: top 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-            display: flex; flex-direction: column; overflow: hidden;
-        }
-        #theater-mode.open { top: 0; }
-
-        /* STAGE LIGHTING */
-        .stage-lights {
-            position: absolute; top: -50%; left: 50%; transform: translateX(-50%);
-            width: 100%; height: 100%;
-            background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 60%);
-            pointer-events: none; z-index: 1;
-        }
-        
-        /* MOVING AURORA MESH */
-        .aurora-mesh {
-            position: absolute; inset: 0; z-index: 0; opacity: 0.6;
-            background: 
-                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
-                radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
-                radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
-            filter: blur(60px);
-            animation: breathe 10s infinite alternate;
-        }
-        @keyframes breathe { 0% { opacity: 0.4; transform: scale(1); } 100% { opacity: 0.7; transform: scale(1.1); } }
-
-        /* CENTER ART (3D & GLOWING) */
-        .theater-stage {
-            flex: 1; position: relative; z-index: 10; display: flex; flex-direction: column; 
-            align-items: center; justify-content: center; perspective: 1000px;
-        }
-        
-        .holo-card {
-            width: 350px; height: 350px; border-radius: 30px;
-            background: #000; position: relative;
-            transform-style: preserve-3d; animation: float3D 6s ease-in-out infinite;
-            box-shadow: 
-                0 0 0 1px rgba(255,255,255,0.1),
-                0 30px 80px rgba(0,0,0,0.8),
-                0 0 100px rgba(59, 130, 246, 0.2); /* Neon Glow */
-        }
-        .holo-img {
-            width: 100%; height: 100%; object-fit: cover; border-radius: 30px;
-            mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
-        }
-        .holo-ring {
-            position: absolute; inset: -20px; border-radius: 40px;
-            border: 2px solid rgba(255,255,255,0.05);
-            animation: spin 20s linear infinite; pointer-events: none;
-        }
-        @keyframes float3D { 0%,100% { transform: translateY(0) rotateX(5deg); } 50% { transform: translateY(-20px) rotateX(0deg); } }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-
-        /* TITLE TYPOGRAPHY */
-        .now-playing {
-            text-align: center; margin-top: 40px; z-index: 20;
-        }
-        .np-title { font-family: var(--font-display); font-size: 2.5rem; font-weight: 800; margin: 0; text-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .np-host { font-size: 1.1rem; color: var(--primary); font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-top: 5px; }
-
-        /* UI OVERLAY */
-        .ui-layer {
-            position: absolute; inset: 0; z-index: 50; display: flex; flex-direction: column; justify-content: space-between;
-            padding: 30px; pointer-events: none; /* Let clicks pass through to background for hearts */
-        }
-
-        /* Top Nav */
-        .ui-top { display: flex; justify-content: space-between; pointer-events: auto; }
-        .close-btn { background: rgba(255,255,255,0.1); width: 50px; height: 50px; border-radius: 50%; display: grid; place-items: center; font-size: 1.5rem; color: white; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); transition: 0.2s; }
-        .close-btn:hover { background: rgba(255,255,255,0.2); transform: scale(1.1); }
-
-        /* Bottom Controls (Glass Deck) */
-        .ui-bottom { 
-            display: flex; gap: 20px; align-items: flex-end; pointer-events: auto; 
-        }
-        
-        /* Modern Chat */
-        .chat-area {
-            flex: 1; max-height: 300px; display: flex; flex-direction: column; justify-content: flex-end;
-            mask-image: linear-gradient(to bottom, transparent, black 20%);
-        }
-        .chat-pill {
-            background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(12px);
-            padding: 10px 16px; border-radius: 24px; margin-top: 8px; color: white; font-size: 0.95rem;
-            align-self: flex-start; border: 1px solid rgba(255,255,255,0.08);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2); animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .chat-pill b { color: var(--accent); margin-right: 6px; }
-        .chat-pill.me { align-self: flex-end; background: rgba(59, 130, 246, 0.6); border-color: rgba(59, 130, 246, 0.3); }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* Action Buttons */
-        .actions-deck {
-            display: flex; gap: 15px; align-items: center;
-            background: rgba(20, 20, 30, 0.6); backdrop-filter: blur(20px);
-            padding: 10px; border-radius: 40px; border: 1px solid rgba(255,255,255,0.1);
-        }
-        .action-btn {
-            width: 50px; height: 50px; border-radius: 50%; background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1); font-size: 1.5rem; color: white;
-            transition: 0.2s; display: grid; place-items: center;
-        }
-        .action-btn:hover { background: rgba(255,255,255,0.15); transform: scale(1.1); }
-        .action-btn.primary { background: linear-gradient(135deg, var(--primary), var(--accent)); border: none; box-shadow: 0 0 20px rgba(99, 102, 241, 0.4); }
-        
-        .chat-input {
-            background: transparent; border: none; color: white; outline: none; padding: 0 15px; font-size: 1rem; width: 150px;
-        }
-
-        /* Floating Hearts */
-        #float-layer { position: absolute; inset: 0; pointer-events: none; z-index: 40; }
-        .floater { position: absolute; font-size: 2.5rem; animation: floatUp 2s ease-out forwards; text-shadow: 0 0 20px rgba(255,0,100,0.5); }
-        @keyframes floatUp { 0% { transform: translateY(0) scale(0.5); opacity:0; } 20% { opacity:1; transform: translateY(-50px) scale(1.2); } 100% { transform: translateY(-400px) scale(1) rotate(20deg); opacity:0; } }
-
-        /* Modals & Utils */
-        .modal-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px);
-            z-index: 6000; display: none; align-items: center; justify-content: center;
-        }
-        .modal { background: #1e293b; padding: 40px; border-radius: 24px; width: 90%; max-width: 400px; border: 1px solid var(--border); text-align: center; animation: popIn 0.3s; }
-        .hidden-view { display: none; }
-        @keyframes shine { 0% { left: -50%; } 100% { left: 150%; } }
-        @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        
-        @media (max-width: 1024px) { .sidebar-right { display: none; } .app-layout { grid-template-columns: 80px 1fr; } .nav-text, .balance-card { display: none; } .sidebar-left { width: 80px; align-items: center; } .logo { font-size: 0.8rem; } }
-        @media (max-width: 768px) { .app-layout { grid-template-columns: 1fr; } .sidebar-left { display: none; } .main-content { padding: 20px; padding-bottom: 100px; } .top-header { display: none; } .holo-card { width: 280px; height: 280px; } .np-title { font-size: 2rem; } }
-    </style>
-</head>
-<body>
-
-    <div class="modal-overlay" id="wallet-modal">
-        <div class="modal">
-            <h2 style="font-family:var(--font-display);">💰 Top Up Wallet</h2>
-            <p style="color:#94a3b8; margin-bottom:30px;">Secure, instant crypto & fiat deposits.</p>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:20px;">
-                <button class="nav-item" style="justify-content:center; background:rgba(255,255,255,0.05);" onclick="addToWallet(10)">+$10</button>
-                <button class="nav-item" style="justify-content:center; background:rgba(255,255,255,0.05);" onclick="addToWallet(50)">+$50</button>
-                <button class="nav-item" style="justify-content:center; background:rgba(255,255,255,0.05);" onclick="addToWallet(100)">+$100</button>
-                <button class="nav-item" style="justify-content:center; background:rgba(255,255,255,0.05);" onclick="addToWallet(500)">+$500</button>
-            </div>
-            <button class="nav-item" style="justify-content:center; width:100%; background:var(--danger); color:white;" onclick="closeModals()">Cancel</button>
-        </div>
-    </div>
-
-    <div class="app-layout">
-        
-        <aside class="sidebar-left">
-            <div class="logo" onclick="navigate('home')">AIR<span>VIBE</span></div>
-            <div class="nav-item active" onclick="navigate('home')" id="nav-home"><span class="nav-icon">🏠</span> <span class="nav-text">Home</span></div>
-            <div class="nav-item" onclick="navigate('trending')" id="nav-trending"><span class="nav-icon">🔥</span> <span class="nav-text">Trending</span></div>
-            <div class="nav-item" onclick="location.href='/studio'"><span class="nav-icon">🎙️</span> <span class="nav-text">Studio</span> <span class="badge">LIVE</span></div>
-            <div class="nav-item" onclick="navigate('library')" id="nav-library"><span class="nav-icon">📁</span> <span class="nav-text">Library</span></div>
-
-            <div class="balance-card">
-                <div style="font-size:0.8rem; opacity:0.8;">Balance</div>
-                <div style="font-size:1.8rem; font-weight:800; font-family:var(--font-display);" id="wallet-display">$0.00</div>
-                <button onclick="openModal('wallet-modal')" style="margin-top:15px; width:100%; padding:10px; border:none; border-radius:10px; background:rgba(0,0,0,0.3); color:white; font-weight:600;">+ Top Up</button>
-            </div>
-        </aside>
-
-        <main class="main-content">
-            <div class="top-header">
-                <div class="search-bar">
-                    <span>🔍</span>
-                    <input type="text" class="search-input" placeholder="Search artists, tracks, tags..." onkeyup="filterGrid(this.value)">
-                </div>
-                <div class="user-menu">
-                    <button class="icon-btn">🔔<div style="position:absolute; top:10px; right:10px; width:8px; height:8px; background:var(--danger); border-radius:50%;"></div></button>
-                    <div class="user-avatar" onclick="alert('Profile Settings coming soon!')" style="background-image:url('https://source.unsplash.com/random/100x100?face')"></div>
-                </div>
-            </div>
-
-            <div id="view-home">
-                <div class="carousel-container">
-                    <div class="slide active" style="background-image: url('https://source.unsplash.com/random/1200x400?concert')">
-                        <div class="slide-content"><h1>Global Music Festival</h1><p style="font-size:1.2rem; opacity:0.8;">Live from Tokyo • 14k Watching</p></div>
-                    </div>
-                </div>
-                <div class="section-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
-                    <h2 style="font-family:var(--font-display);">🔴 Live Channels</h2>
-                    <span style="color:var(--primary); font-weight:bold; cursor:pointer;">View All</span>
-                </div>
-                <div class="grid" id="live-grid"></div>
-            </div>
-
-            <div id="view-trending" class="hidden-view">
-                <h1 style="font-family:var(--font-display);">🔥 Trending Now</h1>
-                <div class="grid" id="trending-grid"></div>
-            </div>
-
-            <div id="view-library" class="hidden-view">
-                <h1 style="font-family:var(--font-display);">📁 Your Library</h1>
-                <div style="text-align:center; padding:80px; opacity:0.6;">
-                    <div style="font-size:4rem;">👻</div>
-                    <h3>It's quiet here.</h3>
-                    <button class="nav-item" style="display:inline-flex; background:var(--primary); color:white; margin-top:20px;" onclick="navigate('home')">Explore Now</button>
-                </div>
-            </div>
-        </main>
-
-        <aside class="sidebar-right">
-            <h3>🏆 Top Creators</h3>
-            <div id="top-creators"></div>
-            <h3 style="margin-top:30px;">Explore Tags</h3>
-            <div class="tag-cloud">
-                <span class="tag" onclick="filterGrid('afro')">#Afrobeats</span>
-                <span class="tag" onclick="filterGrid('tech')">#TechTalk</span>
-                <span class="tag" onclick="filterGrid('game')">#Gaming</span>
-                <span class="tag" onclick="filterGrid('chill')">#Lofi</span>
-                <span class="tag" onclick="filterGrid('news')">#News</span>
-            </div>
-        </aside>
-    </div>
-
-    <div class="player-bar" id="mini-player" onclick="openTheater()">
-        <div id="mp-art" style="width:50px; height:50px; border-radius:12px; background:#333; background-size:cover;"></div>
-        <div style="flex:1;">
-            <div id="mp-title" style="font-weight:700; font-family:var(--font-display); font-size:1.1rem;">Title</div>
-            <div id="mp-host" style="font-size:0.9rem; color:var(--primary);">Host</div>
-        </div>
-        <button onclick="event.stopPropagation(); togglePlay()" id="mp-play-btn" style="background:none; border:none; color:white; font-size:2rem;">⏸</button>
-    </div>
-
-    <div id="theater-mode" onclick="screenTap(event)">
-        
-        <div class="aurora-mesh"></div>
-        <div class="stage-lights"></div>
-
-        <div id="float-layer"></div>
-
-        <div class="ui-layer">
-            <div class="ui-top">
-                <button class="close-btn" onclick="closeTheater()">⌄</button>
-                <div style="text-align:center;">
-                    <div style="font-size:0.7rem; color:var(--primary); font-weight:800; letter-spacing:2px;">LIVE AIR</div>
-                    <div style="background:rgba(239,68,68,0.2); color:var(--danger); padding:2px 8px; border-radius:4px; font-size:0.6rem; display:inline-block; font-weight:bold; margin-top:5px;">● REC</div>
-                </div>
-                <button class="close-btn">⋮</button>
-            </div>
-
-            <div class="ui-bottom">
-                <div class="chat-area" id="tm-chat">
-                    <div class="chat-pill" style="align-self:center; background:rgba(255,255,255,0.1);">👋 Welcome to the vibe room!</div>
-                </div>
-
-                <div class="actions-deck" onclick="event.stopPropagation()">
-                    <input id="tm-chat-input" class="chat-input" placeholder="Type a message..." onkeypress="if(event.key==='Enter') sendChat()">
-                    
-                    <button class="action-btn" onclick="sendGift('❤️')">❤️</button>
-                    <button class="action-btn" onclick="sendGift('🔥')">🔥</button>
-                    <button class="action-btn primary" onclick="sendGift('🚀')">🚀</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="theater-stage">
-            <div class="holo-card">
-                <div class="holo-ring"></div>
-                <img id="tm-art" class="holo-img" src="">
-            </div>
-            
-            <div class="now-playing">
-                <div id="tm-title" class="np-title">Song Title</div>
-                <div id="tm-host" class="np-host">HOST NAME</div>
-            </div>
-        </div>
-
-    </div>
-
-    <audio id="remoteAudio" autoplay></audio>
-
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="broadcast-client.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Airvibe | The Future of Live Audio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        const socket = io();
-        let balance = 0;
-        let allStreams = []; 
-        let currentRoomId = null;
-
-        // --- 1. DATA LOGIC ---
-        socket.on('connect', () => socket.emit('requestData'));
-        
-        socket.on('streamList', streams => {
-            allStreams = Object.values(streams);
-            renderGrid(allStreams, 'live-grid');
-            renderGrid(allStreams, 'trending-grid'); 
-            renderLeaderboard();
-        });
-
-        // --- 2. RENDERERS ---
-        function renderGrid(list, elementId) {
-            const grid = document.getElementById(elementId);
-            if(list.length === 0) {
-                grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; opacity:0.5;">No streams found.</div>`;
-                return;
+        tailwind.config = {
+            theme: { 
+                extend: { 
+                    colors: { 
+                        bg: '#020617', 
+                        primary: '#6366f1', 
+                        accent: '#a855f7',
+                        surface: '#0f172a'
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'marquee': 'marquee 25s linear infinite',
+                    },
+                    keyframes: {
+                        float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-20px)' } },
+                        marquee: { '0%': { transform: 'translateX(0)' }, '100%': { transform: 'translateX(-100%)' } }
+                    }
+                } 
             }
-            let html = '';
-            list.forEach(s => {
-                const img = s.image || `https://source.unsplash.com/random/400x300?concert&sig=${s.id}`;
-                html += `
-                    <div class="card" onclick="playStream('${s.id}', '${s.title}', '${s.host}', '${img}')">
-                        <div class="card-img" style="background-image:url('${img}')">
-                            <div class="live-tag">LIVE</div>
-                        </div>
-                        <div class="card-info">
-                            <div class="card-title">${s.title}</div>
-                            <div style="font-size:0.8rem; color:#aaa; display:flex; justify-content:space-between;">
-                                <span>${s.host}</span>
-                                <span style="color:var(--primary)">${s.listeners} 🎧</span>
-                            </div>
-                        </div>
-                    </div>`;
-            });
-            grid.innerHTML = html;
-        }
-
-        function renderLeaderboard() {
-            const el = document.getElementById('top-creators');
-            const creators = [{name: 'DJ_Sky', followers: '12k'}, {name: 'TechTalk', followers: '8.5k'}, {name: 'LofiGirl', followers: '400k'}];
-            let html = '';
-            creators.forEach((c, i) => {
-                html += `
-                <div style="display:flex; align-items:center; gap:10px; margin-bottom:15px; cursor:pointer;">
-                    <div style="width:40px; height:40px; background:url('https://source.unsplash.com/random/5${i}x50?face'); background-size:cover; border-radius:50%;"></div>
-                    <div><div style="font-weight:bold; font-size:0.9rem;">${c.name}</div><div style="font-size:0.75rem; color:#888;">${c.followers} Followers</div></div>
-                </div>`;
-            });
-            el.innerHTML = html;
-        }
-
-        // --- 3. PLAYER & THEATER LOGIC ---
-        function playStream(id, t, h, img) {
-            currentRoomId = id;
-            
-            // 1. Show Mini Player
-            document.getElementById('mini-player').style.display = 'flex';
-            document.getElementById('mp-title').innerText = t;
-            document.getElementById('mp-host').innerText = h;
-            document.getElementById('mp-art').style.backgroundImage = `url('${img}')`;
-            
-            // 2. Prep Amazing Theater
-            document.getElementById('tm-host').innerText = h;
-            document.getElementById('tm-title').innerText = t;
-            document.getElementById('tm-art').src = img; // Img tag for 3D card
-            document.getElementById('tm-chat').innerHTML = '<div class="chat-pill" style="align-self:center; background:rgba(255,255,255,0.1);">Joined Room.</div>';
-
-            // 3. Connect Socket
-            socket.emit('joinEvent', id);
-            if(typeof joinStream === 'function') joinStream(id);
-            
-            // 4. Auto Open
-            openTheater();
-        }
-
-        function togglePlay() {
-            const aud = document.getElementById('remoteAudio');
-            const btn = document.getElementById('mp-play-btn');
-            if(aud.paused) { aud.play(); btn.innerText='⏸'; } else { aud.pause(); btn.innerText='▶'; }
-        }
-
-        function openTheater() { 
-            document.getElementById('theater-mode').classList.add('open'); 
-            document.body.classList.add('theater-open');
-        }
-        function closeTheater() { 
-            document.getElementById('theater-mode').classList.remove('open');
-            document.body.classList.remove('theater-open');
-        }
-
-        // --- 4. IMMERSIVE INTERACTIONS ---
-        function screenTap(e) {
-            // Prevent interaction if clicking controls
-            if(e.target.closest('.actions-deck') || e.target.closest('.ui-top')) return;
-            
-            spawnFloater('❤️', e.clientX, e.clientY);
-            if(Math.random() > 0.7 && currentRoomId) socket.emit('sendGift', { room: currentRoomId, user: "Anon", gift: '❤️' });
-        }
-
-        function sendChat() {
-            const input = document.getElementById('tm-chat-input');
-            const msg = input.value;
-            if(!msg || !currentRoomId) return;
-            socket.emit('chatMessage', { room: currentRoomId, user: "Me", msg: msg });
-            addBubble("Me", msg, true);
-            input.value = '';
-        }
-
-        function sendGift(emoji) {
-            if(!currentRoomId) return;
-            socket.emit('sendGift', { room: currentRoomId, user: "Me", gift: emoji });
-            for(let i=0; i<5; i++) setTimeout(() => spawnFloater(emoji, window.innerWidth/2 + (Math.random()*100-50), window.innerHeight-100), i*100);
-            addBubble("System", `You sent ${emoji}`, true);
-        }
-
-        // Listeners
-        socket.on('chatMessage', data => { if(data.user !== "Me") addBubble(data.user || "User", data.msg, false); });
-        socket.on('giftReceived', data => {
-            if(data.user !== "Me") {
-                spawnFloater(data.gift, Math.random()*window.innerWidth, window.innerHeight-50);
-                addBubble("System", `${data.user} sent ${data.gift}`, false);
-            }
-        });
-
-        // UI Helpers
-        function addBubble(user, text, isMe) {
-            const list = document.getElementById('tm-chat');
-            const div = document.createElement('div');
-            div.className = `chat-pill ${isMe ? 'me' : ''}`;
-            div.innerHTML = `<b>${user}</b> ${text}`;
-            list.appendChild(div);
-            list.scrollTop = list.scrollHeight;
-        }
-
-        function spawnFloater(char, x, y) {
-            const el = document.createElement('div');
-            el.innerText = char;
-            el.className = 'floater';
-            el.style.left = x + 'px';
-            el.style.top = y + 'px';
-            document.getElementById('float-layer').appendChild(el);
-            setTimeout(() => el.remove(), 2000);
-        }
-
-        // --- 5. NAVIGATION & WALLET ---
-        function navigate(viewId) {
-            document.querySelectorAll('[id^="view-"]').forEach(el => el.classList.add('hidden-view'));
-            document.getElementById(`view-${viewId}`).classList.remove('hidden-view');
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            const navEl = document.getElementById(`nav-${viewId}`);
-            if(navEl) navEl.classList.add('active');
-        }
-
-        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
-        function closeModals() { document.querySelectorAll('.modal-overlay').forEach(el => el.style.display = 'none'); }
-        
-        function addToWallet(amount) {
-            balance += amount;
-            document.getElementById('wallet-display').innerText = `$${balance.toFixed(2)}`;
-            closeModals();
-            alert(`Added $${amount}`);
-        }
-
-        function filterGrid(query) {
-            const term = query.toLowerCase();
-            const filtered = allStreams.filter(s => s.title.toLowerCase().includes(term) || s.host.toLowerCase().includes(term));
-            renderGrid(filtered, 'live-grid');
         }
     </script>
+    <style>
+        body { background: #020617; color: white; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
+        .glass-nav { background: rgba(2, 6, 23, 0.8); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .glass-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255,255,255,0.05); backdrop-filter: blur(10px); }
+        .text-gradient { background: linear-gradient(135deg, #fff 0%, #94a3b8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero-gradient { background: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.15) 0%, rgba(2, 6, 23, 0) 50%); }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <nav class="fixed top-0 left-0 right-0 h-20 glass-nav z-50 flex items-center justify-between px-6 md:px-12 transition-all duration-300" id="navbar">
+        <a href="/" class="flex items-center gap-2 group cursor-pointer">
+            <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center font-bold text-black group-hover:rotate-12 transition">A</div>
+            <div class="text-xl font-bold tracking-tight">AIRVIBE</div>
+        </a>
+        
+        <div class="hidden md:flex gap-8 text-sm font-medium text-gray-400">
+            <a href="#how-it-works" class="hover:text-white transition">How it Works</a>
+            <a href="#trending" class="hover:text-white transition">Creators</a>
+            <a href="#features" class="hover:text-white transition">Features</a>
+        </div>
+
+        <div class="flex gap-4">
+            <a href="/login" class="hidden md:block px-4 py-2 text-sm font-bold text-gray-300 hover:text-white transition">Login</a>
+            <a href="/register" class="px-5 py-2 bg-white text-black text-sm font-bold rounded-full hover:bg-gray-200 transition shadow-[0_0_20px_rgba(255,255,255,0.2)]">Get Started</a>
+        </div>
+    </nav>
+
+    <main class="min-h-screen flex items-center justify-center pt-32 pb-20 px-6 relative hero-gradient">
+        <div class="max-w-7xl w-full grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-center">
+            
+            <div class="text-center md:text-left order-2 md:order-1">
+                <div class="inline-flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] md:text-xs font-bold tracking-widest text-primary mb-6 hover:bg-white/10 transition cursor-default">
+                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> v27.0 ONLINE
+                </div>
+                <h1 class="text-5xl md:text-7xl font-black leading-tight mb-6">
+                    <span class="text-gradient">Broadcast</span><br>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">Your Vibe.</span>
+                </h1>
+                <p class="text-gray-400 text-lg md:text-xl mb-8 leading-relaxed max-w-lg mx-auto md:mx-0">
+                    Your pocket radio station. Crystal clear audio, instant monetization, and a global audience waiting for you.
+                </p>
+                <div class="flex flex-col md:flex-row gap-4 justify-center md:justify-start">
+                    <a href="/dashboard" class="px-8 py-4 bg-primary hover:bg-indigo-500 text-white font-bold rounded-full transition transform hover:scale-105 shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2">
+                        <span>🎧 Start Listening</span>
+                    </a>
+                    <a href="/studio" class="px-8 py-4 bg-white/5 border border-white/10 hover:bg-white/10 font-bold rounded-full transition flex items-center justify-center gap-2 group">
+                        <span>🎙️ Go Live</span>
+                        <span class="group-hover:translate-x-1 transition">→</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="relative order-1 md:order-2 flex justify-center">
+                <div class="absolute inset-0 bg-gradient-to-tr from-primary/30 to-accent/30 blur-[100px] opacity-50 rounded-full"></div>
+                <div class="relative w-full max-w-sm aspect-square animate-float" style="transform-style: preserve-3d; transition: transform 0.1s ease-out;">
+                    <div class="absolute inset-0 bg-gray-900/80 backdrop-blur-xl border border-white/10 rounded-3xl p-6 flex flex-col justify-between shadow-2xl">
+                        <div class="flex justify-between items-start">
+                            <div class="flex gap-3">
+                                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" class="w-12 h-12 rounded-full bg-white/10">
+                                <div><div class="font-bold text-white">Midnight LoFi</div><div class="text-xs text-primary">● Live Now</div></div>
+                            </div>
+                            <div class="px-2 py-1 bg-red-500/20 text-red-400 text-[10px] font-bold rounded">ON AIR</div>
+                        </div>
+                        <div class="flex items-end justify-center gap-1 h-24 my-4 opacity-80">
+                            <div class="w-2 bg-primary rounded-t h-[60%] animate-pulse"></div>
+                            <div class="w-2 bg-primary rounded-t h-[90%] animate-[pulse_1.2s_infinite]"></div>
+                            <div class="w-2 bg-primary rounded-t h-[40%] animate-[pulse_0.8s_infinite]"></div>
+                            <div class="w-2 bg-primary rounded-t h-[75%] animate-[pulse_1.5s_infinite]"></div>
+                            <div class="w-2 bg-primary rounded-t h-[50%] animate-[pulse_1s_infinite]"></div>
+                        </div>
+                        <div class="flex gap-2">
+                            <input class="bg-black/50 border border-white/10 rounded-full px-4 py-2 text-xs w-full text-gray-500" value="Playing music..." readonly>
+                            <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-xs">❤️</div>
+                        </div>
+                    </div>
+                    <div class="absolute -bottom-6 -right-6 bg-gray-800 border border-white/10 p-4 rounded-2xl shadow-xl animate-[bounce_3s_infinite]" style="transform: translateZ(30px);">
+                        <div class="text-xs text-gray-400">Total Listeners</div>
+                        <div class="text-2xl font-bold text-white">1,240 🎧</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="bg-primary/10 border-y border-white/5 py-4 overflow-hidden relative">
+        <div class="whitespace-nowrap animate-marquee flex gap-10 text-sm font-bold text-gray-400">
+            <span class="text-white">🔴 NOW LIVE:</span>
+            <span>DJ Spinall - Afro Beats</span>
+            <span>★</span>
+            <span>Pastor Jerry - Midnight Prayer</span>
+            <span>★</span>
+            <span>Tech Talk Daily</span>
+            <span>★</span>
+            <span>Chill Vibe Radio</span>
+            <span>★</span>
+            <span>Late Night Jazz</span>
+            <span>★</span>
+            <span class="text-white">🔴 NOW LIVE:</span>
+            <span>DJ Spinall - Afro Beats</span>
+            <span>★</span>
+            <span>Pastor Jerry - Midnight Prayer</span>
+        </div>
+    </div>
+
+    <section id="how-it-works" class="py-24 px-6 relative">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-5xl font-black mb-4">Start in 3 Minutes</h2>
+                <p class="text-gray-400">No equipment needed. Just your phone or laptop.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="glass-card p-8 rounded-3xl relative group hover:bg-white/5 transition">
+                    <div class="absolute -top-6 left-8 w-12 h-12 bg-gray-800 border border-white/10 rounded-xl flex items-center justify-center text-xl font-bold text-primary group-hover:scale-110 transition">1</div>
+                    <h3 class="text-xl font-bold mt-4 mb-2">Create Account</h3>
+                    <p class="text-gray-400 text-sm">Sign up for free. Choose your username and set up your channel profile in seconds.</p>
+                </div>
+                <div class="glass-card p-8 rounded-3xl relative group hover:bg-white/5 transition">
+                    <div class="absolute -top-6 left-8 w-12 h-12 bg-gray-800 border border-white/10 rounded-xl flex items-center justify-center text-xl font-bold text-primary group-hover:scale-110 transition">2</div>
+                    <h3 class="text-xl font-bold mt-4 mb-2">Go Live</h3>
+                    <p class="text-gray-400 text-sm">Hit the "Go Live" button. Use our built-in soundboard and effects rack to sound like a pro.</p>
+                </div>
+                <div class="glass-card p-8 rounded-3xl relative group hover:bg-white/5 transition">
+                    <div class="absolute -top-6 left-8 w-12 h-12 bg-gray-800 border border-white/10 rounded-xl flex items-center justify-center text-xl font-bold text-primary group-hover:scale-110 transition">3</div>
+                    <h3 class="text-xl font-bold mt-4 mb-2">Get Paid</h3>
+                    <p class="text-gray-400 text-sm">Listeners send gifts and coins. Cash out directly to your wallet instantly.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="trending" class="py-24 px-6 bg-surface relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
+        <div class="max-w-7xl mx-auto relative z-10">
+            <div class="flex justify-between items-end mb-12">
+                <div>
+                    <h2 class="text-3xl md:text-4xl font-bold">Trending Now 🔥</h2>
+                    <p class="text-gray-400">Join the rooms with the most heat.</p>
+                </div>
+                <a href="/dashboard" class="text-primary font-bold hover:underline hidden md:block">View All -></a>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="glass-card p-4 rounded-2xl hover:border-primary/50 transition cursor-pointer" onclick="window.location.href='/dashboard'">
+                    <div class="relative mb-4">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Jazz" class="w-full h-40 object-cover rounded-xl bg-black">
+                        <div class="absolute top-2 right-2 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded">LIVE</div>
+                    </div>
+                    <h3 class="font-bold">Smooth Jazz Café</h3>
+                    <p class="text-xs text-gray-400">@JazzMaster • 4.2k Listening</p>
+                </div>
+                <div class="glass-card p-4 rounded-2xl hover:border-primary/50 transition cursor-pointer" onclick="window.location.href='/dashboard'">
+                    <div class="relative mb-4">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Tech" class="w-full h-40 object-cover rounded-xl bg-black">
+                        <div class="absolute top-2 right-2 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded">LIVE</div>
+                    </div>
+                    <h3 class="font-bold">Silicon Valley Insider</h3>
+                    <p class="text-xs text-gray-400">@TechDaily • 1.8k Listening</p>
+                </div>
+                <div class="glass-card p-4 rounded-2xl hover:border-primary/50 transition cursor-pointer" onclick="window.location.href='/dashboard'">
+                    <div class="relative mb-4">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Comedy" class="w-full h-40 object-cover rounded-xl bg-black">
+                        <div class="absolute top-2 right-2 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded">LIVE</div>
+                    </div>
+                    <h3 class="font-bold">Laughter Lounge</h3>
+                    <p class="text-xs text-gray-400">@FunnyGuy • 850 Listening</p>
+                </div>
+                <div class="glass-card p-4 rounded-2xl hover:border-primary/50 transition cursor-pointer" onclick="window.location.href='/dashboard'">
+                    <div class="relative mb-4">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Gospel" class="w-full h-40 object-cover rounded-xl bg-black">
+                        <div class="absolute top-2 right-2 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded">LIVE</div>
+                    </div>
+                    <h3 class="font-bold">Morning Devotion</h3>
+                    <p class="text-xs text-gray-400">@PastorJohn • 12k Listening</p>
+                </div>
+            </div>
+            
+            <a href="/dashboard" class="block md:hidden mt-8 text-center text-primary font-bold border border-primary/20 py-3 rounded-xl">View All Streams</a>
+        </div>
+    </section>
+
+    <section id="features" class="py-24 px-6 border-t border-white/5">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Everything You Need</h2>
+                <p class="text-gray-400">Professional tools, simplified for everyone.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="p-8 rounded-3xl bg-white/5 border border-white/5 hover:border-primary/50 transition duration-300">
+                    <div class="text-4xl mb-4">🎙️</div>
+                    <h3 class="text-xl font-bold mb-2">Crystal Clear Audio</h3>
+                    <p class="text-sm text-gray-400">Opus codec streaming ensures studio quality with minimal data usage.</p>
+                </div>
+                <div class="p-8 rounded-3xl bg-white/5 border border-white/5 hover:border-primary/50 transition duration-300">
+                    <div class="text-4xl mb-4">💰</div>
+                    <h3 class="text-xl font-bold mb-2">Monetization</h3>
+                    <p class="text-sm text-gray-400">Earn from virtual gifts and subscriptions directly from your listeners.</p>
+                </div>
+                <div class="p-8 rounded-3xl bg-white/5 border border-white/5 hover:border-primary/50 transition duration-300">
+                    <div class="text-4xl mb-4">💬</div>
+                    <h3 class="text-xl font-bold mb-2">Real-time Chat</h3>
+                    <p class="text-sm text-gray-400">Engage with your community instantly with zero latency messaging.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-20 bg-primary relative overflow-hidden">
+        <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
+        <div class="max-w-7xl mx-auto px-6 relative z-10 text-center">
+            <h2 class="text-3xl font-black mb-12 text-white">PLATFORM GROWTH</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <div class="text-5xl font-black mb-2">50k+</div>
+                    <div class="text-indigo-200 font-bold tracking-widest text-sm">LISTENERS</div>
+                </div>
+                <div>
+                    <div class="text-5xl font-black mb-2">12k+</div>
+                    <div class="text-indigo-200 font-bold tracking-widest text-sm">BROADCASTERS</div>
+                </div>
+                <div>
+                    <div class="text-5xl font-black mb-2">24/7</div>
+                    <div class="text-indigo-200 font-bold tracking-widest text-sm">UPTIME</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-32 px-6 text-center relative">
+        <div class="max-w-3xl mx-auto">
+            <h2 class="text-4xl md:text-6xl font-black mb-6">Ready to go viral?</h2>
+            <p class="text-gray-400 text-lg mb-10">Join thousands of creators building their audio empire on Airvibe today.</p>
+            <div class="flex flex-col md:flex-row justify-center gap-4">
+                <a href="/register" class="px-10 py-5 bg-white text-black font-black text-lg rounded-full hover:bg-gray-200 transition shadow-[0_0_40px_rgba(255,255,255,0.3)]">
+                    🚀 Launch Channel
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="border-t border-white/5 py-12 text-center text-gray-600 text-sm">
+        <p>&copy; 2025 Airvibe Platform. Built for Creators.</p>
+    </footer>
+
+    <script>
+        const card = document.querySelector('.animate-float');
+        const container = document.querySelector('main');
+
+        // Desktop Mouse Move
+        container.addEventListener('mousemove', (e) => {
+            const xAxis = (window.innerWidth / 2 - e.pageX) / 25;
+            const yAxis = (window.innerHeight / 2 - e.pageY) / 25;
+            card.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
+        });
+
+        container.addEventListener('mouseleave', () => {
+            card.style.transition = "all 0.5s ease";
+            card.style.transform = `rotateY(0deg) rotateX(0deg)`;
+        });
+        
+        container.addEventListener('mouseenter', () => { card.style.transition = "none"; });
+        
+        // Mobile Gyroscope
+        if (window.DeviceOrientationEvent) {
+            window.addEventListener("deviceorientation", (e) => {
+                if(e.gamma && e.beta) {
+                    const x = e.gamma / 3; 
+                    const y = e.beta / 3;
+                    card.style.transform = `rotateY(${x}deg) rotateX(${y}deg)`;
+                }
+            }, true);
+        }
+    </script>
+
 </body>
 </html>

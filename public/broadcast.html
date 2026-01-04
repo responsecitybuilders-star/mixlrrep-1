@@ -20,6 +20,9 @@
         .count-num { font-size: 15rem; font-weight: 900; color: #6366f1; font-family: 'JetBrains Mono'; }
         .grid-layout { display: grid; grid-template-columns: 280px 1fr 320px; height: calc(100vh - 64px); }
         @media (max-width: 1024px) { .grid-layout { grid-template-columns: 1fr; } .sidebar { display: none; } }
+        /* Mobile Sidebar Overlay */
+        .sidebar-mobile { position: fixed; inset: 0; z-index: 50; background: #111827; display: none; flex-direction: column; }
+        .sidebar-mobile.open { display: flex; }
     </style>
 </head>
 <body class="flex flex-col">
@@ -45,6 +48,7 @@
         </div>
         <div class="flex items-center gap-3">
             <div id="status-badge" class="px-3 py-1 bg-red-900/20 border border-red-500 text-red-500 rounded text-xs font-bold hidden">● ON AIR</div>
+            <button class="p-2 rounded hover:bg-white/10 md:hidden" onclick="toggleSidebar()">💬</button>
         </div>
     </header>
 
@@ -57,6 +61,15 @@
                 </div>
                 <input type="range" class="w-full mt-4 accent-primary" min="0" max="200" value="100" oninput="setGain(this.value)">
             </div>
+            
+            <div>
+                <label class="text-xs font-bold text-gray-500 mb-2 block">VOICE FX RACK</label>
+                <div class="grid grid-cols-2 gap-2">
+                    <button id="fx-radio" class="p-3 bg-white/5 border border-white/10 rounded text-xs font-bold text-gray-400 hover:text-white transition" onclick="toggleFX('RADIO')">📻 RADIO</button>
+                    <button id="fx-stadium" class="p-3 bg-white/5 border border-white/10 rounded text-xs font-bold text-gray-400 hover:text-white transition" onclick="toggleFX('STADIUM')">🏟️ STADIUM</button>
+                </div>
+            </div>
+
             <div class="p-3 bg-black/20 border border-white/10 rounded-lg">
                 <div class="flex justify-between items-center mb-2">
                     <span class="text-xs font-bold text-primary">🦆 AUTO DUCKING</span>
@@ -93,7 +106,6 @@
             <div class="absolute bottom-32 left-0 right-0 text-center px-10 pointer-events-none z-10">
                 <div id="captions" class="text-xl font-bold text-white/80 text-shadow-lg transition-all duration-200 min-h-[30px]"></div>
             </div>
-            
             <div class="glass rounded-2xl p-3 flex items-center justify-center gap-4 mx-auto z-30 mb-4 max-w-2xl w-full dock absolute bottom-4 left-1/2 -translate-x-1/2">
                 <button class="btn-icon text-gray-400" onclick="document.getElementById('bgm-file').click()">🎵</button>
                 <input type="file" id="bgm-file" hidden onchange="loadBGM(this)">
@@ -126,16 +138,32 @@
         </aside>
     </div>
 
+    <div id="mobile-sidebar" class="sidebar-mobile">
+        <div class="flex justify-between items-center p-4 border-b border-white/10">
+            <h3 class="font-bold">Stream Chat</h3>
+            <button onclick="toggleSidebar()" class="text-gray-400">✕</button>
+        </div>
+        <div id="mob-chat-feed" class="flex-1 overflow-y-auto p-4 space-y-2"></div>
+        <div class="p-4 bg-black/40 border-t border-white/10">
+            <form onsubmit="sendChat(event, 'mob')" class="flex gap-2">
+                <input id="mob-chat-input" class="w-full bg-white/10 rounded p-3 text-sm text-white outline-none" placeholder="Chat..." autocomplete="off">
+                <button class="bg-primary text-black font-bold px-4 rounded">Send</button>
+            </form>
+        </div>
+    </div>
+
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
         let audioCtx, micSource, micGain, bgmSource, bgmGain, masterDest, analyser, noiseFilter;
+        let radioFilter, stadiumDelay, stadiumFeedback, activeFX = null;
         let isLive = false, isRecording = false, isDucking = false;
         let mediaRecorder, recordedChunks = [];
         let bgmAudio = new Audio(); bgmAudio.loop = true;
         let countdownTimer, sessionTimer;
         let currentEarnings = 0;
         let startTime = 0;
+        let streamMimeType = 'audio/webm;codecs=opus'; // Default high quality
 
         window.onload = initAudioEngine;
 
@@ -145,39 +173,99 @@
                 audioCtx = new AudioContext();
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 
-                // Visualizer Setup
+                // --- 1. DETERMINE BROWSER COMPATIBILITY ---
+                if (!MediaRecorder.isTypeSupported(streamMimeType)) {
+                    streamMimeType = 'audio/mp4'; // Fallback for Safari
+                    if (!MediaRecorder.isTypeSupported(streamMimeType)) streamMimeType = 'audio/webm';
+                }
+                console.log("🎤 Selected Codec:", streamMimeType);
+
+                // --- 2. AUDIO NODES SETUP ---
                 micSource = audioCtx.createMediaStreamSource(stream);
                 micGain = audioCtx.createGain();
                 bgmGain = audioCtx.createGain(); bgmGain.gain.value = 0.3;
                 masterDest = audioCtx.createMediaStreamDestination();
                 analyser = audioCtx.createAnalyser();
 
+                // --- 3. FX RACK SETUP ---
+                // A. Radio Filter (Mid-range boost, Low/High cut)
+                radioFilter = audioCtx.createBiquadFilter();
+                radioFilter.type = "bandpass";
+                radioFilter.frequency.value = 1000;
+                radioFilter.Q.value = 1;
+
+                // B. Stadium Reverb (Delay + Feedback)
+                stadiumDelay = audioCtx.createDelay();
+                stadiumDelay.delayTime.value = 0.15; // 150ms echo
+                stadiumFeedback = audioCtx.createGain();
+                stadiumFeedback.gain.value = 0.4; // 40% repeat
+                stadiumDelay.connect(stadiumFeedback);
+                stadiumFeedback.connect(stadiumDelay);
+
+                // --- 4. WIRING (DEFAULT: DRY) ---
                 micSource.connect(micGain);
                 micGain.connect(analyser); 
-                // Do NOT connect to masterDest here, MediaRecorder handles it.
+                // Do NOT connect to masterDest here yet, handled by recorder/live logic
 
                 startVisualizer();
 
-                // === SERVER RELAY AUDIO ENGINE (Robust Logic) ===
-                let mimeType = 'audio/webm;codecs=opus';
-                if (!MediaRecorder.isTypeSupported(mimeType)) {
-                    mimeType = 'audio/webm'; 
-                    if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'audio/mp4'; 
-                }
-
-                mediaRecorder = new MediaRecorder(stream, { mimeType });
-                
-                mediaRecorder.ondataavailable = (event) => {
+                // --- 5. RECORDER ENGINE ---
+                mediaRecorder = new MediaRecorder(masterDest.stream, { mimeType: streamMimeType });
+                mediaRecorder.ondataavailable = async (event) => {
                     if (event.data.size > 0 && isLive) {
-                        socket.emit('audioStream', { room: socket.id, chunk: event.data });
+                        // Safe Blob Conversion
+                        const buffer = await event.data.arrayBuffer();
+                        socket.emit('audioStream', { room: socket.id, chunk: buffer });
                     }
                 };
 
-                console.log("✅ Audio Engine Ready (Relay Mode)");
+                // Connect for local monitoring (optional, usually mute to prevent feedback)
+                // micGain.connect(audioCtx.destination); 
+
+                console.log("✅ Audio Engine Ready");
             } catch (e) {
                 console.error("Mic Blocked", e);
                 alert("Microphone access is required.");
             }
+        }
+
+        // --- NEW: FX TOGGLE LOGIC ---
+        function toggleFX(type) {
+            // Unplug everything first
+            micSource.disconnect();
+            radioFilter.disconnect();
+            stadiumDelay.disconnect();
+            micGain.disconnect();
+
+            // UI Reset
+            document.getElementById('fx-radio').classList.remove('bg-primary', 'text-black');
+            document.getElementById('fx-stadium').classList.remove('bg-primary', 'text-black');
+
+            if (activeFX === type) {
+                // Turn OFF (Back to Dry)
+                micSource.connect(micGain);
+                activeFX = null;
+                addLog("SYSTEM", "FX: OFF");
+            } else {
+                // Turn ON
+                if (type === 'RADIO') {
+                    micSource.connect(radioFilter);
+                    radioFilter.connect(micGain);
+                    document.getElementById('fx-radio').classList.add('bg-primary', 'text-black');
+                } else if (type === 'STADIUM') {
+                    // Split signal: Dry + Wet
+                    micSource.connect(micGain); // Dry
+                    micSource.connect(stadiumDelay); // Wet
+                    stadiumDelay.connect(micGain);
+                    document.getElementById('fx-stadium').classList.add('bg-primary', 'text-black');
+                }
+                activeFX = type;
+                addLog("SYSTEM", `FX: ${type} ON`);
+            }
+            
+            // Reconnect Output
+            micGain.connect(masterDest);
+            micGain.connect(analyser);
         }
 
         function initiateGoLive() {
@@ -185,8 +273,14 @@
                 stopBroadcast();
             } else {
                 if(audioCtx.state === 'suspended') audioCtx.resume();
+                
+                // Connect Mic to Master if not already
+                if(!activeFX) {
+                    micSource.connect(masterDest); // Ensure path exists
+                }
+
                 document.getElementById('pre-live-overlay').classList.remove('hidden');
-                let count = 15;
+                let count = 3; // Fast countdown
                 document.getElementById('countdown-val').innerText = count;
                 countdownTimer = setInterval(() => {
                     count--;
@@ -206,19 +300,17 @@
         }
 
         function goLiveReal() {
-            socket.emit('broadcaster', { title: "My Show", host: "Host" });
+            // Inform Server about MimeType
+            socket.emit('broadcaster', { title: "My Show", host: "Host", mimeType: streamMimeType });
             isLive = true;
             
-            // START SENDING AUDIO
-            if(mediaRecorder && mediaRecorder.state === "inactive") {
-                mediaRecorder.start(250); // 250ms chunks
-            }
+            mediaRecorder.start(250); // 250ms chunks
             
             const btn = document.getElementById('main-btn');
             btn.innerText = "END STREAM";
             btn.classList.add('bg-red-600', 'pulse-live');
             document.getElementById('status-badge').classList.remove('hidden');
-            addLog('SYSTEM', '🚀 YOU ARE LIVE (Server Relay Mode)!', {isPriority: true});
+            addLog('SYSTEM', '🚀 YOU ARE LIVE!', {isPriority: true});
             
             startTime = Date.now();
             sessionTimer = setInterval(() => {
@@ -243,44 +335,52 @@
             btn.classList.remove('bg-red-600', 'pulse-live');
             document.getElementById('status-badge').classList.add('hidden');
             addLog('SYSTEM', '🛑 Broadcast Ended');
+            
+            // Soft reload to reset audio graph
             setTimeout(() => location.reload(), 1500);
         }
 
-        // === SHARE FUNCTION (New) ===
         function shareBroadcast() {
-            if(!isLive) return alert("Go Live first to generate a link!");
+            if(!isLive) return alert("Go Live first!");
             const link = `${window.location.origin}/dashboard?room=${socket.id}`;
             navigator.clipboard.writeText(link).then(() => {
                 addLog("SYSTEM", "🔗 Link Copied!", {isPriority: true});
-                alert("Copied! Share this with fans:\n" + link);
+                alert("Link Copied! Send it to your fans:\n" + link);
             });
         }
 
         // === CHAT & LOGS ===
-        function sendChat(event) {
+        function sendChat(event, mode) {
             if(event) event.preventDefault();
-            const input = document.getElementById('chat-input');
-            const msg = input.value.trim();
-            if(!msg) return;
-            addLog("HOST", msg);
-            socket.emit('chatMessage', { room: socket.id, user: 'HOST', msg: msg });
+            const id = mode === 'mob' ? 'mob-chat-input' : 'chat-input';
+            const input = document.getElementById(id);
+            if(!input.value.trim()) return;
+            addLog("HOST", input.value);
+            socket.emit('chatMessage', { room: socket.id, user: 'HOST', msg: input.value });
             input.value = '';
         }
 
         function addLog(user, txt, meta = {}) {
+            // Add to Desktop
             const div = document.createElement('div');
             let classes = "text-sm p-2 rounded mb-2 border border-white/5 animate-slide-up ";
             if (meta.isGold) { classes += "gold-msg "; user = `👑 ${user}`; } 
             else if (meta.isPriority) { classes += "border-l-2 border-primary bg-white/10 "; }
             else { classes += "bg-white/5 "; }
-            
             div.className = classes;
             const nameColor = meta.isGold ? "text-yellow-400" : "text-primary";
             div.innerHTML = `<span class="font-bold ${nameColor}">${user}:</span> ${txt}`;
-            const feed = document.getElementById('chat-feed');
-            feed.appendChild(div);
-            feed.scrollTop = feed.scrollHeight;
+            
+            document.getElementById('chat-feed').appendChild(div);
+            document.getElementById('chat-feed').scrollTop = document.getElementById('chat-feed').scrollHeight;
+
+            // Add to Mobile
+            const mobDiv = div.cloneNode(true);
+            document.getElementById('mob-chat-feed').appendChild(mobDiv);
+            document.getElementById('mob-chat-feed').scrollTop = document.getElementById('mob-chat-feed').scrollHeight;
         }
+
+        function toggleSidebar() { document.getElementById('mobile-sidebar').classList.toggle('open'); }
 
         // === SOCKET LISTENERS ===
         socket.on('roomLog', data => { 
@@ -307,7 +407,7 @@
         // === UTILS ===
         function setGain(val) { if(micGain) micGain.gain.value = val/100; }
         function playSFX(name) { addLog("SYSTEM", `🔊 SFX: ${name}`); }
-        function toggleCinema() { document.querySelector('aside').classList.toggle('hidden'); }
+        
         function loadBGM(input) {
             if(input.files[0]) {
                 bgmAudio.src = URL.createObjectURL(input.files[0]);
@@ -322,7 +422,6 @@
         function toggleRecording() {
             if(!isLive) return alert("Go LIVE first!");
             if (!isRecording) {
-                // For local file recording
                 recordedChunks = [];
                 const destRec = audioCtx.createMediaStreamDestination();
                 micGain.connect(destRec); 
