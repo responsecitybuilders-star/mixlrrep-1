@@ -340,10 +340,15 @@
         let currentUser = { username: "Guest", plan: "Free", coins: 0 };
         let liveStreams = [];
         let currentRoomId = null;
+        
+        // AUDIO VARIABLES
+        let mediaSource;
+        let sourceBuffer;
+        let queue = [];
+        let isUpdating = false;
 
-        // 1. INIT & DEEP LINK LOGIC
+        // 1. INIT
         async function init() {
-            // Fetch User
             try {
                 const res = await fetch('/api/user/me');
                 const data = await res.json();
@@ -357,25 +362,19 @@
             renderGiftGrid('faith');
         }
 
-        // 2. LIVE FEED & AUTO-JOIN
+        // 2. LIVE FEED
         socket.on('streamList', streams => {
             liveStreams = Object.values(streams);
             renderLiveGrids();
             
-            // CHECK FOR DIRECT LINK (?room=xyz)
             const params = new URLSearchParams(window.location.search);
             const roomToJoin = params.get('room');
             
             if(roomToJoin && liveStreams.length > 0) {
-                // Find the stream object
                 const stream = liveStreams.find(s => s.id === roomToJoin);
-                
-                // Only join if we haven't already joined (check currentRoomId)
                 if(stream && currentRoomId !== roomToJoin) {
                     const img = `https://api.dicebear.com/7.x/avataaars/svg?seed=${stream.host}`;
                     joinRoom(stream.id, stream.title, stream.host, img);
-                    
-                    // Clear the URL so refreshing doesn't keep re-joining
                     window.history.replaceState({}, document.title, "/dashboard");
                 }
             }
@@ -412,7 +411,7 @@
             gridHome.innerHTML = liveStreams.slice(0, 2).map(s => generateCard(s)).join(''); 
         }
 
-        // 3. JOIN LIVE ROOM
+        // 3. JOIN LIVE ROOM (With Audio Fix)
         function joinRoom(id, title, host, img) {
             currentRoomId = id;
             document.getElementById('room-title').innerText = title;
@@ -423,17 +422,97 @@
 
             document.getElementById('live-room').classList.add('active');
             socket.emit('joinEvent', { targetId: id, user: currentUser });
+
+            // Initialize Audio Logic
+            initAudioReceiver();
+        }
+
+        function initAudioReceiver() {
+            const audio = document.getElementById('remoteAudio');
+            
+            // Cleanup previous MediaSource if exists
+            if (mediaSource && mediaSource.readyState === 'open') {
+                try { mediaSource.endOfStream(); } catch(e){}
+            }
+            
+            mediaSource = new MediaSource();
+            audio.src = URL.createObjectURL(mediaSource);
+            
+            // Force play to overcome browser autoplay policies
+            audio.play().catch(e => console.log("⚠️ Click interaction needed for audio"));
+
+            mediaSource.addEventListener('sourceopen', () => {
+                // Try OPUS first, fallback if needed
+                const mime = MediaSource.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/webm';
+                try {
+                    sourceBuffer = mediaSource.addSourceBuffer(mime);
+                    sourceBuffer.mode = 'sequence';
+                    sourceBuffer.addEventListener('updateend', () => {
+                        isUpdating = false;
+                        if (queue.length > 0) processAudioQueue();
+                    });
+                } catch (e) { console.error("SourceBuffer Error:", e); }
+            });
         }
 
         function leaveRoom() {
             document.getElementById('live-room').classList.remove('active');
             currentRoomId = null;
-            document.getElementById('remoteAudio').srcObject = null;
+            // Stop audio memory leak
+            const audio = document.getElementById('remoteAudio');
+            audio.pause();
+            audio.src = "";
         }
 
-        // 4. CHAT (Fixed)
+        // 4. AUDIO DATA HANDLER (Robust Version)
+        socket.on('audioBuffer', async (data) => {
+            try {
+                // Convert Blob to ArrayBuffer if needed
+                let buffer;
+                if (data instanceof Blob) {
+                    buffer = await data.arrayBuffer();
+                } else {
+                    buffer = data;
+                }
+
+                // Push to queue
+                queue.push(buffer);
+                
+                // If the buffer is stuck or not updating, kickstart it
+                if (!isUpdating) {
+                    processAudioQueue();
+                }
+            } catch (e) {
+                console.error("Audio Convert Error:", e);
+            }
+        });
+
+        function processAudioQueue() {
+            if (!sourceBuffer || isUpdating || queue.length === 0) return;
+            if (sourceBuffer.updating) return; // Double check
+
+            try {
+                isUpdating = true;
+                sourceBuffer.appendBuffer(queue.shift());
+            } catch (e) {
+                // If QuotaExceeded, we need to clear buffer (live stream catch-up)
+                if (e.name === 'QuotaExceededError') {
+                    // Remove old buffer to free up space
+                    const removeEnd = sourceBuffer.buffered.length > 0 ? sourceBuffer.buffered.end(0) - 5 : 0;
+                    if (removeEnd > 0) {
+                        sourceBuffer.remove(0, removeEnd);
+                    }
+                    isUpdating = false; // Reset flag to allow next try
+                } else {
+                    console.log("Buffer error:", e);
+                    isUpdating = false;
+                }
+            }
+        }
+
+        // 5. CHAT
         function sendRoomChat(event) {
-            event.preventDefault(); // Stop reload
+            event.preventDefault();
             const input = document.getElementById('chat-msg');
             const txt = input.value.trim();
             
@@ -446,22 +525,11 @@
             input.focus();
         }
 
-        // 5. GIFTING & COINS (Advanced)
+        // 6. GIFTING & UTILS
         const giftData = {
-            faith: [
-                { icon: '🕊️', name: 'Dove', cost: 50 }, { icon: '🕯️', name: 'Light', cost: 100 },
-                { icon: '📖', name: 'Word', cost: 200 }, { icon: '⛪', name: 'Church', cost: 500 },
-                { icon: '🙏', name: 'Pray', cost: 1000 }, { icon: '🌊', name: 'River', cost: 5000 }
-            ],
-            classic: [
-                { icon: '❤️', name: 'Heart', cost: 10 }, { icon: '🌹', name: 'Rose', cost: 50 },
-                { icon: '🔥', name: 'Fire', cost: 100 }, { icon: '🚀', name: 'Rocket', cost: 5000 },
-                { icon: '🦁', name: 'Lion', cost: 10000 }, { icon: '🪐', name: 'Planet', cost: 20000 }
-            ],
-            luxury: [
-                { icon: '💎', name: 'Diamond', cost: 10000 }, { icon: '🚗', name: 'Lambo', cost: 25000 },
-                { icon: '🏰', name: 'Castle', cost: 40000 }, { icon: '👑', name: 'Throne', cost: 50000 }
-            ]
+            faith: [{icon:'🕊️',name:'Dove',cost:50},{icon:'🕯️',name:'Light',cost:100},{icon:'📖',name:'Word',cost:200},{icon:'⛪',name:'Church',cost:500},{icon:'🙏',name:'Pray',cost:1000},{icon:'🌊',name:'River',cost:5000}],
+            classic: [{icon:'❤️',name:'Heart',cost:10},{icon:'🌹',name:'Rose',cost:50},{icon:'🔥',name:'Fire',cost:100},{icon:'🚀',name:'Rocket',cost:5000},{icon:'🦁',name:'Lion',cost:10000},{icon:'🪐',name:'Planet',cost:20000}],
+            luxury: [{icon:'💎',name:'Diamond',cost:10000},{icon:'🚗',name:'Lambo',cost:25000},{icon:'🏰',name:'Castle',cost:40000},{icon:'👑',name:'Throne',cost:50000}]
         };
 
         function switchGiftTab(category, btn) {
@@ -476,48 +544,24 @@
             let html = `<div class="gift-grid">`;
             items.forEach(g => {
                 const colorClass = g.cost >= 5000 ? 'text-gold' : 'text-gray-400';
-                html += `
-                    <div class="gift-item coin-glow" onclick="attemptGift('${g.icon}', ${g.cost})">
-                        <div class="text-2xl mb-1">${g.icon}</div>
-                        <div class="text-[9px] ${colorClass} font-bold">${g.cost.toLocaleString()}</div>
-                    </div>
-                `;
+                html += `<div class="gift-item coin-glow" onclick="attemptGift('${g.icon}', ${g.cost})"><div class="text-2xl mb-1">${g.icon}</div><div class="text-[9px] ${colorClass} font-bold">${g.cost.toLocaleString()}</div></div>`;
             });
             html += `</div>`;
             container.innerHTML = html;
         }
 
         function attemptGift(emoji, cost) {
-            if(currentUser.coins < cost) {
-                document.getElementById('coin-modal').classList.add('open');
-                return;
-            }
+            if(currentUser.coins < cost) { document.getElementById('coin-modal').classList.add('open'); return; }
             currentUser.coins -= cost;
             document.getElementById('coin-bal').innerText = currentUser.coins.toLocaleString();
             socket.emit('sendGift', { room: currentRoomId, user: currentUser.username, gift: emoji });
-            
             spawnFloater(emoji);
             addChatLog("System", `Sent ${emoji}`, true);
         }
 
         function openCoinModal() { document.getElementById('coin-modal').classList.add('open'); }
+        async function buyCoins(a, p) { const res=await fetch('/api/wallet/buy-coins',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({amount:a,cost:p})}); const d=await res.json(); if(d.success){currentUser.coins+=a; document.getElementById('coin-bal').innerText=currentUser.coins.toLocaleString(); document.getElementById('coin-modal').classList.remove('open'); confetti({particleCount:100}); alert(`🎉 +${a} Coins!`);} }
 
-        async function buyCoins(amount, price) {
-            const res = await fetch('/api/wallet/buy-coins', {
-                method: 'POST', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ amount: amount, cost: price })
-            });
-            const data = await res.json();
-            if(data.success) {
-                currentUser.coins += amount;
-                document.getElementById('coin-bal').innerText = currentUser.coins.toLocaleString();
-                document.getElementById('coin-modal').classList.remove('open');
-                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-                alert(`🎉 Added ${amount} Coins!`);
-            }
-        }
-
-        // 6. UTILS
         function addChatLog(user, text, isMe) {
             const list = document.getElementById('room-chat');
             const div = document.createElement('div');
@@ -525,63 +569,26 @@
             const align = isMe ? 'ml-auto' : 'mr-auto';
             div.className = `chat-pill ${color} p-2 rounded-2xl text-sm mb-2 w-fit max-w-[80%] border text-white ${align} break-words`;
             div.innerHTML = `<span class="font-bold text-[10px] block mb-0.5 opacity-60">${user}</span> ${text}`;
-            list.appendChild(div);
-            list.scrollTop = list.scrollHeight;
+            list.appendChild(div); list.scrollTop = list.scrollHeight;
         }
 
         function spawnFloater(char) {
             const el = document.createElement('div');
-            el.innerText = char;
-            el.className = 'floater';
+            el.innerText = char; el.className = 'floater';
             el.style.left = (window.innerWidth / 2) + (Math.random()*100 - 50) + 'px';
             el.style.top = (window.innerHeight - 100) + 'px';
             document.getElementById('float-layer').appendChild(el);
             setTimeout(() => el.remove(), 2500);
         }
 
-        function toggleMuteRoom() {
-            const audio = document.getElementById('remoteAudio');
-            const btn = document.getElementById('room-mute-btn');
-            audio.muted = !audio.muted;
-            btn.innerText = audio.muted ? '🔇' : '🔊';
-        }
-
-        function switchView(viewName) {
-            ['home', 'following', 'library', 'live'].forEach(v => document.getElementById(`view-${v}`).classList.add('hidden'));
-            document.getElementById(`view-${viewName}`).classList.remove('hidden');
-            document.getElementById(`view-${viewName}`).classList.add('fade-in');
-            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-            document.getElementById(`nav-${viewName}`).classList.add('active');
-        }
-
-        function toggleDataSaver() {
-            const badge = document.getElementById('ds-badge');
-            badge.classList.toggle('hidden');
-            alert(badge.classList.contains('hidden') ? '⚡ Data Saver Off' : '⚡ Data Saver On');
-        }
-
+        function toggleMuteRoom() { const a=document.getElementById('remoteAudio'); a.muted=!a.muted; document.getElementById('room-mute-btn').innerText=a.muted?'🔇':'🔊'; }
+        function switchView(viewName) { ['home', 'following', 'library', 'live'].forEach(v => document.getElementById(`view-${v}`).classList.add('hidden')); document.getElementById(`view-${viewName}`).classList.remove('hidden'); document.getElementById(`view-${viewName}`).classList.add('fade-in'); document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active')); document.getElementById(`nav-${viewName}`).classList.add('active'); }
+        function toggleDataSaver() { document.getElementById('ds-badge').classList.toggle('hidden'); alert('Data Saver Toggled'); }
         function openCarMode() { document.getElementById('car-mode').classList.add('active'); }
         function closeCarMode() { document.getElementById('car-mode').classList.remove('active'); }
+        function triggerCheckout(p, pr) { document.getElementById('chk-plan').innerText=p; document.getElementById('chk-price').innerText=pr; document.getElementById('checkout-modal').classList.add('open'); }
+        function processPayment() { const b=document.querySelector('#checkout-modal button'); b.innerText="Processing..."; setTimeout(()=>{ document.getElementById('checkout-modal').classList.remove('open'); confetti({particleCount:150}); alert("🎉 Success!"); b.innerText="🔒 Pay Securely"; }, 2000); }
 
-        function triggerCheckout(plan, price) {
-            document.getElementById('chk-plan').innerText = plan;
-            document.getElementById('chk-price').innerText = price;
-            document.getElementById('checkout-modal').classList.add('open');
-        }
-
-        function processPayment() {
-            const btn = document.querySelector('#checkout-modal button');
-            btn.innerText = "Processing...";
-            setTimeout(() => {
-                document.getElementById('checkout-modal').classList.remove('open');
-                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-                alert("🎉 Upgrade Successful!");
-                btn.innerText = "🔒 Pay Securely";
-                document.querySelectorAll('.locked-feat').forEach(el => el.classList.remove('locked-feat'));
-            }, 2000);
-        }
-
-        // Listeners
         socket.on('chatMessage', data => { if(data.user !== currentUser.username) addChatLog(data.user, data.msg, false); });
         socket.on('giftReceived', data => { if(data.user !== currentUser.username) { spawnFloater(data.gift); addChatLog("System", `${data.user} sent ${data.gift}`, false); } });
         socket.on('roomLog', data => { if(data.type === 'join') document.getElementById('room-listeners').innerText = data.count; });

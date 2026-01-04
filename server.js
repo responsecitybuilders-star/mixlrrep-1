@@ -96,7 +96,6 @@ app.post('/api/wallet/buy-coins', (req, res) => {
 
 // 4. PAGE ROUTES (Updated for Auth.html)
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
-// Serve auth.html for login/register
 app.get('/login', (req, res) => res.sendFile(path.join(__dirname, 'public', 'auth.html')));
 app.get('/register', (req, res) => res.sendFile(path.join(__dirname, 'public', 'auth.html')));
 app.get('/studio', (req, res) => res.sendFile(path.join(__dirname, 'public', 'broadcast.html')));
@@ -105,37 +104,46 @@ app.get('/profile', (req, res) => res.sendFile(path.join(__dirname, 'public', 'p
 
 // --- 4. REAL-TIME ENGINE ---
 let activeStreams = {};
+let streamHeaders = {}; // NEW: Store header chunks
 
 io.on('connection', (socket) => {
     console.log(`🔌 Connected: ${socket.id}`);
 
-    // --- 1. DATA REQUEST (THE FIX FOR EMPTY GRID) ---
+    // --- 1. DATA REQUEST ---
     socket.on('requestData', () => {
-        // When dashboard asks, send the list immediately
         socket.emit('streamList', activeStreams);
     });
 
     // --- HOST LOGIC ---
     socket.on('broadcaster', (data) => {
         activeStreams[socket.id] = { id: socket.id, ...data, listeners: 0 };
+        streamHeaders[socket.id] = null; // Reset header on new stream
         socket.join(socket.id);
-        io.emit('streamList', activeStreams); // Update everyone
+        io.emit('streamList', activeStreams);
         console.log(`🎙️ LIVE: ${data.title}`);
     });
 
     socket.on('stopBroadcast', () => {
         if(activeStreams[socket.id]) {
             delete activeStreams[socket.id];
+            delete streamHeaders[socket.id]; // Clean up header
             io.emit('streamList', activeStreams);
         }
     });
 
-    // --- AUDIO RELAY (50 USERS) ---
+    // --- AUDIO RELAY (FIXED FOR LATE JOINERS) ---
     socket.on('audioStream', (data) => {
+        // 1. If this is the FIRST chunk, save it as the header
+        if (!streamHeaders[data.room]) {
+            streamHeaders[data.room] = data.chunk;
+            console.log(`🧠 Captured Header for Room ${data.room}`);
+        }
+
+        // 2. Broadcast to everyone in the room
         socket.to(data.room).emit('audioBuffer', data.chunk);
     });
 
-    // --- LISTENER LOGIC ---
+    // --- LISTENER LOGIC (FIXED) ---
     socket.on('joinEvent', (data) => {
         const roomId = (typeof data === 'object') ? data.targetId : data;
         const user = (typeof data === 'object' && data.user) ? data.user.username : 'Guest';
@@ -145,10 +153,15 @@ io.on('connection', (socket) => {
             console.log(`🎧 ${user} joined ${roomId}`);
             activeStreams[roomId].listeners++;
             
-            // Notify room of new count
+            // Notify room
             io.to(roomId).emit('roomLog', { type: 'join', count: activeStreams[roomId].listeners });
-            // Update global grid counts
             io.emit('streamList', activeStreams);
+
+            // 🔥 CRITICAL FIX: Send Header to new listener
+            if (streamHeaders[roomId]) {
+                socket.emit('audioBuffer', streamHeaders[roomId]);
+                console.log(`📨 Sent Header to ${user} (Late Joiner Fix)`);
+            }
         }
     });
 
@@ -163,7 +176,7 @@ io.on('connection', (socket) => {
         console.log(`🎁 ${data.gift} from ${data.user}`);
         socket.to(data.room).emit('giftReceived', data);
         
-        // Deduct coins (Mock ID 1 for safety)
+        // Deduct coins (Mock ID 1)
         const costMap = { '❤️': 10, '🚀': 5000, '🕊️': 500 }; 
         const cost = costMap[data.gift] || 10; 
         db.run(`UPDATE users SET coins = coins - ? WHERE id = 1`, [cost]);
@@ -172,6 +185,7 @@ io.on('connection', (socket) => {
     socket.on('disconnect', () => {
         if(activeStreams[socket.id]) {
             delete activeStreams[socket.id];
+            delete streamHeaders[socket.id];
             io.emit('streamList', activeStreams);
         }
     });
