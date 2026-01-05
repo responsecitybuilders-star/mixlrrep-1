@@ -2,482 +2,142 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Airvibe Studio | Pro</title>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Airvibe Studio | Diagnostic</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = { theme: { extend: { colors: { bg: '#030712', panel: '#111827', primary: '#6366f1', accent: '#a855f7' } } } }
-    </script>
     <style>
-        body { background: #030712; color: #f9fafb; font-family: 'Space Grotesk', sans-serif; overflow: hidden; height: 100vh; }
-        .glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
-        .btn-icon { @apply p-2 rounded-lg hover:bg-white/10 transition active:scale-95; }
-        .pulse-live { animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 #6366f1; } 70% { box-shadow: 0 0 0 15px transparent; } }
-        .gold-msg { border-left: 2px solid #fbbf24; background: linear-gradient(90deg, rgba(251, 191, 36, 0.1), transparent); }
-        .countdown-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(20px); }
-        .count-num { font-size: 15rem; font-weight: 900; color: #6366f1; font-family: 'JetBrains Mono'; }
-        .grid-layout { display: grid; grid-template-columns: 280px 1fr 320px; height: calc(100vh - 64px); }
-        @media (max-width: 1024px) { .grid-layout { grid-template-columns: 1fr; } .sidebar { display: none; } }
-        /* Mobile Sidebar Overlay */
-        .sidebar-mobile { position: fixed; inset: 0; z-index: 50; background: #111827; display: none; flex-direction: column; }
-        .sidebar-mobile.open { display: flex; }
+        #debug-console { position: fixed; bottom: 0; left: 0; width: 100%; height: 150px; background: rgba(0,0,0,0.9); color: #0f0; font-family: monospace; font-size: 10px; overflow-y: scroll; z-index: 9999; padding: 10px; border-top: 1px solid #0f0; }
+        .log-line { margin-bottom: 2px; border-bottom: 1px solid #333; }
+        .pulse-live { animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
     </style>
 </head>
-<body class="flex flex-col">
+<body class="bg-black text-white h-screen flex flex-col">
 
-    <div id="pre-live-overlay" class="hidden countdown-overlay">
-        <div class="text-white text-xl font-bold tracking-[0.5em] mb-4">GOING LIVE IN</div>
-        <div id="countdown-val" class="count-num">15</div>
-        <button onclick="cancelLive()" class="mt-10 px-6 py-2 border border-white/20 text-white/50 hover:text-white rounded-full transition">CANCEL</button>
+    <div class="p-4 border-b border-gray-800 flex justify-between items-center">
+        <h1 class="font-bold text-indigo-500">STUDIO DIAGNOSTIC</h1>
+        <div id="live-dot" class="w-3 h-3 rounded-full bg-gray-500"></div>
     </div>
 
-    <header class="h-16 border-b border-white/10 flex items-center justify-between px-6 z-20 bg-panel shrink-0">
-        <div class="flex items-center gap-4">
-            <h1 class="text-xl font-bold tracking-tighter">AIRVIBE <span class="text-primary text-xs align-top">PRO</span></h1>
-            <div class="hidden md:flex gap-4 text-xs font-mono text-gray-500 bg-black/30 p-2 rounded border border-white/10">
-                <span class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-green-500"></div> BITRATE: <b class="text-white">320 KBPS</b></span>
-                <span class="flex items-center gap-2 border-l border-white/10 pl-4">⏱ TIME: <b class="text-white" id="session-timer">00:00:00</b></span>
-            </div>
-        </div>
-        <div class="flex-1 mx-10 hidden md:flex items-center gap-4 justify-center">
-             <div class="text-xs font-bold bg-black/40 px-3 py-1 rounded border border-white/10 flex items-center gap-2">
-                💰 EARNINGS: <span class="text-primary text-sm" id="earnings-val">₦0.00</span>
-             </div>
-        </div>
-        <div class="flex items-center gap-3">
-            <div id="status-badge" class="px-3 py-1 bg-red-900/20 border border-red-500 text-red-500 rounded text-xs font-bold hidden">● ON AIR</div>
-            <button class="p-2 rounded hover:bg-white/10 md:hidden" onclick="toggleSidebar()">💬</button>
-        </div>
-    </header>
-
-    <div class="grid-layout">
-        <div class="bg-panel border-r border-white/10 p-4 hidden lg:flex flex-col gap-6 overflow-y-auto z-20">
-            <div>
-                <label class="text-xs font-bold text-gray-500 mb-2 block">MIC CHECK</label>
-                <div class="h-2 bg-black rounded overflow-hidden">
-                    <div class="h-full bg-green-500 transition-all duration-75" id="mic-meter" style="width: 0%"></div>
-                </div>
-                <input type="range" class="w-full mt-4 accent-primary" min="0" max="200" value="100" oninput="setGain(this.value)">
-            </div>
-            
-            <div>
-                <label class="text-xs font-bold text-gray-500 mb-2 block">VOICE FX RACK</label>
-                <div class="grid grid-cols-2 gap-2">
-                    <button id="fx-radio" class="p-3 bg-white/5 border border-white/10 rounded text-xs font-bold text-gray-400 hover:text-white transition" onclick="toggleFX('RADIO')">📻 RADIO</button>
-                    <button id="fx-stadium" class="p-3 bg-white/5 border border-white/10 rounded text-xs font-bold text-gray-400 hover:text-white transition" onclick="toggleFX('STADIUM')">🏟️ STADIUM</button>
-                </div>
-            </div>
-
-            <div class="p-3 bg-black/20 border border-white/10 rounded-lg">
-                <div class="flex justify-between items-center mb-2">
-                    <span class="text-xs font-bold text-primary">🦆 AUTO DUCKING</span>
-                    <input type="checkbox" class="accent-primary" onchange="toggleDucking()">
-                </div>
-                <p class="text-[10px] text-gray-500">Lowers music when you speak.</p>
-            </div>
-            <div>
-                <label class="text-xs font-bold text-gray-500 mb-2 block">SOUNDBOARD</label>
-                <div class="grid grid-cols-2 gap-2">
-                    <button class="p-3 bg-white/5 rounded hover:bg-primary hover:text-black transition font-bold text-xs" onclick="playSFX('AIRHORN')">📣 HORN</button>
-                    <button class="p-3 bg-white/5 rounded hover:bg-primary hover:text-black transition font-bold text-xs" onclick="playSFX('LAUGH')">😂 LAUGH</button>
-                    <button class="p-3 bg-white/5 rounded hover:bg-primary hover:text-black transition font-bold text-xs" onclick="playSFX('APPLAUSE')">👏 CLAP</button>
-                    <button class="p-3 bg-white/5 rounded hover:bg-primary hover:text-black transition font-bold text-xs" onclick="playSFX('RIMSHOT')">🥁 RIM</button>
-                </div>
-            </div>
+    <div class="flex-1 flex flex-col items-center justify-center gap-6">
+        <div class="text-center">
+            <div class="text-xs text-gray-500 mb-2">MIC STATUS</div>
+            <div id="mic-status" class="text-xl font-bold text-red-500">OFF</div>
         </div>
 
-        <div class="relative flex flex-col justify-between p-6 overflow-hidden">
-            <canvas id="visualizer" class="absolute inset-0 w-full h-full"></canvas>
-            <div class="absolute top-4 right-4 z-10 opacity-50 hover:opacity-100 transition text-center">
-                <div class="w-24 h-24 rounded-full border border-primary relative animate-[spin_10s_linear_infinite] mx-auto"></div>
-                <div class="text-[10px] mt-1 tracking-widest text-primary font-bold">LISTENERS: <span id="listener-count" class="text-white text-lg block">0</span></div>
-            </div>
-            <div id="alert-box" class="absolute top-1/4 left-1/2 -translate-x-1/2 z-20 hidden w-max">
-                <div class="glass px-6 py-3 rounded-full flex items-center gap-3 animate-bounce shadow-xl shadow-primary/20">
-                    <span class="text-2xl">💰</span>
-                    <div>
-                        <div class="text-xs font-bold text-primary">NEW DONATION</div>
-                        <div class="font-bold text-white alert-text">User just tipped!</div>
-                    </div>
-                </div>
-            </div>
-            <div class="absolute bottom-32 left-0 right-0 text-center px-10 pointer-events-none z-10">
-                <div id="captions" class="text-xl font-bold text-white/80 text-shadow-lg transition-all duration-200 min-h-[30px]"></div>
-            </div>
-            <div class="glass rounded-2xl p-3 flex items-center justify-center gap-4 mx-auto z-30 mb-4 max-w-2xl w-full dock absolute bottom-4 left-1/2 -translate-x-1/2">
-                <button class="btn-icon text-gray-400" onclick="document.getElementById('bgm-file').click()">🎵</button>
-                <input type="file" id="bgm-file" hidden onchange="loadBGM(this)">
-                
-                <button id="main-btn" class="btn-action h-14 w-44 rounded-xl shadow-[0_0_20px_var(--primary)] hover:scale-105 transition text-lg shrink-0" onclick="initiateGoLive()">GO LIVE</button>
+        <button id="main-btn" onclick="startBroadcast()" class="w-40 h-40 rounded-full bg-white text-black font-black text-xl shadow-lg shadow-indigo-500/50 hover:scale-105 transition">
+            GO LIVE
+        </button>
 
-                <button class="btn-icon text-red-500" onclick="toggleRecording()" id="rec-btn" title="Record Session">🔴</button>
-                
-                <button class="btn-icon text-blue-400" onclick="shareBroadcast()" title="Share Link">🔗</button>
-            </div>
+        <div class="text-xs text-gray-500 mt-4 text-center">
+            Chunk Size: <span id="chunk-size">0</span> bytes<br>
+            Packets Sent: <span id="packet-count">0</span>
         </div>
-
-        <aside class="bg-panel border-l border-white/10 flex flex-col z-20 sidebar">
-            <div class="flex border-b border-white/10 text-xs font-bold">
-                <button class="flex-1 p-3 border-b-2 border-primary">CHAT</button>
-                <button class="flex-1 p-3 text-gray-500">Q&A</button>
-            </div>
-            <div class="flex-1 overflow-hidden relative">
-                <div id="tab-chat" class="absolute inset-0 flex flex-col p-4 overflow-y-auto">
-                    <div class="text-center text-xs text-gray-600 mt-4">Welcome to the chat room.</div>
-                    <div id="chat-feed" class="flex flex-col gap-2 mt-4 pb-20"></div>
-                </div>
-            </div>
-            <div class="p-3 border-t border-white/10 bg-black/20">
-                <form onsubmit="sendChat(event)" class="flex gap-2">
-                    <input id="chat-input" class="w-full bg-black border border-white/10 rounded p-2 text-sm text-white focus:border-primary outline-none" placeholder="Type..." autocomplete="off">
-                    <button type="submit" class="bg-primary text-white px-3 rounded font-bold">➤</button>
-                </form>
-            </div>
-        </aside>
+        
+        <button onclick="document.getElementById('bgm-file').click()" class="text-xs border border-white/20 p-2 rounded">🎵 Load Music</button>
+        <input type="file" id="bgm-file" hidden onchange="loadMusic(this)">
     </div>
 
-    <div id="mobile-sidebar" class="sidebar-mobile">
-        <div class="flex justify-between items-center p-4 border-b border-white/10">
-            <h3 class="font-bold">Stream Chat</h3>
-            <button onclick="toggleSidebar()" class="text-gray-400">✕</button>
-        </div>
-        <div id="mob-chat-feed" class="flex-1 overflow-y-auto p-4 space-y-2"></div>
-        <div class="p-4 bg-black/40 border-t border-white/10">
-            <form onsubmit="sendChat(event, 'mob')" class="flex gap-2">
-                <input id="mob-chat-input" class="w-full bg-white/10 rounded p-3 text-sm text-white outline-none" placeholder="Chat..." autocomplete="off">
-                <button class="bg-primary text-black font-bold px-4 rounded">Send</button>
-            </form>
-        </div>
-    </div>
+    <div id="debug-console">Waiting for user...</div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
-        let audioCtx, micSource, micGain, bgmSource, bgmGain, masterDest, analyser, noiseFilter;
-        let radioFilter, stadiumDelay, stadiumFeedback, activeFX = null;
-        let isLive = false, isRecording = false, isDucking = false;
-        let mediaRecorder, recordedChunks = [];
-        let bgmAudio = new Audio(); bgmAudio.loop = true;
-        let countdownTimer, sessionTimer;
-        let currentEarnings = 0;
-        let startTime = 0;
-        let streamMimeType = 'audio/webm;codecs=opus'; // Default high quality
+        let mediaRecorder;
+        let audioCtx;
+        let packets = 0;
+        let bgmAudio = new Audio();
+        let bgmSource, bgmGain, micGain, masterDest;
 
-        window.onload = initAudioEngine;
+        function log(msg) {
+            const box = document.getElementById('debug-console');
+            box.innerHTML = `<div class="log-line">[${new Date().toLocaleTimeString()}] ${msg}</div>` + box.innerHTML;
+        }
 
-        async function initAudioEngine() {
+        async function startBroadcast() {
             try {
-                const AudioContext = window.AudioContext || window.webkitAudioContext;
-                audioCtx = new AudioContext();
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                log("🚀 Initializing Audio Engine...");
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 
-                // --- 1. DETERMINE BROWSER COMPATIBILITY ---
-                if (!MediaRecorder.isTypeSupported(streamMimeType)) {
-                    streamMimeType = 'audio/mp4'; // Fallback for Safari
-                    if (!MediaRecorder.isTypeSupported(streamMimeType)) streamMimeType = 'audio/webm';
-                }
-                console.log("🎤 Selected Codec:", streamMimeType);
-
-                // --- 2. AUDIO NODES SETUP ---
-                micSource = audioCtx.createMediaStreamSource(stream);
-                micGain = audioCtx.createGain();
-                bgmGain = audioCtx.createGain(); bgmGain.gain.value = 0.3;
                 masterDest = audioCtx.createMediaStreamDestination();
-                analyser = audioCtx.createAnalyser();
+                micGain = audioCtx.createGain();
+                bgmGain = audioCtx.createGain();
+                
+                micGain.connect(masterDest);
+                bgmGain.connect(masterDest);
 
-                // --- 3. FX RACK SETUP ---
-                // A. Radio Filter (Mid-range boost, Low/High cut)
-                radioFilter = audioCtx.createBiquadFilter();
-                radioFilter.type = "bandpass";
-                radioFilter.frequency.value = 1000;
-                radioFilter.Q.value = 1;
-
-                // B. Stadium Reverb (Delay + Feedback)
-                stadiumDelay = audioCtx.createDelay();
-                stadiumDelay.delayTime.value = 0.15; // 150ms echo
-                stadiumFeedback = audioCtx.createGain();
-                stadiumFeedback.gain.value = 0.4; // 40% repeat
-                stadiumDelay.connect(stadiumFeedback);
-                stadiumFeedback.connect(stadiumDelay);
-
-                // --- 4. WIRING (DEFAULT: DRY) ---
+                // 1. GET MIC (No Echo Cancellation for Raw Power)
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: { 
+                        echoCancellation: false, 
+                        noiseSuppression: false, 
+                        autoGainControl: false 
+                    } 
+                });
+                
+                const micSource = audioCtx.createMediaStreamSource(stream);
                 micSource.connect(micGain);
-                micGain.connect(analyser); 
-                // Do NOT connect to masterDest here yet, handled by recorder/live logic
 
-                startVisualizer();
+                log("✅ Microphone Access Granted");
+                document.getElementById('mic-status').innerText = "ACTIVE";
+                document.getElementById('mic-status').className = "text-xl font-bold text-green-500";
 
-                // --- 5. RECORDER ENGINE ---
-                mediaRecorder = new MediaRecorder(masterDest.stream, { mimeType: streamMimeType });
-                mediaRecorder.ondataavailable = async (event) => {
-                    if (event.data.size > 0 && isLive) {
-                        // Safe Blob Conversion
-                        const buffer = await event.data.arrayBuffer();
+                // 2. SETUP RECORDER
+                // Prefer 'audio/webm' for reliability on Android Chrome
+                let mimeType = 'audio/webm;codecs=opus';
+                if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'audio/mp4';
+                
+                log(`ℹ️ Using Codec: ${mimeType}`);
+
+                // Connect to Socket
+                socket.emit('broadcaster', { title: "Diagnostic Stream", host: "DebugUser", mimeType: mimeType });
+                
+                mediaRecorder = new MediaRecorder(masterDest.stream, { mimeType: mimeType, audioBitsPerSecond: 128000 });
+
+                mediaRecorder.ondataavailable = async (e) => {
+                    if (e.data.size > 0) {
+                        const buffer = await e.data.arrayBuffer();
                         socket.emit('audioStream', { room: socket.id, chunk: buffer });
+                        
+                        // UPDATE UI
+                        packets++;
+                        document.getElementById('chunk-size').innerText = e.data.size;
+                        document.getElementById('packet-count').innerText = packets;
+                        
+                        // Log first 5 packets to verify start
+                        if (packets < 5 || packets % 10 === 0) log(`📤 Sent Packet #${packets}: ${e.data.size} bytes`);
+                        
+                        // Visual Dot Flash
+                        const dot = document.getElementById('live-dot');
+                        dot.style.backgroundColor = '#22c55e'; // Green
+                        setTimeout(() => dot.style.backgroundColor = '#ef4444', 500); // Red
+                    } else {
+                        log("⚠️ Empty Chunk Detected!");
                     }
                 };
 
-                // Connect for local monitoring (optional, usually mute to prevent feedback)
-                // micGain.connect(audioCtx.destination); 
-
-                console.log("✅ Audio Engine Ready");
-            } catch (e) {
-                console.error("Mic Blocked", e);
-                alert("Microphone access is required.");
-            }
-        }
-
-        // --- NEW: FX TOGGLE LOGIC ---
-        function toggleFX(type) {
-            // Unplug everything first
-            micSource.disconnect();
-            radioFilter.disconnect();
-            stadiumDelay.disconnect();
-            micGain.disconnect();
-
-            // UI Reset
-            document.getElementById('fx-radio').classList.remove('bg-primary', 'text-black');
-            document.getElementById('fx-stadium').classList.remove('bg-primary', 'text-black');
-
-            if (activeFX === type) {
-                // Turn OFF (Back to Dry)
-                micSource.connect(micGain);
-                activeFX = null;
-                addLog("SYSTEM", "FX: OFF");
-            } else {
-                // Turn ON
-                if (type === 'RADIO') {
-                    micSource.connect(radioFilter);
-                    radioFilter.connect(micGain);
-                    document.getElementById('fx-radio').classList.add('bg-primary', 'text-black');
-                } else if (type === 'STADIUM') {
-                    // Split signal: Dry + Wet
-                    micSource.connect(micGain); // Dry
-                    micSource.connect(stadiumDelay); // Wet
-                    stadiumDelay.connect(micGain);
-                    document.getElementById('fx-stadium').classList.add('bg-primary', 'text-black');
-                }
-                activeFX = type;
-                addLog("SYSTEM", `FX: ${type} ON`);
-            }
-            
-            // Reconnect Output
-            micGain.connect(masterDest);
-            micGain.connect(analyser);
-        }
-
-        function initiateGoLive() {
-            if (isLive) {
-                stopBroadcast();
-            } else {
-                if(audioCtx.state === 'suspended') audioCtx.resume();
+                // 3. START (1 Second Chunks)
+                mediaRecorder.start(1000); 
+                log("🔴 RECORDER STARTED (1000ms chunks)");
                 
-                // Connect Mic to Master if not already
-                if(!activeFX) {
-                    micSource.connect(masterDest); // Ensure path exists
-                }
+                document.getElementById('main-btn').innerText = "STOP";
+                document.getElementById('main-btn').className = "w-40 h-40 rounded-full bg-red-600 text-white font-black text-xl pulse-live";
+                document.getElementById('main-btn').onclick = () => location.reload(); // Hard reset to stop
 
-                document.getElementById('pre-live-overlay').classList.remove('hidden');
-                let count = 3; // Fast countdown
-                document.getElementById('countdown-val').innerText = count;
-                countdownTimer = setInterval(() => {
-                    count--;
-                    document.getElementById('countdown-val').innerText = count;
-                    if(count <= 0) {
-                        clearInterval(countdownTimer);
-                        document.getElementById('pre-live-overlay').classList.add('hidden');
-                        goLiveReal();
-                    }
-                }, 1000);
+            } catch (err) {
+                log("❌ CRITICAL ERROR: " + err.message);
+                alert("Error: " + err.message);
             }
         }
 
-        function cancelLive() {
-            clearInterval(countdownTimer);
-            document.getElementById('pre-live-overlay').classList.add('hidden');
-        }
-
-        function goLiveReal() {
-            // Inform Server about MimeType
-            socket.emit('broadcaster', { title: "My Show", host: "Host", mimeType: streamMimeType });
-            isLive = true;
-            
-            mediaRecorder.start(250); // 250ms chunks
-            
-            const btn = document.getElementById('main-btn');
-            btn.innerText = "END STREAM";
-            btn.classList.add('bg-red-600', 'pulse-live');
-            document.getElementById('status-badge').classList.remove('hidden');
-            addLog('SYSTEM', '🚀 YOU ARE LIVE!', {isPriority: true});
-            
-            startTime = Date.now();
-            sessionTimer = setInterval(() => {
-                const elapsed = Math.floor((Date.now() - startTime) / 1000);
-                const h = String(Math.floor(elapsed / 3600)).padStart(2, '0');
-                const m = String(Math.floor((elapsed % 3600) / 60)).padStart(2, '0');
-                const s = String(elapsed % 60).padStart(2, '0');
-                document.getElementById('session-timer').innerText = `${h}:${m}:${s}`;
-            }, 1000);
-        }
-
-        function stopBroadcast() {
-            if(isRecording) toggleRecording();
-            isLive = false;
-            if(mediaRecorder && mediaRecorder.state !== "inactive") mediaRecorder.stop();
-            
-            socket.emit('stopBroadcast');
-            clearInterval(sessionTimer);
-            
-            const btn = document.getElementById('main-btn');
-            btn.innerText = "GO LIVE";
-            btn.classList.remove('bg-red-600', 'pulse-live');
-            document.getElementById('status-badge').classList.add('hidden');
-            addLog('SYSTEM', '🛑 Broadcast Ended');
-            
-            // Soft reload to reset audio graph
-            setTimeout(() => location.reload(), 1500);
-        }
-
-        function shareBroadcast() {
-            if(!isLive) return alert("Go Live first!");
-            const link = `${window.location.origin}/dashboard?room=${socket.id}`;
-            navigator.clipboard.writeText(link).then(() => {
-                addLog("SYSTEM", "🔗 Link Copied!", {isPriority: true});
-                alert("Link Copied! Send it to your fans:\n" + link);
-            });
-        }
-
-        // === CHAT & LOGS ===
-        function sendChat(event, mode) {
-            if(event) event.preventDefault();
-            const id = mode === 'mob' ? 'mob-chat-input' : 'chat-input';
-            const input = document.getElementById(id);
-            if(!input.value.trim()) return;
-            addLog("HOST", input.value);
-            socket.emit('chatMessage', { room: socket.id, user: 'HOST', msg: input.value });
-            input.value = '';
-        }
-
-        function addLog(user, txt, meta = {}) {
-            // Add to Desktop
-            const div = document.createElement('div');
-            let classes = "text-sm p-2 rounded mb-2 border border-white/5 animate-slide-up ";
-            if (meta.isGold) { classes += "gold-msg "; user = `👑 ${user}`; } 
-            else if (meta.isPriority) { classes += "border-l-2 border-primary bg-white/10 "; }
-            else { classes += "bg-white/5 "; }
-            div.className = classes;
-            const nameColor = meta.isGold ? "text-yellow-400" : "text-primary";
-            div.innerHTML = `<span class="font-bold ${nameColor}">${user}:</span> ${txt}`;
-            
-            document.getElementById('chat-feed').appendChild(div);
-            document.getElementById('chat-feed').scrollTop = document.getElementById('chat-feed').scrollHeight;
-
-            // Add to Mobile
-            const mobDiv = div.cloneNode(true);
-            document.getElementById('mob-chat-feed').appendChild(mobDiv);
-            document.getElementById('mob-chat-feed').scrollTop = document.getElementById('mob-chat-feed').scrollHeight;
-        }
-
-        function toggleSidebar() { document.getElementById('mobile-sidebar').classList.toggle('open'); }
-
-        // === SOCKET LISTENERS ===
-        socket.on('roomLog', data => { 
-            if(data.type === 'join') {
-                addLog("🔔", "A user joined");
-                document.getElementById('listener-count').innerText = data.count;
-            }
-        });
-        socket.on('chatMessage', data => addLog(data.user, data.msg, data));
-        socket.on('giftReceived', data => {
-            let val = 0;
-            if(data.gift === '🚀') val = 5000;
-            else if(data.gift === '❤️') val = 500;
-            else val = 100;
-            currentEarnings += val;
-            document.getElementById('earnings-val').innerText = "₦" + currentEarnings.toLocaleString();
-            const box = document.getElementById('alert-box');
-            box.querySelector('.alert-text').innerText = `${data.user} tipped ₦${val}!`;
-            box.classList.remove('hidden');
-            setTimeout(() => box.classList.add('hidden'), 4000);
-            addLog("SYSTEM", `${data.user} sent ${data.gift} (₦${val})`, {isGold: true});
-        });
-
-        // === UTILS ===
-        function setGain(val) { if(micGain) micGain.gain.value = val/100; }
-        function playSFX(name) { addLog("SYSTEM", `🔊 SFX: ${name}`); }
-        
-        function loadBGM(input) {
-            if(input.files[0]) {
+        function loadMusic(input) {
+            if (input.files[0]) {
                 bgmAudio.src = URL.createObjectURL(input.files[0]);
-                if(audioCtx && !bgmSource) {
-                    bgmSource = audioCtx.createMediaElementSource(bgmAudio);
-                    bgmSource.connect(bgmGain).connect(masterDest);
-                }
-                addLog("SYSTEM", `🎵 Track: ${input.files[0].name}`);
+                bgmSource = audioCtx.createMediaElementSource(bgmAudio);
+                bgmSource.connect(bgmGain);
+                bgmAudio.play();
+                log("🎵 Music Loaded & Playing");
             }
-        }
-        
-        function toggleRecording() {
-            if(!isLive) return alert("Go LIVE first!");
-            if (!isRecording) {
-                recordedChunks = [];
-                const destRec = audioCtx.createMediaStreamDestination();
-                micGain.connect(destRec); 
-                window.fileRecorder = new MediaRecorder(destRec.stream);
-                window.fileRecorder.ondataavailable = e => recordedChunks.push(e.data);
-                window.fileRecorder.onstop = saveRecording;
-                window.fileRecorder.start();
-                isRecording = true;
-                document.getElementById('rec-btn').classList.add('animate-pulse', 'text-white');
-                addLog("SYSTEM", "🔴 REC Started");
-            } else {
-                window.fileRecorder.stop();
-                isRecording = false;
-                document.getElementById('rec-btn').classList.remove('animate-pulse', 'text-white');
-            }
-        }
-
-        function saveRecording() {
-            const blob = new Blob(recordedChunks, { type: 'audio/webm' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = `rec_${Date.now()}.webm`;
-            a.click();
-            addLog("SYSTEM", "💾 Saved");
-        }
-
-        function startVisualizer() {
-            const canvas = document.getElementById('visualizer');
-            const ctx = canvas.getContext('2d');
-            const dataArray = new Uint8Array(analyser.frequencyBinCount);
-            function draw() {
-                requestAnimationFrame(draw);
-                analyser.getByteTimeDomainData(dataArray);
-                canvas.width = canvas.parentElement.offsetWidth;
-                canvas.height = canvas.parentElement.offsetHeight;
-                ctx.clearRect(0,0,canvas.width,canvas.height);
-                ctx.lineWidth = 2;
-                ctx.strokeStyle = '#6366f1';
-                ctx.beginPath();
-                const slice = canvas.width * 1.0 / dataArray.length;
-                let x = 0;
-                for(let i=0; i<dataArray.length; i++) {
-                    const v = dataArray[i] / 128.0;
-                    const y = v * canvas.height/2;
-                    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-                    x+=slice;
-                }
-                ctx.lineTo(canvas.width, canvas.height/2);
-                ctx.stroke();
-                
-                let sum = 0;
-                for(let i=0; i<dataArray.length; i++) sum += Math.abs(dataArray[i]-128);
-                document.getElementById('mic-meter').style.width = Math.min(100, (sum/dataArray.length)*10) + '%';
-            }
-            draw();
         }
     </script>
 </body>

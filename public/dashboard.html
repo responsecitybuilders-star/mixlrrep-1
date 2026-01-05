@@ -4,381 +4,183 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Airvibe | Listener Hub</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;500;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    
-    <script>
-        tailwind.config = {
-            theme: { extend: { colors: { bg: '#020617', glass: 'rgba(30, 41, 59, 0.4)', primary: '#6366f1', danger: '#ef4444', gold: '#fbbf24' } } }
-        }
-    </script>
     <style>
-        body { background: #020617; color: white; font-family: 'Plus Jakarta Sans', sans-serif; overflow: hidden; }
-        
-        /* === UI UTILITIES === */
-        .glass-panel { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); }
-        .hide-scroll::-webkit-scrollbar { display: none; }
-        .nav-link.active { background: rgba(99, 102, 241, 0.15); border-right: 3px solid #6366f1; color: white; }
-        .nav-link-mobile.active { color: #6366f1; }
-        .fade-in { animation: fadeIn 0.3s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .coin-glow:active { animation: glowPop 0.3s ease-out; }
-        @keyframes glowPop { 0% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.7); transform: scale(1); } 100% { box-shadow: 0 0 50px 20px rgba(251, 191, 36, 0); transform: scale(1); } }
-
-        /* === THEATER MODE (Responsive) === */
-        .theater-overlay { position: fixed; inset: 0; background: #000; z-index: 5000; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1); display: flex; flex-direction: column; overflow: hidden; }
-        .theater-overlay.active { transform: translateY(0); }
-
-        /* Audio Start Overlay */
-        #audio-start-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.8); z-index: 6000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
-        #audio-start-overlay.show { display: flex; }
-
-        .pulse-ring { position: absolute; width: 300px; height: 300px; border-radius: 50%; border: 1px solid rgba(99, 102, 241, 0.3); top: 50%; left: 50%; transform: translate(-50%, -50%); animation: ripple 3s infinite; }
-        .pulse-ring:nth-child(2) { animation-delay: 1s; }
-        @keyframes ripple { 0% { width: 300px; height: 300px; opacity: 1; } 100% { width: 800px; height: 800px; opacity: 0; } }
-
-        .floater { position: absolute; font-size: 2.5rem; animation: floatUp 2.5s ease-out forwards; pointer-events: none; z-index: 6000; }
-        @keyframes floatUp { 0% { transform: translateY(0) scale(0.5); opacity:0; } 100% { transform: translateY(-500px) scale(1.5) rotate(20deg); opacity:0; } }
-
-        .coin-btn { background: linear-gradient(135deg, #fbbf24, #d97706); color: black; font-weight: 800; padding: 6px 14px; border-radius: 20px; display: flex; align-items: center; gap: 6px; }
-        .gift-tab.active { background: #6366f1; color: white; font-weight: bold; }
-        .gift-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding-top: 10px; }
-        .gift-item { display: flex; flex-direction: column; align-items: center; padding: 8px; border-radius: 10px; cursor: pointer; transition: 0.2s; }
-        .gift-item:active { transform: scale(0.95); }
-
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 9000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
-        .modal.open { display: flex; animation: popIn 0.3s; }
-        .car-mode { position: fixed; inset: 0; background: #000; z-index: 8000; display: none; flex-direction: column; padding: 40px; }
-        .car-mode.active { display: flex; }
-        .big-btn { background: #222; border: 2px solid #444; border-radius: 24px; flex: 1; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 800; transition: 0.2s; }
+        body { background: #000; color: white; font-family: monospace; overflow: hidden; }
+        #debug-log { position: fixed; top: 0; left: 0; width: 100%; height: 120px; background: rgba(0,20,0,0.9); color: #0f0; font-size: 10px; padding: 5px; overflow-y: scroll; z-index: 9999; border-bottom: 1px solid #0f0; }
+        .stat-box { border: 1px solid #333; padding: 10px; margin: 10px; border-radius: 8px; background: #111; }
+        #play-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .hidden { display: none !important; }
     </style>
 </head>
-<body class="flex flex-col md:flex-row h-screen">
+<body class="flex flex-col h-screen pt-[130px]"> <div id="debug-log">Waiting for logs...</div>
 
-    <audio id="remoteAudio" playsinline></audio>
-    <div id="float-layer" class="fixed inset-0 pointer-events-none z-[6000]"></div>
-
-    <aside class="w-64 glass-panel border-r border-white/5 flex-col z-20 hidden md:flex">
-        <div class="h-20 flex items-center px-8 border-b border-white/5 text-xl font-black tracking-tighter">AIR<span class="text-indigo-500">VIBE</span></div>
-        <nav class="flex-1 py-6 space-y-1">
-            <button onclick="switchView('home')" id="nav-home" class="nav-link active w-full flex items-center px-8 py-3 text-sm font-medium text-gray-400 hover:bg-white/5 text-left"><span class="mr-4">🏠</span> Home</button>
-            <button onclick="switchView('live')" id="nav-live" class="nav-link w-full flex items-center px-8 py-3 text-sm font-medium text-gray-400 hover:bg-white/5 text-left"><span class="mr-4">🔴</span> Live</button>
-            <button onclick="switchView('library')" id="nav-library" class="nav-link w-full flex items-center px-8 py-3 text-sm font-medium text-gray-400 hover:bg-white/5 text-left"><span class="mr-4">📂</span> Library</button>
-            <div class="pt-6 pb-2 px-8 text-[10px] font-bold text-gray-500 tracking-widest">TOOLS</div>
-            <button onclick="openCarMode()" class="nav-link w-full flex items-center px-8 py-3 text-sm font-medium text-gray-400 hover:bg-white/5 text-left"><span class="mr-4">🚗</span> Car Mode</button>
-        </nav>
-        <div class="p-4 border-t border-white/5">
-            <div class="flex items-center gap-3">
-                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Guest" class="w-10 h-10 rounded-full bg-black border border-white/10">
-                <div><div class="text-sm font-bold" id="user-name-disp">Guest</div><div class="text-[10px] text-gray-400" id="user-plan-disp">FREE</div></div>
-            </div>
-        </div>
-    </aside>
-
-    <main class="flex-1 flex flex-col relative overflow-hidden bg-[#020617] pb-16 md:pb-0">
-        <header class="h-16 border-b border-white/5 flex items-center justify-between px-4 md:px-8 bg-black/20 backdrop-blur shrink-0">
-            <h2 class="text-lg font-bold">Discover</h2>
-            <div class="flex gap-3 items-center">
-                <button class="coin-btn coin-glow text-xs" onclick="openCoinModal()"><span>🪙</span> <span id="coin-bal">0</span></button>
-                <a href="/profile" class="hidden md:block px-3 py-1 rounded border border-white/10 text-xs font-bold">PROFILE</a>
-            </div>
-        </header>
-
-        <div class="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 hide-scroll" id="content-area">
-            <div id="view-home" class="fade-in">
-                <div class="flex justify-between items-center mb-2"><h3 class="font-bold">🔴 Live Now</h3></div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="home-live-grid">
-                    <div class="p-8 text-center text-gray-600 glass-panel rounded-xl">Loading...</div>
-                </div>
-                <h3 class="font-bold mt-6 mb-2">💎 Features</h3>
-                <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    <div class="glass-panel p-4 rounded-xl locked-feat" onclick="triggerCheckout('Ghost Mode', '1,450')"><div class="text-2xl mb-1">👻</div><div class="text-xs font-bold">Ghost Mode</div></div>
-                    <div class="glass-panel p-4 rounded-xl locked-feat" onclick="triggerCheckout('Downloads', '990')"><div class="text-2xl mb-1">💾</div><div class="text-xs font-bold">Vault</div></div>
-                </div>
-            </div>
-            <div id="view-live" class="hidden fade-in"><h3 class="font-bold mb-4">All Broadcasts</h3><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="live-grid-full"></div></div>
-            <div id="view-library" class="hidden fade-in"><div class="glass-panel p-10 rounded-2xl text-center border-dashed border-2 border-white/10"><div class="text-4xl mb-2">🔒</div><button class="px-6 py-2 bg-primary rounded-full font-bold" onclick="triggerCheckout('Super Fan', '990')">Upgrade</button></div></div>
-        </div>
-    </main>
-
-    <nav class="md:hidden fixed bottom-0 left-0 right-0 h-16 glass-panel border-t border-white/10 flex justify-around items-center z-40 pb-safe">
-        <button onclick="switchView('home')" id="mob-home" class="nav-link-mobile active flex flex-col items-center text-gray-500 w-full h-full justify-center"><span class="text-xl mb-0.5">🏠</span><span class="text-[10px]">Home</span></button>
-        <button onclick="switchView('live')" id="mob-live" class="nav-link-mobile flex flex-col items-center text-gray-500 w-full h-full justify-center"><span class="text-xl mb-0.5">🔴</span><span class="text-[10px]">Live</span></button>
-        <button onclick="switchView('library')" id="mob-library" class="nav-link-mobile flex flex-col items-center text-gray-500 w-full h-full justify-center"><span class="text-xl mb-0.5">📂</span><span class="text-[10px]">Lib</span></button>
-    </nav>
-
-    <div id="live-room" class="theater-overlay">
-        <div class="h-14 flex items-center justify-between px-4 bg-black/60 backdrop-blur z-20 shrink-0 border-b border-white/5">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-full bg-primary border border-white/20 overflow-hidden"><img id="room-avatar" class="w-full h-full object-cover"></div>
-                <div><h2 class="font-bold text-sm leading-tight" id="room-title">...</h2><p class="text-[10px] text-primary">@<span id="room-host">User</span></p></div>
-            </div>
-            <button onclick="leaveRoom()" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">✕</button>
+    <div class="flex-1 overflow-y-auto p-4">
+        <h1 class="text-xl font-bold text-indigo-500 mb-4">LISTENER DIAGNOSTICS</h1>
+        
+        <div class="stat-box">
+            <div class="text-gray-500 text-xs">CONNECTION STATUS</div>
+            <div id="conn-status" class="text-yellow-500 font-bold">Connecting...</div>
         </div>
 
-        <div class="flex-1 flex flex-col md:flex-row overflow-hidden relative">
-            <div id="audio-start-overlay" onclick="startAudioManually()">
-                <div class="bg-primary text-white font-bold py-4 px-8 rounded-full animate-bounce shadow-[0_0_30px_var(--primary)] cursor-pointer">
-                    🔊 TAP TO JOIN AUDIO
-                </div>
+        <div class="stat-box">
+            <div class="text-gray-500 text-xs">DATA FLOW</div>
+            <div class="flex justify-between mt-1">
+                <span>Packets Received:</span>
+                <span id="pkt-count" class="text-blue-400 font-bold">0</span>
             </div>
-
-            <div class="relative w-full h-[35vh] md:h-auto md:flex-1 bg-gradient-to-b from-[#1e1b4b] to-black flex items-center justify-center shrink-0">
-                <div class="pulse-ring"></div>
-                <img id="room-art" class="w-32 h-32 md:w-60 md:h-60 rounded-full border-4 border-primary/30 shadow-[0_0_30px_rgba(99,102,241,0.4)] relative z-10 animate-pulse object-cover">
-                <div class="absolute bottom-4 right-4 bg-black/50 px-3 py-1 rounded-full text-[10px] backdrop-blur border border-white/10">👥 <span id="room-listeners">0</span></div>
-            </div>
-
-            <div class="flex-1 bg-gray-900/90 flex flex-col overflow-hidden w-full md:w-96 md:border-l md:border-white/10 backdrop-blur-xl">
-                <div class="p-2 border-b border-white/5 font-bold text-[10px] text-gray-400 bg-black/20 text-center">LIVE CHAT</div>
-                <div id="room-chat" class="flex-1 overflow-y-auto p-4 space-y-2 bg-black/20"></div>
-
-                <div class="h-14 border-t border-white/5 bg-black/40 flex items-center gap-2 px-2 overflow-x-auto hide-scroll shrink-0">
-                    <button onclick="attemptGift('❤️', 10)" class="shrink-0 px-3 py-1.5 bg-white/5 rounded-full text-xs border border-white/5 hover:bg-primary">❤️ 10</button>
-                    <button onclick="attemptGift('🔥', 100)" class="shrink-0 px-3 py-1.5 bg-white/5 rounded-full text-xs border border-white/5 hover:bg-primary">🔥 100</button>
-                    <button onclick="attemptGift('🚀', 5000)" class="shrink-0 px-3 py-1.5 bg-white/5 rounded-full text-xs border border-white/5 text-gold">🚀 5k</button>
-                    <button onclick="attemptGift('💎', 10000)" class="shrink-0 px-3 py-1.5 bg-white/5 rounded-full text-xs border border-white/5 text-blue-300">💎 10k</button>
-                </div>
-
-                <div class="p-3 bg-black/60 shrink-0 pb-6 md:pb-3 border-t border-white/5">
-                    <form onsubmit="sendRoomChat(event)" class="flex gap-2">
-                        <input id="chat-msg" type="text" class="flex-1 bg-white/10 border-0 rounded-full px-4 py-3 text-sm text-white focus:ring-1 focus:ring-primary outline-none" placeholder="Chat..." autocomplete="off">
-                        <button type="submit" class="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white shadow-lg">➤</button>
-                    </form>
-                </div>
+            <div class="flex justify-between">
+                <span>Buffer Length:</span>
+                <span id="buf-len" class="text-green-400 font-bold">0s</span>
             </div>
         </div>
+
+        <audio id="remoteAudio" controls class="w-full mt-4"></audio>
     </div>
 
-    <div id="coin-modal" class="modal">
-        <div class="bg-gray-900 w-80 rounded-2xl p-6 text-center border border-white/10 relative">
-            <button onclick="document.getElementById('coin-modal').classList.remove('open')" class="absolute top-4 right-4 text-gray-500">✕</button>
-            <h3 class="text-xl font-bold mb-4">Get Coins</h3>
-            <div class="grid grid-cols-2 gap-3">
-                <button onclick="buyCoins(100, 500)" class="p-3 bg-white/5 rounded-xl border border-white/10"><div class="font-bold text-gold">100</div><div class="text-[10px]">₦500</div></button>
-                <button onclick="buyCoins(1000, 4500)" class="p-3 bg-white/5 rounded-xl border border-white/10"><div class="font-bold text-gold">1k</div><div class="text-[10px]">₦4.5k</div></button>
-            </div>
-        </div>
-    </div>
-
-    <div id="checkout-modal" class="modal">
-        <div class="bg-gray-900 w-80 rounded-2xl p-6 text-center border border-white/10">
-            <h3 class="font-bold text-xl mb-1">Upgrade</h3>
-            <p class="text-xs text-gray-400 mb-4" id="chk-plan">Pro Plan</p>
-            <div class="bg-black p-3 rounded mb-4 font-bold text-xl">₦<span id="chk-price">0</span></div>
-            <button onclick="processPayment()" class="w-full py-3 bg-green-500 text-black font-bold rounded-xl">Pay Now</button>
-            <button onclick="document.getElementById('checkout-modal').classList.remove('open')" class="mt-4 text-xs text-gray-500">Cancel</button>
-        </div>
-    </div>
-
-    <div id="car-mode" class="car-mode">
-        <div class="flex justify-between items-center mb-10"><h1 class="text-4xl font-black text-white">DRIVE</h1><button onclick="closeCarMode()" class="text-2xl text-gray-400 border border-gray-600 px-6 py-2 rounded-full">EXIT</button></div>
-        <div class="flex-1 flex flex-col gap-4"><div class="big-btn text-green-400">▶ PLAY</div><div class="flex gap-4 flex-1"><div class="big-btn text-white">⏮</div><div class="big-btn text-white">⏭</div></div><div class="big-btn text-red-400" onclick="alert('Mic')">🎤</div></div>
+    <div id="play-overlay" class="hidden">
+        <div class="text-4xl mb-4">🔊</div>
+        <button onclick="forcePlay()" class="px-8 py-4 bg-green-600 text-white font-bold rounded-full animate-bounce shadow-[0_0_30px_rgba(34,197,94,0.6)]">
+            TAP TO HEAR AUDIO
+        </button>
+        <p class="mt-4 text-gray-400 text-xs text-center px-8">Browser blocked audio.<br>Tap to unlock.</p>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
-        let currentUser = { username: "Guest", plan: "Free", coins: 0 };
-        let liveStreams = [];
-        let currentRoomId = null;
-        let mediaSource, sourceBuffer, queue = [], isUpdating = false;
+        let mediaSource, sourceBuffer, queue = [];
+        let isUpdating = false;
+        let packets = 0;
+        
+        // 🔒 LOCK: Prevents double joining
+        let isConnected = false; 
 
-        async function init() {
-            try {
-                const res = await fetch('/api/user/me');
-                const data = await res.json();
-                currentUser = data.user;
-                document.getElementById('user-name-disp').innerText = currentUser.username;
-                document.getElementById('coin-bal').innerText = currentUser.coins.toLocaleString();
-            } catch(e) {}
-            socket.emit('requestData');
+        function log(msg) {
+            const el = document.getElementById('debug-log');
+            el.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}<br>` + el.innerHTML;
         }
 
-        socket.on('streamList', streams => {
-            liveStreams = Object.values(streams);
-            renderLiveGrids();
-            const params = new URLSearchParams(window.location.search);
-            const roomToJoin = params.get('room');
-            if(roomToJoin && liveStreams.length > 0) {
-                const stream = liveStreams.find(s => s.id === roomToJoin);
-                if(stream && currentRoomId !== roomToJoin) joinRoom(stream.id, stream.title, stream.host);
+        // --- 1. CONNECT & JOIN ---
+        socket.on('connect', () => {
+            log("✅ Socket Connected");
+            document.getElementById('conn-status').innerText = "Searching for Stream...";
+            socket.emit('requestData');
+        });
+
+        socket.on('streamList', (streams) => {
+            const list = Object.values(streams);
+            if (list.length > 0 && !isConnected) {
+                const stream = list[0];
+                joinRoom(stream.id, stream.mimeType);
             }
         });
 
-        function renderLiveGrids() {
-            const html = liveStreams.length ? liveStreams.map(s => `
-                <div onclick="joinRoom('${s.id}','${s.title}','${s.host}')" class="glass-panel p-4 rounded-xl flex items-center justify-between cursor-pointer active:scale-95 transition">
-                    <div class="flex items-center gap-3">
-                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${s.host}" class="w-10 h-10 rounded-full bg-black border border-white/10">
-                        <div><div class="font-bold text-sm text-white">${s.title}</div><div class="text-[10px] text-gray-400">@${s.host}</div></div>
-                    </div>
-                    <div class="text-[10px] bg-red-900/50 text-red-400 px-2 py-1 rounded border border-red-500/20 animate-pulse">● LIVE</div>
-                </div>
-            `).join('') : '<div class="p-6 text-center text-gray-500 text-sm">No live streams.</div>';
-            document.getElementById('home-live-grid').innerHTML = html;
-            document.getElementById('live-grid-full').innerHTML = html;
+        function joinRoom(id, mimeType) {
+            if (isConnected) return;
+            isConnected = true; // Lock
+
+            log(`➡️ Joining Room: ${id.substr(0,5)}...`);
+            document.getElementById('conn-status').innerText = "Joined Room (Waiting for Audio)";
+            document.getElementById('conn-status').className = "text-green-500 font-bold";
+            
+            socket.emit('joinEvent', { targetId: id });
+            initAudio(mimeType || 'audio/webm;codecs=opus');
         }
 
-        // === JOIN ROOM & AUDIO INIT ===
-        function joinRoom(id, title, host) {
-            currentRoomId = id;
-            document.getElementById('room-title').innerText = title;
-            document.getElementById('room-host').innerText = host;
-            document.getElementById('room-avatar').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${host}`;
-            document.getElementById('room-art').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${host}`;
-            document.getElementById('room-chat').innerHTML = '<div class="text-center text-[10px] text-gray-500 my-4">Joined Room</div>';
-            document.getElementById('live-room').classList.add('active');
-            
-            socket.emit('joinEvent', { targetId: id, user: currentUser });
-            
-            // Audio Setup
-            initAudioReceiver();
-        }
-
-        function initAudioReceiver() {
+        // --- 2. AUDIO ENGINE ---
+        function initAudio(mime) {
             const audio = document.getElementById('remoteAudio');
-            
-            // Reset MediaSource
-            if (mediaSource && mediaSource.readyState === 'open') try{ mediaSource.endOfStream(); } catch(e){}
             mediaSource = new MediaSource();
             audio.src = URL.createObjectURL(mediaSource);
-            
-            // Try to play automatically
-            const playPromise = audio.play();
-            if (playPromise !== undefined) {
-                playPromise.then(() => {
-                    // Autoplay started!
-                    document.getElementById('audio-start-overlay').classList.remove('show');
-                }).catch(error => {
-                    // Autoplay was prevented -> Show Overlay
-                    console.log("Autoplay blocked. Waiting for user interaction.");
-                    document.getElementById('audio-start-overlay').classList.add('show');
-                });
-            }
 
             mediaSource.addEventListener('sourceopen', () => {
-                // Determine mime type
-                const mime = MediaSource.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/webm';
+                log(`🔓 MediaSource Open (${mime})`);
                 try {
+                    if (!MediaSource.isTypeSupported(mime)) mime = 'audio/mp4';
+                    
                     sourceBuffer = mediaSource.addSourceBuffer(mime);
-                    sourceBuffer.mode = 'sequence';
-                    sourceBuffer.addEventListener('updateend', () => { isUpdating=false; if(queue.length>0) processQueue(); });
-                } catch(e) { console.error("SourceBuffer Error", e); }
+                    sourceBuffer.mode = 'sequence'; // The Stitcher Fix
+                    
+                    sourceBuffer.addEventListener('updateend', () => {
+                        isUpdating = false;
+                        if (queue.length > 0) processQueue();
+                    });
+                    
+                    log("✅ Buffer Ready. Waiting for Data...");
+                } catch (e) {
+                    log("❌ Init Error: " + e.message);
+                }
             });
-        }
 
-        // Called when user taps the overlay
-        function startAudioManually() {
-            const audio = document.getElementById('remoteAudio');
+            // Try to play automatically
             audio.play().then(() => {
-                document.getElementById('audio-start-overlay').classList.remove('show');
+                log("🔊 Autoplay Started!");
+            }).catch(e => {
+                log("⚠️ Autoplay Blocked - SHOWING BUTTON");
+                document.getElementById('play-overlay').classList.remove('hidden');
             });
+
+            // Monitor Buffer
+            setInterval(() => {
+                if (audio.buffered.length > 0) {
+                    const end = audio.buffered.end(audio.buffered.length - 1);
+                    const len = end - audio.currentTime;
+                    document.getElementById('buf-len').innerText = len.toFixed(2) + "s";
+                    
+                    // Jump if stuck
+                    if (len > 3) {
+                        log("⏩ Skipping Forward (Latency Fix)");
+                        audio.currentTime = end - 0.5;
+                    }
+                }
+            }, 500);
         }
 
-        function leaveRoom() {
-            document.getElementById('live-room').classList.remove('active');
-            currentRoomId = null;
+        function forcePlay() {
             const audio = document.getElementById('remoteAudio');
-            audio.pause(); audio.src = "";
+            audio.play();
+            document.getElementById('play-overlay').classList.add('hidden');
+            log("🔊 User Forced Play");
         }
 
+        // --- 3. DATA HANDLER ---
         socket.on('audioBuffer', async (data) => {
+            // Count packet
+            packets++;
+            document.getElementById('pkt-count').innerText = packets;
+            
+            // Uncommented Log for visual confirmation
+            if (packets % 20 === 0) log(`📥 Rx Packet #${packets}`);
+
+            if (!sourceBuffer) return;
+
             try {
-                let buf = (data instanceof Blob) ? await data.arrayBuffer() : data;
+                const buf = (data instanceof Blob) ? await data.arrayBuffer() : data;
                 queue.push(buf);
-                if(!isUpdating) processQueue();
-            } catch(e){}
+                if (!isUpdating) processQueue();
+            } catch (e) {
+                log("Data Error: " + e.message);
+            }
         });
 
         function processQueue() {
-            if(!sourceBuffer || isUpdating || queue.length===0) return;
-            try { 
-                isUpdating=true; 
-                sourceBuffer.appendBuffer(queue.shift()); 
-            } catch(e) { 
-                // Buffer Cleanup Logic (Important for long streams)
-                if(e.name==='QuotaExceededError') { 
-                    const removeEnd = sourceBuffer.buffered.length > 0 ? sourceBuffer.buffered.end(0) - 5 : 0;
-                    if(removeEnd > 0) sourceBuffer.remove(0, removeEnd);
-                    isUpdating=false; 
+            if (queue.length === 0 || isUpdating || sourceBuffer.updating) return;
+
+            try {
+                isUpdating = true;
+                sourceBuffer.appendBuffer(queue.shift());
+            } catch (e) {
+                isUpdating = false;
+                if (e.name === 'QuotaExceededError') {
+                    // Nuclear Cleaning
+                    if (sourceBuffer.buffered.length > 0) {
+                        sourceBuffer.remove(0, sourceBuffer.buffered.end(0) - 5);
+                    }
                 }
             }
         }
-
-        // Buffer Maintenance (Every 30s)
-        setInterval(() => {
-            if(sourceBuffer && sourceBuffer.buffered.length > 0 && !sourceBuffer.updating) {
-                const end = sourceBuffer.buffered.end(0);
-                if(end > 30) { 
-                    try { sourceBuffer.remove(0, end - 20); } catch(e){} 
-                }
-            }
-        }, 30000);
-
-        function sendRoomChat(e) {
-            e.preventDefault();
-            const inp = document.getElementById('chat-msg');
-            const txt = inp.value.trim();
-            if(!txt || !currentRoomId) return;
-            socket.emit('chatMessage', { room: currentRoomId, user: currentUser.username, msg: txt });
-            addChatLog(currentUser.username, txt, true);
-            inp.value = ''; inp.focus();
-        }
-
-        function addChatLog(user, txt, isMe) {
-            const div = document.createElement('div');
-            div.className = `p-2 rounded-xl text-xs w-fit max-w-[85%] break-words mb-2 ${isMe ? 'ml-auto bg-primary text-white' : 'mr-auto bg-white/10 text-gray-200'}`;
-            div.innerHTML = `<span class="font-bold opacity-50 block text-[9px]">${user}</span>${txt}`;
-            const box = document.getElementById('room-chat');
-            box.appendChild(div); box.scrollTop = box.scrollHeight;
-        }
-
-        function attemptGift(icon, cost) {
-            if(currentUser.coins < cost) { document.getElementById('coin-modal').classList.add('open'); return; }
-            currentUser.coins -= cost;
-            document.getElementById('coin-bal').innerText = currentUser.coins.toLocaleString();
-            socket.emit('sendGift', { room: currentRoomId, user: currentUser.username, gift: icon });
-            addChatLog("System", `Sent ${icon}`, true);
-            spawnFloat(icon);
-        }
-
-        function spawnFloat(char) {
-            const el = document.createElement('div');
-            el.innerText = char; el.className = 'floater';
-            el.style.left = '50%'; el.style.top = '70%';
-            document.getElementById('float-layer').appendChild(el);
-            setTimeout(()=>el.remove(), 2000);
-        }
-
-        async function buyCoins(a, p) {
-            const res = await fetch('/api/wallet/buy-coins', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({amount:a,cost:p})});
-            if(res.ok) { currentUser.coins += a; document.getElementById('coin-bal').innerText = currentUser.coins.toLocaleString(); document.getElementById('coin-modal').classList.remove('open'); confetti(); }
-        }
-
-        function switchView(v) {
-            ['home','live','library'].forEach(id => {
-                document.getElementById('view-'+id).classList.add('hidden');
-                if(document.getElementById('nav-'+id)) document.getElementById('nav-'+id).classList.remove('active');
-                if(document.getElementById('mob-'+id)) document.getElementById('mob-'+id).classList.remove('active');
-            });
-            document.getElementById('view-'+v).classList.remove('hidden');
-            if(document.getElementById('nav-'+v)) document.getElementById('nav-'+v).classList.add('active');
-            if(document.getElementById('mob-'+v)) document.getElementById('mob-'+v).classList.add('active');
-        }
-
-        function openCoinModal() { document.getElementById('coin-modal').classList.add('open'); }
-        function openCarMode() { document.getElementById('car-mode').classList.add('active'); }
-        function closeCarMode() { document.getElementById('car-mode').classList.remove('active'); }
-        function triggerCheckout(p, pr) { document.getElementById('chk-plan').innerText=p; document.getElementById('chk-price').innerText=pr; document.getElementById('checkout-modal').classList.add('open'); }
-        function processPayment() { document.getElementById('checkout-modal').classList.remove('open'); confetti(); alert("Success!"); }
-
-        socket.on('chatMessage', d => { if(d.user !== currentUser.username) addChatLog(d.user, d.msg, false); });
-        socket.on('giftReceived', d => { if(d.user !== currentUser.username) { addChatLog("System", `${d.user} sent ${d.gift}`, false); spawnFloat(d.gift); }});
-        socket.on('roomLog', d => { if(d.type==='join') document.getElementById('room-listeners').innerText = d.count; });
-
-        init();
     </script>
 </body>
 </html>

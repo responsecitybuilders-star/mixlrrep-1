@@ -1,0 +1,8 @@
+# 1. Stage all your new files
+git add .
+
+# 2. Commit the changes
+git commit -m "Added Voice FX Rack, Audio MIME Fix, and Mobile Optimization"
+
+# 3. Push to the cloud
+git push
