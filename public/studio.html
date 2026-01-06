@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Airvibe Studio | Master Control</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { theme: { extend: { colors: { bg: '#050505', panel: '#111', primary: '#6366f1', danger: '#ef4444', success: '#22c55e' } } } }
+    </script>
+    <style>
+        body { background: #050505; color: #fff; font-family: 'Space Grotesk', sans-serif; overflow: hidden; height: 100vh; }
+        .glass { background: rgba(20,20,20,0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+        .pulse-live { animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 15px transparent; } }
+        
+        /* DIAGNOSTIC CONSOLE */
+        #console-log {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: #0f0;
+            background: #000;
+            border-top: 1px solid #333;
+            height: 120px;
+            overflow-y: auto;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            z-index: 50;
+            padding: 8px;
+        }
+        .log-warn { color: #facc15; }
+        .log-err { color: #ef4444; }
+        .log-info { color: #60a5fa; }
+    </style>
+</head>
+<body class="flex flex-col">
+
+    <header class="h-14 border-b border-white/10 flex items-center justify-between px-4 bg-panel z-20">
+        <div class="flex items-center gap-2">
+            <div id="conn-dot" class="w-2 h-2 rounded-full bg-gray-500"></div>
+            <h1 class="font-bold tracking-tight">STUDIO <span class="text-xs text-primary align-top">PRO</span></h1>
+        </div>
+        <div class="flex items-center gap-3">
+            <div class="text-[10px] text-gray-400 font-mono">
+                <span id="kbps-counter">0</span> KB/s
+            </div>
+            <div id="live-badge" class="hidden px-2 py-0.5 bg-danger/20 border border-danger text-danger text-[10px] font-bold rounded">LIVE</div>
+        </div>
+    </header>
+
+    <div class="flex-1 overflow-y-auto p-4 pb-40 space-y-6">
+        
+        <div class="p-4 rounded-xl border border-white/10 bg-white/5">
+            <div class="flex justify-between items-center mb-4">
+                <span class="text-xs font-bold text-gray-400">AUDIO ENGINE</span>
+                <span id="engine-status" class="text-xs font-bold text-gray-500">OFFLINE</span>
+            </div>
+            <canvas id="visualizer" class="w-full h-16 bg-black rounded border border-white/5"></canvas>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <div class="p-4 rounded-xl border border-white/10 bg-white/5">
+                <label class="text-[10px] font-bold text-gray-400 block mb-2">MICROPHONE</label>
+                <input type="range" class="w-full accent-primary" min="0" max="200" value="100" oninput="setGain('mic', this.value)">
+            </div>
+            <div class="p-4 rounded-xl border border-white/10 bg-white/5 relative">
+                <label class="text-[10px] font-bold text-gray-400 block mb-2">MUSIC DECK</label>
+                <input type="range" class="w-full accent-blue-500" min="0" max="100" value="50" oninput="setGain('bgm', this.value)">
+                
+                <div class="mt-3 flex gap-2">
+                    <button onclick="document.getElementById('music-file').click()" class="bg-white/10 p-2 rounded text-xs flex-1 hover:bg-white/20">📂 Load</button>
+                    <button id="play-btn" onclick="toggleMusic()" class="bg-blue-600 p-2 rounded text-xs flex-1 font-bold disabled:opacity-50" disabled>▶ Play</button>
+                </div>
+                <input type="file" id="music-file" hidden accept="audio/*" onchange="loadTrack(this)">
+                <div id="track-name" class="text-[9px] text-gray-500 mt-2 truncate">No Track Loaded</div>
+            </div>
+        </div>
+
+        <div class="flex justify-center pt-4">
+            <button id="broadcast-btn" onclick="toggleBroadcast()" class="w-48 h-48 rounded-full bg-white/5 border-4 border-white/10 shadow-[0_0_30px_rgba(0,0,0,0.5)] flex flex-col items-center justify-center gap-2 hover:scale-105 transition-all active:scale-95">
+                <span class="text-3xl">🎙️</span>
+                <span id="btn-text" class="font-black text-xl tracking-widest text-gray-400">START<br>ENGINE</span>
+            </button>
+        </div>
+
+        <div class="text-center text-[10px] text-gray-600 px-8">
+            ⚠️ <b>IMPORTANT:</b> Keep this screen ON. Do not switch tabs or the audio will cut.
+        </div>
+    </div>
+
+    <div id="console-log">
+        <div class="text-gray-500">System Initializing...</div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        
+        // --- CORE VARIABLES ---
+        let audioCtx, masterDest, micNode, bgmNode, micGain, bgmGain, analyser;
+        let mediaRecorder;
+        let isEngineReady = false;
+        let isLive = false;
+        let chunkCount = 0;
+        
+        // --- ZOMBIE AUDIO (Prevents sleep) ---
+        window.bgmAudio = new Audio();
+        window.bgmAudio.loop = true;
+        window.bgmAudio.crossOrigin = "anonymous";
+
+        // --- LOGGER ---
+        function log(msg, type = '') {
+            const box = document.getElementById('console-log');
+            const time = new Date().toLocaleTimeString().split(' ')[0];
+            const colorClass = type === 'error' ? 'log-err' : type === 'warn' ? 'log-warn' : type === 'info' ? 'log-info' : '';
+            
+            box.innerHTML = `<div class="${colorClass}">[${time}] ${msg}</div>` + box.innerHTML;
+        }
+
+        // 1. INITIALIZE ENGINE (Fixed Wiring)
+        async function initAudioEngine() {
+            try {
+                log("🚀 Starting Audio Engine...");
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContext();
+                
+                // SETUP NODES
+                masterDest = audioCtx.createMediaStreamDestination(); // Goes to Internet
+                analyser = audioCtx.createAnalyser(); // Goes to Visualizer
+                analyser.fftSize = 64;
+
+                micGain = audioCtx.createGain();
+                bgmGain = audioCtx.createGain();
+                bgmGain.gain.value = 0.5;
+
+                // --- 🔌 THE FIX: SPLIT WIRING ---
+                // Old broken code: micGain -> masterDest -> analyser (CRASH)
+                // New working code: micGain -> masterDest AND micGain -> analyser
+                
+                // Route 1: To the Internet
+                micGain.connect(masterDest);
+                bgmGain.connect(masterDest);
+                
+                // Route 2: To the Visualizer
+                micGain.connect(analyser);
+                bgmGain.connect(analyser);
+
+                // --- ANTI-SLEEP HEARTBEAT ---
+                const oscillator = audioCtx.createOscillator();
+                const silentGain = audioCtx.createGain();
+                oscillator.type = 'sine';
+                oscillator.frequency.value = 30; 
+                silentGain.gain.value = 0.001; 
+                
+                oscillator.connect(silentGain);
+                silentGain.connect(masterDest); // Keep stream alive
+                oscillator.start();
+                log("💓 Heartbeat Active");
+
+                // --- GET MICROPHONE (SAFE MODE) ---
+                let stream;
+                try {
+                    // Try Pro Mode (Echo Cancellation OFF)
+                    stream = await navigator.mediaDevices.getUserMedia({
+                        audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }
+                    });
+                    log("✅ Mic Connected (Pro Mode)");
+                } catch (err) {
+                    log("⚠️ Pro Mode Failed, trying Basic Mode...", 'warn');
+                    // Fallback to Basic Mode (Works on all phones)
+                    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    log("✅ Mic Connected (Basic Mode)");
+                }
+
+                micNode = audioCtx.createMediaStreamSource(stream);
+                micNode.connect(micGain);
+                
+                // UI UPDATE
+                isEngineReady = true;
+                document.getElementById('engine-status').innerText = "READY";
+                document.getElementById('engine-status').classList.replace('text-gray-500', 'text-success');
+                
+                // Activate Button
+                const btn = document.getElementById('broadcast-btn');
+                btn.classList.replace('bg-white/5', 'bg-white');
+                document.getElementById('btn-text').innerHTML = "GO<br>LIVE";
+                
+                startVisualizer();
+
+            } catch(e) {
+                log("❌ ENGINE FAILURE: " + e.message, 'error');
+                alert("Audio Engine Error: " + e.message);
+            }
+        }
+        // 2. TOGGLE BROADCAST
+        function toggleBroadcast() {
+            if(!isEngineReady) {
+                initAudioEngine(); // First click initializes
+                return;
+            }
+
+            if(isLive) stopBroadcast();
+            else startBroadcast();
+        }
+
+        function startBroadcast() {
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+
+            // CHOOSE ROBUST CODEC
+            let mimeType = 'audio/webm;codecs=opus';
+            if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'audio/mp4';
+            
+            log(`ℹ️ Broadcasting with: ${mimeType}`, 'info');
+
+            // SOCKET HANDSHAKE
+            socket.emit('broadcaster', { 
+                title: "Mobile Production", 
+                host: "Host", 
+                mimeType: mimeType 
+            });
+
+            // RECORDER SETUP (1000ms chunks)
+            mediaRecorder = new MediaRecorder(masterDest.stream, {
+                mimeType: mimeType,
+                audioBitsPerSecond: 128000
+            });
+
+            mediaRecorder.ondataavailable = async (e) => {
+                if (e.data.size > 0) {
+                    const buffer = await e.data.arrayBuffer();
+                    socket.emit('audioStream', { room: socket.id, chunk: buffer });
+                    
+                    // UPDATE UI METRICS
+                    chunkCount++;
+                    document.getElementById('kbps-counter').innerText = Math.round(e.data.size / 1024);
+                    
+                    if(chunkCount % 10 === 0) log(`📤 Chunk #${chunkCount}: ${e.data.size}b`);
+                }
+            };
+
+            mediaRecorder.start(1000);
+            isLive = true;
+
+            // UI UPDATE
+            document.getElementById('broadcast-btn').classList.replace('bg-white', 'bg-danger');
+            document.getElementById('broadcast-btn').classList.replace('text-black', 'text-white');
+            document.getElementById('broadcast-btn').classList.add('pulse-live');
+            document.getElementById('btn-text').innerHTML = "ON<br>AIR";
+            document.getElementById('live-badge').classList.remove('hidden');
+            log("🔴 LIVE STREAM STARTED");
+        }
+
+        function stopBroadcast() {
+            if(mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+            }
+            isLive = false;
+            socket.emit('stopBroadcast');
+            
+            // UI RESET
+            document.getElementById('broadcast-btn').classList.replace('bg-danger', 'bg-white');
+            document.getElementById('broadcast-btn').classList.replace('text-white', 'text-black');
+            document.getElementById('broadcast-btn').classList.remove('pulse-live');
+            document.getElementById('btn-text').innerHTML = "GO<br>LIVE";
+            document.getElementById('live-badge').classList.add('hidden');
+            document.getElementById('kbps-counter').innerText = "0";
+            log("🛑 Broadcast Stopped");
+        }
+
+        // 3. MUSIC DECK
+        function loadTrack(input) {
+            const file = input.files[0];
+            if(!file) return;
+
+            const url = URL.createObjectURL(file);
+            window.bgmAudio.src = url;
+            
+            if(!bgmNode && audioCtx) {
+                bgmNode = audioCtx.createMediaElementSource(window.bgmAudio);
+                bgmNode.connect(bgmGain);
+            }
+
+            document.getElementById('track-name').innerText = file.name;
+            document.getElementById('play-btn').disabled = false;
+            log(`🎵 Loaded: ${file.name}`);
+        }
+
+        function toggleMusic() {
+            if(window.bgmAudio.paused) {
+                if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+                window.bgmAudio.play();
+                document.getElementById('play-btn').innerText = "⏸ Pause";
+                document.getElementById('play-btn').classList.replace('bg-blue-600', 'bg-yellow-500');
+            } else {
+                window.bgmAudio.pause();
+                document.getElementById('play-btn').innerText = "▶ Play";
+                document.getElementById('play-btn').classList.replace('bg-yellow-500', 'bg-blue-600');
+            }
+        }
+
+        function setGain(target, val) {
+            if(target === 'mic' && micGain) micGain.gain.value = val / 100;
+            if(target === 'bgm' && bgmGain) bgmGain.gain.value = val / 100;
+        }
+
+        // 4. VISUALIZER
+        function startVisualizer() {
+            const canvas = document.getElementById('visualizer');
+            const ctx = canvas.getContext('2d');
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+
+            function draw() {
+                requestAnimationFrame(draw);
+                analyser.getByteFrequencyData(dataArray);
+
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                const barWidth = (canvas.width / bufferLength) * 2.5;
+                let barHeight;
+                let x = 0;
+
+                for(let i = 0; i < bufferLength; i++) {
+                    barHeight = dataArray[i] / 2;
+                    ctx.fillStyle = `rgb(${barHeight + 100}, 50, 255)`;
+                    ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+                    x += barWidth + 1;
+                }
+            }
+            draw();
+        }
+
+        // SOCKET STATUS
+        socket.on('connect', () => {
+            log("✅ Connected to Server");
+            document.getElementById('conn-dot').classList.replace('bg-gray-500', 'bg-success');
+        });
+        
+        socket.on('disconnect', () => {
+            log("⚠️ Disconnected!", 'warn');
+            document.getElementById('conn-dot').classList.replace('bg-success', 'bg-danger');
+        });
+
+    </script>
+</body>
+</html>
