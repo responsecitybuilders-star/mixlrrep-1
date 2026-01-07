@@ -2,306 +2,1017 @@
 <html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Airvibe | The Future of Live Audio</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎧</text></svg>">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
-            theme: { 
-                extend: { 
-                    colors: { 
-                        bg: '#020617', 
-                        primary: '#6366f1', 
-                        accent: '#a855f7',
-                        surface: '#0f172a'
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'airvibe-dark': '#0A0A0F',
+                        'airvibe-surface': '#111118',
+                        'airvibe-card': '#161622',
+                        'airvibe-border': '#222233',
+                        'airvibe-primary': '#8B5CF6',
+                        'airvibe-secondary': '#06B6D4',
+                        'airvibe-accent': '#F59E0B',
+                        'airvibe-success': '#10B981',
+                        'airvibe-danger': '#EF4444',
+                        'airvibe-text': '#F8FAFC',
+                        'airvibe-text-light': '#94A3B8',
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                        'heading': ['Poppins', 'Inter', 'system-ui', 'sans-serif'],
+                        'mono': ['Space Grotesk', 'monospace'],
                     },
                     animation: {
                         'float': 'float 6s ease-in-out infinite',
-                        'marquee': 'marquee 25s linear infinite',
+                        'float-slow': 'float 8s ease-in-out infinite',
+                        'float-fast': 'float 4s ease-in-out infinite',
+                        'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
+                        'shimmer': 'shimmer 2s linear infinite',
+                        'marquee': 'marquee 30s linear infinite',
+                        'bounce-smooth': 'bounce-smooth 3s ease-in-out infinite',
+                        'fade-in': 'fade-in 0.6s ease-out',
+                        'slide-up': 'slide-up 0.5s ease-out',
+                        'slide-in': 'slide-in 0.7s cubic-bezier(0.16, 1, 0.3, 1)',
+                        'blob': 'blob 10s infinite',
+                        'gradient': 'gradient 8s ease infinite',
                     },
                     keyframes: {
-                        float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-20px)' } },
-                        marquee: { '0%': { transform: 'translateX(0)' }, '100%': { transform: 'translateX(-100%)' } }
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        },
+                        'pulse-glow': {
+                            '0%, 100%': { opacity: 1 },
+                            '50%': { opacity: 0.6 },
+                        },
+                        shimmer: {
+                            '0%': { backgroundPosition: '-200px 0' },
+                            '100%': { backgroundPosition: 'calc(200px + 100%) 0' },
+                        },
+                        marquee: {
+                            '0%': { transform: 'translateX(0)' },
+                            '100%': { transform: 'translateX(-50%)' },
+                        },
+                        'bounce-smooth': {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        'fade-in': {
+                            '0%': { opacity: 0 },
+                            '100%': { opacity: 1 },
+                        },
+                        'slide-up': {
+                            '0%': { transform: 'translateY(30px)', opacity: 0 },
+                            '100%': { transform: 'translateY(0)', opacity: 1 },
+                        },
+                        'slide-in': {
+                            '0%': { transform: 'translateX(-20px)', opacity: 0 },
+                            '100%': { transform: 'translateX(0)', opacity: 1 },
+                        },
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                        },
+                        gradient: {
+                            '0%, 100%': { backgroundPosition: '0% 50%' },
+                            '50%': { backgroundPosition: '100% 50%' },
+                        },
+                    },
+                    backgroundImage: {
+                        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+                        'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+                        'gradient-shimmer': 'linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent)',
+                        'grid-pattern': 'linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px)',
+                    },
+                    backdropBlur: {
+                        'xs': '2px',
                     }
-                } 
+                }
             }
         }
     </script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        body { background: #020617; color: white; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
-        .glass-nav { background: rgba(2, 6, 23, 0.8); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .glass-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255,255,255,0.05); backdrop-filter: blur(10px); }
-        .text-gradient { background: linear-gradient(135deg, #fff 0%, #94a3b8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .hero-gradient { background: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.15) 0%, rgba(2, 6, 23, 0) 50%); }
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background-color: #0A0A0F;
+            color: #F8FAFC;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(6, 182, 212, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(245, 158, 11, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -2;
+        }
+        
+        .grid-bg {
+            background-image: 
+                linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+        
+        .glass-card {
+            background: rgba(22, 22, 34, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+        
+        .glass-nav {
+            background: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #8B5CF6 0%, #06B6D4 50%, #F59E0B 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            background-size: 200% auto;
+        }
+        
+        .gradient-border {
+            position: relative;
+            background: linear-gradient(45deg, #8B5CF6, #06B6D4, #F59E0B);
+            padding: 1px;
+            border-radius: 16px;
+        }
+        
+        .gradient-border > div {
+            background: #161622;
+            border-radius: 15px;
+        }
+        
+        .live-indicator {
+            background: linear-gradient(90deg, #EF4444, #F59E0B);
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+        
+        .waveform {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            height: 40px;
+        }
+        
+        .waveform div {
+            width: 3px;
+            background: linear-gradient(to top, #8B5CF6, #06B6D4);
+            border-radius: 3px;
+        }
+        
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-8px);
+            border-color: rgba(139, 92, 246, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+        
+        .feature-icon {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(6, 182, 212, 0.1));
+            border: 1px solid rgba(139, 92, 246, 0.2);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        .stat-card {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.03), transparent);
+            transform: rotate(45deg);
+            animation: shimmer 3s linear infinite;
+        }
+        
+        @media (max-width: 768px) {
+            .mobile-padding {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+        }
     </style>
 </head>
-<body class="flex flex-col min-h-screen">
+<body class="antialiased overflow-x-hidden">
+    <div class="fixed inset-0 overflow-hidden pointer-events-none z-[-1]">
+        <div class="absolute top-1/4 left-1/4 w-72 h-72 bg-purple-500/10 rounded-full blur-3xl animate-blob"></div>
+        <div class="absolute top-1/3 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl animate-blob animation-delay-2000"></div>
+        <div class="absolute bottom-1/4 left-1/2 w-80 h-80 bg-amber-500/05 rounded-full blur-3xl animate-blob animation-delay-4000"></div>
+        <div class="grid-bg absolute inset-0 opacity-30"></div>
+    </div>
 
-    <nav class="fixed top-0 left-0 right-0 h-20 glass-nav z-50 flex items-center justify-between px-6 md:px-12 transition-all duration-300" id="navbar">
-        <a href="/" class="flex items-center gap-2 group cursor-pointer">
-            <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center font-bold text-black group-hover:rotate-12 transition">A</div>
-            <div class="text-xl font-bold tracking-tight">AIRVIBE</div>
-        </a>
-        
-        <div class="hidden md:flex gap-8 text-sm font-medium text-gray-400">
-            <a href="#how-it-works" class="hover:text-white transition">How it Works</a>
-            <a href="#trending" class="hover:text-white transition">Creators</a>
-            <a href="#features" class="hover:text-white transition">Features</a>
+    <nav class="glass-nav fixed top-0 left-0 right-0 z-50 py-4 px-6 md:px-8 transition-all duration-300">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <a href="/" class="flex items-center gap-3 group">
+                <div class="relative">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-airvibe-primary to-airvibe-secondary flex items-center justify-center font-bold text-white shadow-lg group-hover:rotate-12 transition-transform duration-300">
+                        <i class="fas fa-wave-square text-lg"></i>
+                    </div>
+                    <div class="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-airvibe-dark animate-pulse"></div>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-xl font-bold font-heading tracking-tight">AIRVIBE</span>
+                    <span class="text-[10px] text-airvibe-text-light font-mono tracking-widest">v27.0</span>
+                </div>
+            </a>
+            
+            <div class="hidden lg:flex items-center gap-8">
+                <a href="#how-it-works" class="text-airvibe-text-light hover:text-white font-medium text-sm transition-colors duration-300 hover:scale-105">How It Works</a>
+                <a href="#trending" class="text-airvibe-text-light hover:text-white font-medium text-sm transition-colors duration-300 hover:scale-105">Trending</a>
+                <a href="#features" class="text-airvibe-text-light hover:text-white font-medium text-sm transition-colors duration-300 hover:scale-105">Features</a>
+                <a href="#creators" class="text-airvibe-text-light hover:text-white font-medium text-sm transition-colors duration-300 hover:scale-105">Creators</a>
+                <a href="/studio" class="text-airvibe-text-light hover:text-white font-medium text-sm transition-colors duration-300">Login</a>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <a href="/dashboard" class="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all duration-300 text-sm">
+                    <i class="fas fa-headphones text-xs"></i>
+                    <span>Listen Live</span>
+                </a>
+                <a href="/studio" class="btn-primary px-6 py-3 rounded-full font-semibold text-sm inline-flex items-center gap-2">
+                    <span>Start Broadcasting</span>
+                    <i class="fas fa-arrow-right text-xs"></i>
+                </a>
+                
+                <button id="mobileMenuBtn" class="lg:hidden w-10 h-10 rounded-lg flex flex-col items-center justify-center gap-1.5 bg-white/5 border border-white/10">
+                    <span class="w-5 h-0.5 bg-white"></span>
+                    <span class="w-5 h-0.5 bg-white"></span>
+                    <span class="w-5 h-0.5 bg-white"></span>
+                </button>
+            </div>
         </div>
-
-        <div class="flex gap-4">
-            <a href="/login" class="hidden md:block px-4 py-2 text-sm font-bold text-gray-300 hover:text-white transition">Login</a>
-            <a href="/register" class="px-5 py-2 bg-white text-black text-sm font-bold rounded-full hover:bg-gray-200 transition shadow-[0_0_20px_rgba(255,255,255,0.2)]">Get Started</a>
+        
+        <div id="mobileMenu" class="lg:hidden absolute top-full left-0 right-0 bg-airvibe-surface border-t border-airvibe-border mt-2 py-4 px-6 hidden animate-slide-up">
+            <div class="flex flex-col gap-4">
+                <a href="#how-it-works" class="py-3 border-b border-airvibe-border text-airvibe-text-light hover:text-white transition">How It Works</a>
+                <a href="#trending" class="py-3 border-b border-airvibe-border text-airvibe-text-light hover:text-white transition">Trending</a>
+                <a href="#features" class="py-3 border-b border-airvibe-border text-airvibe-text-light hover:text-white transition">Features</a>
+                <a href="#creators" class="py-3 border-b border-airvibe-border text-airvibe-text-light hover:text-white transition">Creators</a>
+                <a href="/studio" class="py-3 border-b border-airvibe-border text-airvibe-text-light hover:text-white transition">Login</a>
+                <a href="/dashboard" class="py-3 text-center rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition">Listen Live</a>
+            </div>
         </div>
     </nav>
 
-    <main class="min-h-screen flex items-center justify-center pt-32 pb-20 px-6 relative hero-gradient">
-        <div class="max-w-7xl w-full grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-center">
-            
-            <div class="text-center md:text-left order-2 md:order-1">
-                <div class="inline-flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] md:text-xs font-bold tracking-widest text-primary mb-6 hover:bg-white/10 transition cursor-default">
-                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> v27.0 ONLINE
+    <section class="min-h-screen flex items-center justify-center pt-24 pb-16 px-4 md:px-8 relative overflow-hidden">
+        <div class="max-w-7xl w-full grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+            <div class="text-center lg:text-left animate-slide-in">
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-airvibe-primary/20 to-airvibe-secondary/20 border border-airvibe-primary/30 mb-6">
+                    <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                    <span class="text-sm font-medium">LIVE • 2.4K+ ACTIVE STREAMS</span>
                 </div>
-                <h1 class="text-5xl md:text-7xl font-black leading-tight mb-6">
-                    <span class="text-gradient">Broadcast</span><br>
-                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">Your Vibe.</span>
+                
+                <h1 class="text-5xl md:text-7xl lg:text-8xl font-bold font-heading leading-tight mb-6">
+                    <span class="block">Broadcast</span>
+                    <span class="gradient-text">Your Vibe</span>
                 </h1>
-                <p class="text-gray-400 text-lg md:text-xl mb-8 leading-relaxed max-w-lg mx-auto md:mx-0">
-                    Your pocket radio station. Crystal clear audio, instant monetization, and a global audience waiting for you.
+                
+                <p class="text-lg md:text-xl text-airvibe-text-light max-w-xl mx-auto lg:mx-0 mb-10 leading-relaxed">
+                    The ultimate platform for live audio creators. Crystal-clear streaming, instant monetization, and a global audience at your fingertips.
                 </p>
-                <div class="flex flex-col md:flex-row gap-4 justify-center md:justify-start">
-                    <a href="/dashboard" class="px-8 py-4 bg-primary hover:bg-indigo-500 text-white font-bold rounded-full transition transform hover:scale-105 shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2">
-                        <span>🎧 Start Listening</span>
+                
+                <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                    <a href="/studio" class="btn-primary px-8 py-4 rounded-full font-bold text-lg flex items-center justify-center gap-3">
+                        <i class="fas fa-broadcast-tower"></i>
+                        <span>Start Broadcasting</span>
                     </a>
-                    <a href="/studio" class="px-8 py-4 bg-white/5 border border-white/10 hover:bg-white/10 font-bold rounded-full transition flex items-center justify-center gap-2 group">
-                        <span>🎙️ Go Live</span>
-                        <span class="group-hover:translate-x-1 transition">→</span>
+                    <a href="/dashboard" class="btn-secondary px-8 py-4 rounded-full font-bold text-lg flex items-center justify-center gap-3">
+                        <i class="fas fa-headphones"></i>
+                        <span>Explore Live Streams</span>
                     </a>
+                </div>
+                
+                <div class="flex flex-wrap justify-center lg:justify-start gap-6 mt-12">
+                    <div class="text-center">
+                        <div class="text-3xl font-bold">50K+</div>
+                        <div class="text-sm text-airvibe-text-light">Active Creators</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-bold">2M+</div>
+                        <div class="text-sm text-airvibe-text-light">Monthly Listeners</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-bold">99.9%</div>
+                        <div class="text-sm text-airvibe-text-light">Uptime</div>
+                    </div>
                 </div>
             </div>
-
-            <div class="relative order-1 md:order-2 flex justify-center">
-                <div class="absolute inset-0 bg-gradient-to-tr from-primary/30 to-accent/30 blur-[100px] opacity-50 rounded-full"></div>
-                <div class="relative w-full max-w-sm aspect-square animate-float" style="transform-style: preserve-3d; transition: transform 0.1s ease-out;">
-                    <div class="absolute inset-0 bg-gray-900/80 backdrop-blur-xl border border-white/10 rounded-3xl p-6 flex flex-col justify-between shadow-2xl">
-                        <div class="flex justify-between items-start">
-                            <div class="flex gap-3">
-                                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" class="w-12 h-12 rounded-full bg-white/10">
-                                <div><div class="font-bold text-white">Midnight LoFi</div><div class="text-xs text-primary">● Live Now</div></div>
-                            </div>
-                            <div class="px-2 py-1 bg-red-500/20 text-red-400 text-[10px] font-bold rounded">ON AIR</div>
-                        </div>
-                        <div class="flex items-end justify-center gap-1 h-24 my-4 opacity-80">
-                            <div class="w-2 bg-primary rounded-t h-[60%] animate-pulse"></div>
-                            <div class="w-2 bg-primary rounded-t h-[90%] animate-[pulse_1.2s_infinite]"></div>
-                            <div class="w-2 bg-primary rounded-t h-[40%] animate-[pulse_0.8s_infinite]"></div>
-                            <div class="w-2 bg-primary rounded-t h-[75%] animate-[pulse_1.5s_infinite]"></div>
-                            <div class="w-2 bg-primary rounded-t h-[50%] animate-[pulse_1s_infinite]"></div>
-                        </div>
-                        <div class="flex gap-2">
-                            <input class="bg-black/50 border border-white/10 rounded-full px-4 py-2 text-xs w-full text-gray-500" value="Playing music..." readonly>
-                            <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-xs">❤️</div>
+            
+            <div class="relative flex justify-center">
+                <div class="absolute -top-10 -right-10 w-64 h-64 bg-gradient-to-br from-airvibe-primary/20 to-airvibe-secondary/20 rounded-full blur-3xl"></div>
+                <div class="absolute -bottom-10 -left-10 w-56 h-56 bg-gradient-to-tr from-airvibe-accent/10 to-airvibe-danger/10 rounded-full blur-3xl"></div>
+                
+                <div class="glass-card rounded-3xl p-6 max-w-md w-full relative overflow-hidden animate-float">
+                    <div class="absolute -top-3 right-6 z-10">
+                        <div class="live-indicator px-4 py-1.5 rounded-full text-white font-bold text-xs flex items-center gap-2 shadow-lg">
+                            <div class="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                            LIVE NOW
                         </div>
                     </div>
-                    <div class="absolute -bottom-6 -right-6 bg-gray-800 border border-white/10 p-4 rounded-2xl shadow-xl animate-[bounce_3s_infinite]" style="transform: translateZ(30px);">
-                        <div class="text-xs text-gray-400">Total Listeners</div>
-                        <div class="text-2xl font-bold text-white">1,240 🎧</div>
+                    
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="relative">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=DJNova&backgroundColor=8B5CF6&hairColor=000000&accessoriesType=Kurt" class="w-16 h-16 rounded-2xl border-2 border-airvibe-primary/30">
+                            <div class="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-airvibe-dark"></div>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-xl">Midnight LoFi</h3>
+                            <p class="text-airvibe-text-light text-sm">@DJ_Nova • 2.4k listening</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <div class="waveform">
+                            <div class="h-4 animate-[pulse_1.2s_infinite]"></div>
+                            <div class="h-8 animate-[pulse_0.8s_infinite] animation-delay-200"></div>
+                            <div class="h-12 animate-[pulse_1.5s_infinite] animation-delay-400"></div>
+                            <div class="h-16 animate-[pulse_1s_infinite] animation-delay-600"></div>
+                            <div class="h-12 animate-[pulse_1.3s_infinite] animation-delay-800"></div>
+                            <div class="h-8 animate-[pulse_0.9s_infinite] animation-delay-1000"></div>
+                            <div class="h-4 animate-[pulse_1.1s_infinite] animation-delay-1200"></div>
+                        </div>
+                        <div class="text-center mt-2">
+                            <p class="text-airvibe-text-light text-sm">"Midnight Dreams" - Chillhop Mix</p>
+                            <p class="text-airvibe-text-light text-xs">02:45 / 45:12</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <div class="text-xs text-airvibe-text-light mb-2">LIVE CHAT</div>
+                        <div class="space-y-3">
+                            <div class="flex items-start gap-2">
+                                <div class="w-6 h-6 rounded-full bg-airvibe-primary/20 flex items-center justify-center text-xs">👑</div>
+                                <div class="flex-1">
+                                    <div class="text-xs"><span class="font-bold">DJ_Nova</span>: Welcome to the midnight session!</div>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-2">
+                                <div class="w-6 h-6 rounded-full bg-airvibe-secondary/20 flex items-center justify-center text-xs">🎧</div>
+                                <div class="flex-1">
+                                    <div class="text-xs"><span class="font-bold">ChillListener42</span>: This mix is fire! 🔥</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-3">
+                        <button class="flex-1 py-3 rounded-xl bg-airvibe-primary/10 border border-airvibe-primary/20 hover:bg-airvibe-primary/20 transition flex items-center justify-center gap-2">
+                            <i class="fas fa-heart text-airvibe-danger"></i>
+                            <span class="text-sm">Like</span>
+                        </button>
+                        <button class="flex-1 py-3 rounded-xl bg-airvibe-secondary/10 border border-airvibe-secondary/20 hover:bg-airvibe-secondary/20 transition flex items-center justify-center gap-2">
+                            <i class="fas fa-gift text-airvibe-accent"></i>
+                            <span class="text-sm">Send Gift</span>
+                        </button>
+                        <button class="flex-1 py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition flex items-center justify-center gap-2">
+                            <i class="fas fa-share"></i>
+                            <span class="text-sm">Share</span>
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
-    </main>
+        
+        <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce-smooth">
+            <div class="w-6 h-10 border-2 border-white/20 rounded-full flex justify-center">
+                <div class="w-1 h-3 bg-white/50 rounded-full mt-2 animate-pulse"></div>
+            </div>
+        </div>
+    </section>
 
-    <div class="bg-primary/10 border-y border-white/5 py-4 overflow-hidden relative">
-        <div class="whitespace-nowrap animate-marquee flex gap-10 text-sm font-bold text-gray-400">
-            <span class="text-white">🔴 NOW LIVE:</span>
-            <span>DJ Spinall - Afro Beats</span>
-            <span>★</span>
-            <span>Pastor Jerry - Midnight Prayer</span>
-            <span>★</span>
-            <span>Tech Talk Daily</span>
-            <span>★</span>
-            <span>Chill Vibe Radio</span>
-            <span>★</span>
-            <span>Late Night Jazz</span>
-            <span>★</span>
-            <span class="text-white">🔴 NOW LIVE:</span>
-            <span>DJ Spinall - Afro Beats</span>
-            <span>★</span>
-            <span>Pastor Jerry - Midnight Prayer</span>
+    <div class="py-4 bg-gradient-to-r from-airvibe-primary/10 via-airvibe-secondary/10 to-airvibe-primary/10 border-y border-airvibe-border overflow-hidden">
+        <div class="flex animate-marquee whitespace-nowrap">
+            <div class="flex items-center gap-8 px-8">
+                <span class="text-sm font-bold text-white">🔴 LIVE NOW</span>
+                <span class="text-sm text-airvibe-text-light">Midnight LoFi • 2.4k listeners</span>
+                <span class="text-xs text-airvibe-text-light">★</span>
+                <span class="text-sm text-airvibe-text-light">Tech Talk Daily • 1.8k listeners</span>
+                <span class="text-xs text-airvibe-text-light">★</span>
+                <span class="text-sm text-airvibe-text-light">Morning Meditation • 3.2k listeners</span>
+                <span class="text-xs text-airvibe-text-light">★</span>
+                <span class="text-sm text-airvibe-text-light">Afrobeat Party • 4.1k listeners</span>
+                <span class="text-xs text-airvibe-text-light">★</span>
+                <span class="text-sm text-airvibe-text-light">True Crime Stories • 2.7k listeners</span>
+                <span class="text-xs text-airvibe-text-light">★</span>
+            </div>
+            <div class="flex items-center gap-8 px-8">
+                <span class="text-sm font-bold text-white">🔴 LIVE NOW</span>
+                <span class="text-sm text-airvibe-text-light">Midnight LoFi • 2.4k listeners</span>
+                <span class="text-xs text-airvibe-text-light">★</span>
+                <span class="text-sm text-airvibe-text-light">Tech Talk Daily • 1.8k listeners</span>
+                <span class="text-xs text-airvibe-text-light">★</span>
+                <span class="text-sm text-airvibe-text-light">Morning Meditation • 3.2k listeners</span>
+                <span class="text-xs text-airvibe-text-light">★</span>
+                <span class="text-sm text-airvibe-text-light">Afrobeat Party • 4.1k listeners</span>
+                <span class="text-xs text-airvibe-text-light">★</span>
+                <span class="text-sm text-airvibe-text-light">True Crime Stories • 2.7k listeners</span>
+            </div>
         </div>
     </div>
 
-    <section id="how-it-works" class="py-24 px-6 relative">
+    <section id="how-it-works" class="py-24 px-4 md:px-8 relative">
         <div class="max-w-7xl mx-auto">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-5xl font-black mb-4">Start in 3 Minutes</h2>
-                <p class="text-gray-400">No equipment needed. Just your phone or laptop.</p>
+            <div class="text-center mb-16 animate-fade-in">
+                <div class="inline-block px-4 py-2 rounded-full bg-airvibe-primary/10 border border-airvibe-primary/20 text-airvibe-primary font-medium text-sm mb-4">
+                    SIMPLE SETUP
+                </div>
+                <h2 class="text-4xl md:text-5xl font-bold font-heading mb-6">Start Broadcasting in 3 Minutes</h2>
+                <p class="text-lg text-airvibe-text-light max-w-2xl mx-auto">No equipment needed. Just your phone or laptop and you're ready to go live.</p>
             </div>
+            
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="glass-card p-8 rounded-3xl relative group hover:bg-white/5 transition">
-                    <div class="absolute -top-6 left-8 w-12 h-12 bg-gray-800 border border-white/10 rounded-xl flex items-center justify-center text-xl font-bold text-primary group-hover:scale-110 transition">1</div>
-                    <h3 class="text-xl font-bold mt-4 mb-2">Create Account</h3>
-                    <p class="text-gray-400 text-sm">Sign up for free. Choose your username and set up your channel profile in seconds.</p>
+                <div class="glass-card rounded-2xl p-8 card-hover animate-slide-up" style="animation-delay: 0.1s">
+                    <div class="feature-icon w-16 h-16 rounded-2xl flex items-center justify-center text-2xl mb-6">
+                        <i class="fas fa-user-plus text-airvibe-primary"></i>
+                    </div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-8 h-8 rounded-full bg-airvibe-primary flex items-center justify-center text-sm font-bold">1</div>
+                        <h3 class="text-xl font-bold">Create Your Channel</h3>
+                    </div>
+                    <p class="text-airvibe-text-light mb-6">Sign up in seconds. Choose your unique username and customize your channel with a bio and profile picture.</p>
+                    <ul class="space-y-2">
+                        <li class="flex items-center gap-2 text-sm">
+                            <i class="fas fa-check-circle text-airvibe-success"></i>
+                            <span>Instant verification</span>
+                        </li>
+                        <li class="flex items-center gap-2 text-sm">
+                            <i class="fas fa-check-circle text-airvibe-success"></i>
+                            <span>Custom channel URL</span>
+                        </li>
+                    </ul>
                 </div>
-                <div class="glass-card p-8 rounded-3xl relative group hover:bg-white/5 transition">
-                    <div class="absolute -top-6 left-8 w-12 h-12 bg-gray-800 border border-white/10 rounded-xl flex items-center justify-center text-xl font-bold text-primary group-hover:scale-110 transition">2</div>
-                    <h3 class="text-xl font-bold mt-4 mb-2">Go Live</h3>
-                    <p class="text-gray-400 text-sm">Hit the "Go Live" button. Use our built-in soundboard and effects rack to sound like a pro.</p>
+                
+                <div class="glass-card rounded-2xl p-8 card-hover animate-slide-up" style="animation-delay: 0.2s">
+                    <div class="feature-icon w-16 h-16 rounded-2xl flex items-center justify-center text-2xl mb-6">
+                        <i class="fas fa-broadcast-tower text-airvibe-secondary"></i>
+                    </div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-8 h-8 rounded-full bg-airvibe-secondary flex items-center justify-center text-sm font-bold">2</div>
+                        <h3 class="text-xl font-bold">Go Live Instantly</h3>
+                    </div>
+                    <p class="text-airvibe-text-light mb-6">Hit the broadcast button. Use our built-in audio tools, soundboard, and effects to sound professional from day one.</p>
+                    <ul class="space-y-2">
+                        <li class="flex items-center gap-2 text-sm">
+                            <i class="fas fa-check-circle text-airvibe-success"></i>
+                            <span>No software download needed</span>
+                        </li>
+                        <li class="flex items-center gap-2 text-sm">
+                            <i class="fas fa-check-circle text-airvibe-success"></i>
+                            <span>Built-in audio processing</span>
+                        </li>
+                    </ul>
                 </div>
-                <div class="glass-card p-8 rounded-3xl relative group hover:bg-white/5 transition">
-                    <div class="absolute -top-6 left-8 w-12 h-12 bg-gray-800 border border-white/10 rounded-xl flex items-center justify-center text-xl font-bold text-primary group-hover:scale-110 transition">3</div>
-                    <h3 class="text-xl font-bold mt-4 mb-2">Get Paid</h3>
-                    <p class="text-gray-400 text-sm">Listeners send gifts and coins. Cash out directly to your wallet instantly.</p>
+                
+                <div class="glass-card rounded-2xl p-8 card-hover animate-slide-up" style="animation-delay: 0.3s">
+                    <div class="feature-icon w-16 h-16 rounded-2xl flex items-center justify-center text-2xl mb-6">
+                        <i class="fas fa-gem text-airvibe-accent"></i>
+                    </div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-8 h-8 rounded-full bg-airvibe-accent flex items-center justify-center text-sm font-bold">3</div>
+                        <h3 class="text-xl font-bold">Earn Real Rewards</h3>
+                    </div>
+                    <p class="text-airvibe-text-light mb-6">Monetize your passion. Receive virtual gifts, tips, and subscriptions directly from your listeners.</p>
+                    <ul class="space-y-2">
+                        <li class="flex items-center gap-2 text-sm">
+                            <i class="fas fa-check-circle text-airvibe-success"></i>
+                            <span>Instant payout to wallet</span>
+                        </li>
+                        <li class="flex items-center gap-2 text-sm">
+                            <i class="fas fa-check-circle text-airvibe-success"></i>
+                            <span>Multiple monetization options</span>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>
     </section>
 
-    <section id="trending" class="py-24 px-6 bg-surface relative overflow-hidden">
-        <div class="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
+    <section id="trending" class="py-24 px-4 md:px-8 bg-airvibe-surface relative overflow-hidden">
+        <div class="absolute inset-0 bg-grid-pattern bg-[length:40px_40px] opacity-10"></div>
         <div class="max-w-7xl mx-auto relative z-10">
-            <div class="flex justify-between items-end mb-12">
-                <div>
-                    <h2 class="text-3xl md:text-4xl font-bold">Trending Now 🔥</h2>
-                    <p class="text-gray-400">Join the rooms with the most heat.</p>
-                </div>
-                <a href="/dashboard" class="text-primary font-bold hover:underline hidden md:block">View All -></a>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div class="glass-card p-4 rounded-2xl hover:border-primary/50 transition cursor-pointer" onclick="window.location.href='/dashboard'">
-                    <div class="relative mb-4">
-                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Jazz" class="w-full h-40 object-cover rounded-xl bg-black">
-                        <div class="absolute top-2 right-2 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded">LIVE</div>
+            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-end mb-12">
+                <div class="mb-8 lg:mb-0 animate-slide-in">
+                    <div class="inline-block px-4 py-2 rounded-full bg-airvibe-danger/10 border border-airvibe-danger/20 text-airvibe-danger font-medium text-sm mb-4">
+                        TRENDING NOW
                     </div>
-                    <h3 class="font-bold">Smooth Jazz Café</h3>
-                    <p class="text-xs text-gray-400">@JazzMaster • 4.2k Listening</p>
+                    <h2 class="text-4xl md:text-5xl font-bold font-heading mb-4">Hot Streams 🔥</h2>
+                    <p class="text-lg text-airvibe-text-light">Join thousands listening to the most popular streams right now.</p>
                 </div>
-                <div class="glass-card p-4 rounded-2xl hover:border-primary/50 transition cursor-pointer" onclick="window.location.href='/dashboard'">
-                    <div class="relative mb-4">
-                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Tech" class="w-full h-40 object-cover rounded-xl bg-black">
-                        <div class="absolute top-2 right-2 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded">LIVE</div>
-                    </div>
-                    <h3 class="font-bold">Silicon Valley Insider</h3>
-                    <p class="text-xs text-gray-400">@TechDaily • 1.8k Listening</p>
-                </div>
-                <div class="glass-card p-4 rounded-2xl hover:border-primary/50 transition cursor-pointer" onclick="window.location.href='/dashboard'">
-                    <div class="relative mb-4">
-                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Comedy" class="w-full h-40 object-cover rounded-xl bg-black">
-                        <div class="absolute top-2 right-2 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded">LIVE</div>
-                    </div>
-                    <h3 class="font-bold">Laughter Lounge</h3>
-                    <p class="text-xs text-gray-400">@FunnyGuy • 850 Listening</p>
-                </div>
-                <div class="glass-card p-4 rounded-2xl hover:border-primary/50 transition cursor-pointer" onclick="window.location.href='/dashboard'">
-                    <div class="relative mb-4">
-                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Gospel" class="w-full h-40 object-cover rounded-xl bg-black">
-                        <div class="absolute top-2 right-2 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded">LIVE</div>
-                    </div>
-                    <h3 class="font-bold">Morning Devotion</h3>
-                    <p class="text-xs text-gray-400">@PastorJohn • 12k Listening</p>
-                </div>
-            </div>
-            
-            <a href="/dashboard" class="block md:hidden mt-8 text-center text-primary font-bold border border-primary/20 py-3 rounded-xl">View All Streams</a>
-        </div>
-    </section>
-
-    <section id="features" class="py-24 px-6 border-t border-white/5">
-        <div class="max-w-7xl mx-auto">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold mb-4">Everything You Need</h2>
-                <p class="text-gray-400">Professional tools, simplified for everyone.</p>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="p-8 rounded-3xl bg-white/5 border border-white/5 hover:border-primary/50 transition duration-300">
-                    <div class="text-4xl mb-4">🎙️</div>
-                    <h3 class="text-xl font-bold mb-2">Crystal Clear Audio</h3>
-                    <p class="text-sm text-gray-400">Opus codec streaming ensures studio quality with minimal data usage.</p>
-                </div>
-                <div class="p-8 rounded-3xl bg-white/5 border border-white/5 hover:border-primary/50 transition duration-300">
-                    <div class="text-4xl mb-4">💰</div>
-                    <h3 class="text-xl font-bold mb-2">Monetization</h3>
-                    <p class="text-sm text-gray-400">Earn from virtual gifts and subscriptions directly from your listeners.</p>
-                </div>
-                <div class="p-8 rounded-3xl bg-white/5 border border-white/5 hover:border-primary/50 transition duration-300">
-                    <div class="text-4xl mb-4">💬</div>
-                    <h3 class="text-xl font-bold mb-2">Real-time Chat</h3>
-                    <p class="text-sm text-gray-400">Engage with your community instantly with zero latency messaging.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="py-20 bg-primary relative overflow-hidden">
-        <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
-        <div class="max-w-7xl mx-auto px-6 relative z-10 text-center">
-            <h2 class="text-3xl font-black mb-12 text-white">PLATFORM GROWTH</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div>
-                    <div class="text-5xl font-black mb-2">50k+</div>
-                    <div class="text-indigo-200 font-bold tracking-widest text-sm">LISTENERS</div>
-                </div>
-                <div>
-                    <div class="text-5xl font-black mb-2">12k+</div>
-                    <div class="text-indigo-200 font-bold tracking-widest text-sm">BROADCASTERS</div>
-                </div>
-                <div>
-                    <div class="text-5xl font-black mb-2">24/7</div>
-                    <div class="text-indigo-200 font-bold tracking-widest text-sm">UPTIME</div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="py-32 px-6 text-center relative">
-        <div class="max-w-3xl mx-auto">
-            <h2 class="text-4xl md:text-6xl font-black mb-6">Ready to go viral?</h2>
-            <p class="text-gray-400 text-lg mb-10">Join thousands of creators building their audio empire on Airvibe today.</p>
-            <div class="flex flex-col md:flex-row justify-center gap-4">
-                <a href="/register" class="px-10 py-5 bg-white text-black font-black text-lg rounded-full hover:bg-gray-200 transition shadow-[0_0_40px_rgba(255,255,255,0.3)]">
-                    🚀 Launch Channel
+                <a href="/dashboard" class="btn-secondary px-6 py-3 rounded-full font-semibold inline-flex items-center gap-2">
+                    <span>View All Streams</span>
+                    <i class="fas fa-arrow-right"></i>
                 </a>
             </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="glass-card rounded-2xl overflow-hidden card-hover group cursor-pointer" onclick="window.location.href='/dashboard'">
+                    <div class="relative h-48 overflow-hidden">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=JazzMaster&backgroundColor=8B5CF6&hairColor=000000&accessoriesType=Prescription02" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                        <div class="absolute top-4 right-4">
+                            <div class="live-indicator px-3 py-1 rounded-full text-white font-bold text-xs flex items-center gap-1">
+                                <div class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
+                                LIVE
+                            </div>
+                        </div>
+                        <div class="absolute bottom-4 left-4">
+                            <div class="flex items-center gap-2 text-white">
+                                <i class="fas fa-headphones"></i>
+                                <span class="text-sm font-bold">4.2K</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="font-bold text-lg mb-2">Smooth Jazz Café</h3>
+                        <p class="text-airvibe-text-light text-sm mb-4">Late night jazz for your soul. Relaxing piano and saxophone melodies.</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-full bg-airvibe-primary/20 flex items-center justify-center">
+                                    <i class="fas fa-music text-xs"></i>
+                                </div>
+                                <span class="text-sm">@JazzMaster</span>
+                            </div>
+                            <span class="text-xs px-3 py-1 rounded-full bg-green-500/20 text-green-400">Music</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="glass-card rounded-2xl overflow-hidden card-hover group cursor-pointer" onclick="window.location.href='/dashboard'">
+                    <div class="relative h-48 overflow-hidden">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=TechGuru&backgroundColor=06B6D4&hairColor=000000&facialHairType=BeardLight" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                        <div class="absolute top-4 right-4">
+                            <div class="live-indicator px-3 py-1 rounded-full text-white font-bold text-xs flex items-center gap-1">
+                                <div class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
+                                LIVE
+                            </div>
+                        </div>
+                        <div class="absolute bottom-4 left-4">
+                            <div class="flex items-center gap-2 text-white">
+                                <i class="fas fa-headphones"></i>
+                                <span class="text-sm font-bold">1.8K</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="font-bold text-lg mb-2">Tech Talk Daily</h3>
+                        <p class="text-airvibe-text-light text-sm mb-4">Latest tech news, AI developments, and startup stories.</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-full bg-airvibe-secondary/20 flex items-center justify-center">
+                                    <i class="fas fa-microchip text-xs"></i>
+                                </div>
+                                <span class="text-sm">@TechGuru</span>
+                            </div>
+                            <span class="text-xs px-3 py-1 rounded-full bg-blue-500/20 text-blue-400">Tech</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="glass-card rounded-2xl overflow-hidden card-hover group cursor-pointer" onclick="window.location.href='/dashboard'">
+                    <div class="relative h-48 overflow-hidden">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=ComedyQueen&backgroundColor=F59E0B&hairColor=000000&accessoriesType=Sunglasses" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                        <div class="absolute top-4 right-4">
+                            <div class="live-indicator px-3 py-1 rounded-full text-white font-bold text-xs flex items-center gap-1">
+                                <div class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
+                                LIVE
+                            </div>
+                        </div>
+                        <div class="absolute bottom-4 left-4">
+                            <div class="flex items-center gap-2 text-white">
+                                <i class="fas fa-headphones"></i>
+                                <span class="text-sm font-bold">850</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="font-bold text-lg mb-2">Laughter Lounge</h3>
+                        <p class="text-airvibe-text-light text-sm mb-4">Stand-up comedy and hilarious conversations to brighten your day.</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-full bg-airvibe-accent/20 flex items-center justify-center">
+                                    <i class="fas fa-laugh text-xs"></i>
+                                </div>
+                                <span class="text-sm">@ComedyQueen</span>
+                            </div>
+                            <span class="text-xs px-3 py-1 rounded-full bg-yellow-500/20 text-yellow-400">Comedy</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="glass-card rounded-2xl overflow-hidden card-hover group cursor-pointer" onclick="window.location.href='/dashboard'">
+                    <div class="relative h-48 overflow-hidden">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=PastorJohn&backgroundColor=10B981&hairColor=000000&facialHairType=BeardMajestic" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                        <div class="absolute top-4 right-4">
+                            <div class="live-indicator px-3 py-1 rounded-full text-white font-bold text-xs flex items-center gap-1">
+                                <div class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
+                                LIVE
+                            </div>
+                        </div>
+                        <div class="absolute bottom-4 left-4">
+                            <div class="flex items-center gap-2 text-white">
+                                <i class="fas fa-headphones"></i>
+                                <span class="text-sm font-bold">12K</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="font-bold text-lg mb-2">Morning Devotion</h3>
+                        <p class="text-airvibe-text-light text-sm mb-4">Daily spiritual guidance and uplifting messages for your day.</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-full bg-airvibe-success/20 flex items-center justify-center">
+                                    <i class="fas fa-hands-praying text-xs"></i>
+                                </div>
+                                <span class="text-sm">@PastorJohn</span>
+                            </div>
+                            <span class="text-xs px-3 py-1 rounded-full bg-purple-500/20 text-purple-400">Faith</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
-    <footer class="border-t border-white/5 py-12 text-center text-gray-600 text-sm">
-        <p>&copy; 2025 Airvibe Platform. Built for Creators.</p>
+    <section id="features" class="py-24 px-4 md:px-8 relative">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <div class="inline-block px-4 py-2 rounded-full bg-airvibe-primary/10 border border-airvibe-primary/20 text-airvibe-primary font-medium text-sm mb-4">
+                    PREMIUM FEATURES
+                </div>
+                <h2 class="text-4xl md:text-5xl font-bold font-heading mb-6">Everything You Need</h2>
+                <p class="text-lg text-airvibe-text-light max-w-2xl mx-auto">Professional broadcasting tools, simplified for creators of all levels.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="glass-card rounded-2xl p-6 text-center card-hover">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-airvibe-primary/20 to-airvibe-primary/10 border border-airvibe-primary/30 flex items-center justify-center text-2xl mb-4 mx-auto">
+                        <i class="fas fa-broadcast-tower text-airvibe-primary"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Studio-Quality Audio</h3>
+                    <p class="text-airvibe-text-light text-sm">Professional-grade audio processing with real-time noise cancellation and EQ.</p>
+                </div>
+                
+                <div class="glass-card rounded-2xl p-6 text-center card-hover">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-airvibe-secondary/20 to-airvibe-secondary/10 border border-airvibe-secondary/30 flex items-center justify-center text-2xl mb-4 mx-auto">
+                        <i class="fas fa-wallet text-airvibe-secondary"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Instant Monetization</h3>
+                    <p class="text-airvibe-text-light text-sm">Receive tips, gifts, and subscriptions with instant payout to your digital wallet.</p>
+                </div>
+                
+                <div class="glass-card rounded-2xl p-6 text-center card-hover">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-airvibe-accent/20 to-airvibe-accent/10 border border-airvibe-accent/30 flex items-center justify-center text-2xl mb-4 mx-auto">
+                        <i class="fas fa-users text-airvibe-accent"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Global Audience</h3>
+                    <p class="text-airvibe-text-light text-sm">Reach listeners worldwide with our low-latency, high-quality streaming network.</p>
+                </div>
+                
+                <div class="glass-card rounded-2xl p-6 text-center card-hover">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-airvibe-success/20 to-airvibe-success/10 border border-airvibe-success/30 flex items-center justify-center text-2xl mb-4 mx-auto">
+                        <i class="fas fa-chart-line text-airvibe-success"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Advanced Analytics</h3>
+                    <p class="text-airvibe-text-light text-sm">Track your growth with detailed insights on listeners, engagement, and earnings.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-20 relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-r from-airvibe-primary/10 via-airvibe-secondary/10 to-airvibe-primary/10"></div>
+        <div class="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="stat-card glass-card rounded-2xl p-8 text-center relative overflow-hidden">
+                    <div class="relative z-10">
+                        <div class="text-5xl md:text-6xl font-bold mb-2 gradient-text">2M+</div>
+                        <div class="text-xl font-semibold mb-2">Monthly Listeners</div>
+                        <p class="text-airvibe-text-light">Growing community of audio enthusiasts</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card glass-card rounded-2xl p-8 text-center relative overflow-hidden">
+                    <div class="relative z-10">
+                        <div class="text-5xl md:text-6xl font-bold mb-2 gradient-text">50K+</div>
+                        <div class="text-xl font-semibold mb-2">Active Creators</div>
+                        <p class="text-airvibe-text-light">Building their audio empire on Airvibe</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card glass-card rounded-2xl p-8 text-center relative overflow-hidden">
+                    <div class="relative z-10">
+                        <div class="text-5xl md:text-6xl font-bold mb-2 gradient-text">24/7</div>
+                        <div class="text-xl font-semibold mb-2">Platform Uptime</div>
+                        <p class="text-airvibe-text-light">Reliable streaming, always available</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-32 px-4 md:px-8 text-center relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-airvibe-primary/10 via-airvibe-dark to-airvibe-secondary/10"></div>
+        <div class="max-w-4xl mx-auto relative z-10">
+            <div class="inline-block px-6 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium mb-6">
+                🚀 READY TO LAUNCH
+            </div>
+            <h2 class="text-4xl md:text-6xl font-bold font-heading mb-6">Start Your Audio Journey Today</h2>
+            <p class="text-xl text-airvibe-text-light mb-10 max-w-2xl mx-auto">Join thousands of creators who are already building their audience and earning on Airvibe.</p>
+            
+            <div class="flex flex-col sm:flex-row gap-6 justify-center">
+                <a href="/studio" class="btn-primary px-10 py-5 rounded-full font-bold text-lg flex items-center justify-center gap-3 shadow-xl">
+                    <i class="fas fa-rocket"></i>
+                    <span>Start Broadcasting Free</span>
+                </a>
+                <a href="/dashboard" class="btn-secondary px-10 py-5 rounded-full font-bold text-lg flex items-center justify-center gap-3">
+                    <i class="fas fa-headphones"></i>
+                    <span>Explore Live Streams</span>
+                </a>
+            </div>
+            
+            <p class="text-airvibe-text-light text-sm mt-8">No credit card required • Free forever plan • 30-day money-back guarantee</p>
+        </div>
+    </section>
+
+    <footer class="border-t border-airvibe-border py-12 px-4 md:px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+                <div>
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-airvibe-primary to-airvibe-secondary flex items-center justify-center font-bold text-white">
+                            <i class="fas fa-wave-square"></i>
+                        </div>
+                        <span class="text-xl font-bold font-heading">AIRVIBE</span>
+                    </div>
+                    <p class="text-airvibe-text-light text-sm mb-6">The future of live audio broadcasting. Empowering creators worldwide.</p>
+                    <div class="flex gap-4">
+                        <a href="#" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition">
+                            <i class="fab fa-discord"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold text-lg mb-6">Product</h4>
+                    <ul class="space-y-3">
+                        <li><a href="/studio" class="text-airvibe-text-light hover:text-white transition text-sm">Broadcast Studio</a></li>
+                        <li><a href="/dashboard" class="text-airvibe-text-light hover:text-white transition text-sm">Live Dashboard</a></li>
+                        <li><a href="#features" class="text-airvibe-text-light hover:text-white transition text-sm">Features</a></li>
+                        <li><a href="#" class="text-airvibe-text-light hover:text-white transition text-sm">Pricing</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold text-lg mb-6">Company</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-airvibe-text-light hover:text-white transition text-sm">About Us</a></li>
+                        <li><a href="#" class="text-airvibe-text-light hover:text-white transition text-sm">Blog</a></li>
+                        <li><a href="#" class="text-airvibe-text-light hover:text-white transition text-sm">Careers</a></li>
+                        <li><a href="#" class="text-airvibe-text-light hover:text-white transition text-sm">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold text-lg mb-6">Legal</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-airvibe-text-light hover:text-white transition text-sm">Privacy Policy</a></li>
+                        <li><a href="#" class="text-airvibe-text-light hover:text-white transition text-sm">Terms of Service</a></li>
+                        <li><a href="#" class="text-airvibe-text-light hover:text-white transition text-sm">Cookie Policy</a></li>
+                        <li><a href="#" class="text-airvibe-text-light hover:text-white transition text-sm">Community Guidelines</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="pt-8 border-t border-airvibe-border text-center">
+                <p class="text-airvibe-text-light text-sm">&copy; 2025 Airvibe Platform. All rights reserved. Built with ❤️ for creators worldwide.</p>
+                <p class="text-airvibe-text-light text-xs mt-2">v27.0 • Last updated: Today</p>
+            </div>
+        </div>
     </footer>
 
+    <button id="backToTop" class="fixed bottom-6 right-6 w-12 h-12 rounded-full bg-airvibe-primary text-white shadow-lg flex items-center justify-center z-40 opacity-0 transition-opacity duration-300">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
     <script>
-        const card = document.querySelector('.animate-float');
-        const container = document.querySelector('main');
-
-        // Desktop Mouse Move
-        container.addEventListener('mousemove', (e) => {
-            const xAxis = (window.innerWidth / 2 - e.pageX) / 25;
-            const yAxis = (window.innerHeight / 2 - e.pageY) / 25;
-            card.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
-        });
-
-        container.addEventListener('mouseleave', () => {
-            card.style.transition = "all 0.5s ease";
-            card.style.transform = `rotateY(0deg) rotateX(0deg)`;
+        // Mobile Menu Toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+            mobileMenuBtn.classList.toggle('bg-airvibe-primary/20');
         });
         
-        container.addEventListener('mouseenter', () => { card.style.transition = "none"; });
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!mobileMenuBtn.contains(e.target) && !mobileMenu.contains(e.target)) {
+                mobileMenu.classList.add('hidden');
+                mobileMenuBtn.classList.remove('bg-airvibe-primary/20');
+            }
+        });
         
-        // Mobile Gyroscope
-        if (window.DeviceOrientationEvent) {
-            window.addEventListener("deviceorientation", (e) => {
-                if(e.gamma && e.beta) {
-                    const x = e.gamma / 3; 
-                    const y = e.beta / 3;
-                    card.style.transform = `rotateY(${x}deg) rotateX(${y}deg)`;
+        // Back to Top Button
+        const backToTopBtn = document.getElementById('backToTop');
+        
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                backToTopBtn.classList.remove('opacity-0');
+                backToTopBtn.classList.add('opacity-100');
+            } else {
+                backToTopBtn.classList.remove('opacity-100');
+                backToTopBtn.classList.add('opacity-0');
+            }
+        });
+        
+        backToTopBtn.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+        
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    // Close mobile menu if open
+                    mobileMenu.classList.add('hidden');
+                    mobileMenuBtn.classList.remove('bg-airvibe-primary/20');
+                    
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
                 }
-            }, true);
+            });
+        });
+        
+        // Navbar scroll effect
+        const navbar = document.querySelector('nav');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('py-3');
+                navbar.classList.remove('py-4');
+            } else {
+                navbar.classList.remove('py-3');
+                navbar.classList.add('py-4');
+            }
+        });
+        
+        // Interactive demo card 3D effect
+        const demoCard = document.querySelector('.animate-float');
+        if (demoCard) {
+            demoCard.addEventListener('mousemove', (e) => {
+                const xAxis = (window.innerWidth / 2 - e.pageX) / 25;
+                const yAxis = (window.innerHeight / 2 - e.pageY) / 25;
+                demoCard.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
+            });
+            
+            demoCard.addEventListener('mouseleave', () => {
+                demoCard.style.transform = 'rotateY(0deg) rotateX(0deg)';
+            });
         }
+        
+        // Initialize animations when elements come into view
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-fade-in');
+                }
+            });
+        }, observerOptions);
+        
+        // Observe all sections
+        document.querySelectorAll('section').forEach(section => {
+            observer.observe(section);
+        });
+        
+        // Waveform animation
+        function animateWaveform() {
+            const bars = document.querySelectorAll('.waveform div');
+            bars.forEach((bar, index) => {
+                const randomHeight = Math.floor(Math.random() * 16) + 4;
+                bar.style.height = `${randomHeight}px`;
+                
+                // Randomize animation delay
+                const delay = index * 0.2;
+                bar.style.animationDelay = `${delay}s`;
+            });
+        }
+        
+        // Update waveform every 500ms
+        setInterval(animateWaveform, 500);
+        
+        // Initialize
+        animateWaveform();
+        
+        // Add hover effect to stream cards
+        document.querySelectorAll('.card-hover').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-8px)';
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateY(0)';
+            });
+        });
+        
+        console.log('🎧 Airvibe Platform v27.0 initialized successfully!');
     </script>
-
 </body>
 </html>

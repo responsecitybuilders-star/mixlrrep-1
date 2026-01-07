@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join Airvibe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background: #050505; color: white; font-family: 'Outfit', sans-serif; overflow: hidden; }
+        .glass-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(12px); }
+        .input-field { background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); transition: all 0.3s; }
+        .input-field:focus { border-color: #10b981; outline: none; background: rgba(16, 185, 129, 0.1); }
+    </style>
+</head>
+<body class="flex items-center justify-center h-screen relative">
+
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-1/4 right-1/4 w-96 h-96 bg-green-600/10 rounded-full blur-[100px] animate-pulse"></div>
+        <div class="absolute bottom-1/4 left-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-[100px] animate-pulse" style="animation-delay: 1s"></div>
+    </div>
+
+    <div class="glass-card p-8 rounded-3xl w-full max-w-md relative z-10 mx-4">
+        <div class="text-center mb-6">
+            <h1 class="text-2xl font-black tracking-tight">Create Account</h1>
+            <p class="text-gray-400 text-sm mt-1">Join the future of audio broadcasting.</p>
+        </div>
+
+        <form onsubmit="handleRegister(event)" class="space-y-4">
+            <div class="flex flex-col items-center mb-4 group cursor-pointer" onclick="alert('Avatar upload simulated')">
+                <div class="w-20 h-20 rounded-full bg-gray-800 border-2 border-dashed border-gray-600 flex items-center justify-center group-hover:border-green-500 transition">
+                    <i class="fas fa-camera text-gray-500 group-hover:text-green-500"></i>
+                </div>
+                <span class="text-[10px] text-gray-500 mt-2 uppercase font-bold">Upload Photo</span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="text-xs font-bold text-gray-500 uppercase ml-1">Username</label>
+                    <input id="reg-username" type="text" class="input-field w-full rounded-xl px-4 py-3 mt-1 text-white" placeholder="DJ_Cool" required>
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-gray-500 uppercase ml-1">Role</label>
+                    <select id="reg-role" class="input-field w-full rounded-xl px-4 py-3 mt-1 text-white appearance-none">
+                        <option value="listener">Listener</option>
+                        <option value="creator">Creator</option>
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <label class="text-xs font-bold text-gray-500 uppercase ml-1">Email</label>
+                <input type="email" class="input-field w-full rounded-xl px-4 py-3 mt-1 text-white" placeholder="email@domain.com" required>
+            </div>
+            <div>
+                <label class="text-xs font-bold text-gray-500 uppercase ml-1">Password</label>
+                <input type="password" class="input-field w-full rounded-xl px-4 py-3 mt-1 text-white" placeholder="••••••••" required>
+            </div>
+
+            <button type="submit" class="w-full py-3.5 bg-green-600 hover:bg-green-500 text-white font-bold rounded-xl transition shadow-lg shadow-green-900/50 mt-2">
+                Join Airvibe
+            </button>
+        </form>
+
+        <p class="text-center text-sm text-gray-500 mt-6">
+            Already have an account? <a href="/login" class="text-green-400 hover:text-white font-bold">Sign In</a>
+        </p>
+    </div>
+
+    <script>
+        function handleRegister(e) {
+            e.preventDefault();
+            const username = document.getElementById('reg-username').value;
+            const role = document.getElementById('reg-role').value;
+            const btn = e.target.querySelector('button');
+            
+            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Creating Account...';
+            btn.disabled = true;
+
+            // 🔥 MAGIC: Auto-save profile so they don't have to setup again
+            localStorage.setItem('av_name', username);
+            const avatarSeed = Math.floor(Math.random()*9000);
+            localStorage.setItem('av_avatar', `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}`);
+
+            setTimeout(() => {
+                // Redirect based on role
+                if(role === 'creator') {
+                    window.location.href = "/studio";
+                } else {
+                    window.location.href = "/dashboard";
+                }
+            }, 1500);
+        }
+    </script>
+</body>
+</html>

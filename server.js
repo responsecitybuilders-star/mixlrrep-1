@@ -14,9 +14,11 @@ const io = new Server(server, {
   transports: ["websocket", "polling"],
 });
 
+// Serve Public Files
 const PUBLIC_DIR = path.join(__dirname, "public");
 app.use(express.static(PUBLIC_DIR));
 
+// --- 🚏 ROUTES (THE MAP) ---
 function sendIfExists(res, fileName) {
   const filePath = path.join(PUBLIC_DIR, fileName);
   res.sendFile(filePath, (err) => {
@@ -24,252 +26,73 @@ function sendIfExists(res, fileName) {
   });
 }
 
+// 1. Landing Page
 app.get("/", (req, res) => sendIfExists(res, "index.html"));
+
+// 2. Apps
 app.get("/studio", (req, res) => sendIfExists(res, "studio.html"));
 app.get("/listen", (req, res) => sendIfExists(res, "dashboard.html"));
 app.get("/dashboard", (req, res) => sendIfExists(res, "dashboard.html"));
 
+// 3. Auth Pages (NEW LINKS)
+app.get("/login", (req, res) => sendIfExists(res, "login.html"));
+app.get("/register", (req, res) => sendIfExists(res, "register.html"));
+
+// PeerJS Server
 const peerServer = ExpressPeerServer(server, { path: "/peerjs", debug: true });
 app.use("/peerjs", peerServer);
 
-// ✅ GLOBAL CHAT SYSTEM
-const GLOBAL_CHAT_ROOM = "airvibe-global-chat";
-let chatHistory = []; // Store last 100 messages
-let onlineUsers = new Map(); // Store socket.id -> user info
-
-let hostPeerId = null;
-let hostSocketId = null;
-let currentStream = null;
-
-function broadcastStatus() {
-  io.emit("host-status", {
-    live: !!hostPeerId,
-    stream: currentStream,
-    hostPeerId: hostPeerId || null,
-    onlineCount: onlineUsers.size
-  });
-}
-
-function broadcastOnlineUsers() {
-  const users = Array.from(onlineUsers.values()).map(user => ({
-    name: user.name,
-    isHost: user.isHost,
-    role: user.role
-  }));
-  io.to(GLOBAL_CHAT_ROOM).emit("online-users", users);
-}
+// --- 📡 SOCKET LOGIC (EXISTING) ---
+let activeStreams = new Map(); // Store active streams
 
 io.on("connection", (socket) => {
-  console.log("🔌 New Connection:", socket.id);
+  console.log("🔌 Connected:", socket.id);
+  
+  // Send list to new user
+  socket.emit("stream-list", Array.from(activeStreams.values()));
 
-  // ✅ Auto-join global chat
-  socket.join(GLOBAL_CHAT_ROOM);
-
-  // Send current status and chat history to new user
-  socket.emit("host-status", {
-    live: !!hostPeerId,
-    stream: currentStream,
-    hostPeerId: hostPeerId || null,
-    onlineCount: onlineUsers.size
-  });
-
-  // Send chat history
-  socket.emit("chat-history", chatHistory.slice(-50));
-
-  // ✅ USER JOIN EVENT
-  socket.on("user-join", (userData) => {
-    onlineUsers.set(socket.id, {
-      name: userData.name || "Anonymous",
-      isHost: userData.isHost || false,
-      role: userData.role || "listener",
-      socketId: socket.id
+  // HOST: Go Live
+  socket.on("host-ready", (data) => {
+    activeStreams.set(socket.id, {
+      peerId: data.peerId,
+      title: data.title || "Unknown Frequency",
+      hostName: data.hostName || "Anonymous",
+      listeners: 0
     });
-
-    // Notify everyone about new user
-    const joinMsg = {
-      user: "SYSTEM",
-      msg: `${userData.name || "Anonymous"} joined the chat`,
-      type: "system",
-      ts: Date.now()
-    };
-    
-    chatHistory.push(joinMsg);
-    if (chatHistory.length > 100) chatHistory.shift();
-    
-    io.to(GLOBAL_CHAT_ROOM).emit("chatMessage", joinMsg);
-    broadcastOnlineUsers();
-    
-    console.log(`👤 ${userData.name || "Anonymous"} joined (${onlineUsers.size} online)`);
+    socket.join(data.peerId); // Join own room
+    io.emit("stream-list", Array.from(activeStreams.values()));
   });
 
-  // ✅ GLOBAL CHAT MESSAGES
-  socket.on("chatMessage", (data) => {
-    const userInfo = onlineUsers.get(socket.id);
-    const userName = userInfo?.name || data?.user || "Guest";
-    const isHost = userInfo?.isHost || false;
-    
-    const message = {
-      user: userName,
-      msg: data?.msg || "",
-      type: isHost ? "host" : "user",
-      isHost: isHost,
-      color: data?.color || (isHost ? "#ef4444" : "#3b82f6"),
-      ts: Date.now(),
-      socketId: socket.id
-    };
-
-    if (!message.msg.trim()) return;
-
-    // Add to chat history
-    chatHistory.push(message);
-    if (chatHistory.length > 100) chatHistory.shift();
-
-    // Broadcast to everyone in global chat
-    io.to(GLOBAL_CHAT_ROOM).emit("chatMessage", message);
-    console.log(`💬 ${userName}: ${message.msg}`);
-  });
-
-  // ✅ GIFTS (Global)
-  socket.on("sendGift", (data) => {
-    const userInfo = onlineUsers.get(socket.id);
-    const userName = userInfo?.name || data?.user || "Guest";
-    
-    const giftMsg = {
-      user: userName,
-      gift: data?.gift || "❤️",
-      type: "gift",
-      isHost: userInfo?.isHost || false,
-      ts: Date.now()
-    };
-
-    // Broadcast gift to everyone
-    io.to(GLOBAL_CHAT_ROOM).emit("giftReceived", giftMsg);
-    
-    // Also send as system message in chat
-    const chatGiftMsg = {
-      user: "SYSTEM",
-      msg: `${userName} sent a ${giftMsg.gift} gift!`,
-      type: "gift-announce",
-      ts: Date.now()
-    };
-    
-    chatHistory.push(chatGiftMsg);
-    if (chatHistory.length > 100) chatHistory.shift();
-    io.to(GLOBAL_CHAT_ROOM).emit("chatMessage", chatGiftMsg);
-  });
-
-  // ✅ TYPING INDICATOR
-  socket.on("typing", (isTyping) => {
-    const userInfo = onlineUsers.get(socket.id);
-    if (userInfo) {
-      socket.to(GLOBAL_CHAT_ROOM).emit("user-typing", {
-        user: userInfo.name,
-        isTyping: isTyping
-      });
-    }
-  });
-
-  // ✅ HOST SPECIFIC EVENTS
-  socket.on("host-ready", (peerId) => {
-    hostPeerId = peerId;
-    hostSocketId = socket.id;
-
-    currentStream = {
-      title: "Live Radio",
-      host: "Host",
-      startedAt: Date.now(),
-    };
-
-    // Update user info to host
-    onlineUsers.set(socket.id, {
-      name: "HOST",
-      isHost: true,
-      role: "host",
-      socketId: socket.id
-    });
-
-    console.log("🎙️ Host Live. PeerId:", peerId);
-    
-    // Announce host is live
-    const liveMsg = {
-      user: "SYSTEM",
-      msg: "🎤 Host is now LIVE!",
-      type: "system",
-      ts: Date.now()
-    };
-    
-    chatHistory.push(liveMsg);
-    io.to(GLOBAL_CHAT_ROOM).emit("chatMessage", liveMsg);
-    
-    broadcastStatus();
-    broadcastOnlineUsers();
-  });
-
-  socket.on("listener-ready", (listenerPeerId) => {
-    if (hostPeerId && hostSocketId) {
-      io.to(hostSocketId).emit("new-listener", listenerPeerId);
-    }
-  });
-
-  socket.on("request-online-users", () => {
-    const users = Array.from(onlineUsers.values()).map(user => ({
-      name: user.name,
-      isHost: user.isHost,
-      role: user.role
-    }));
-    socket.emit("online-users", users);
-  });
-
-  socket.on("disconnect", () => {
-    const userInfo = onlineUsers.get(socket.id);
-    
-    if (userInfo) {
-      // Notify chat about user leaving
-      const leaveMsg = {
-        user: "SYSTEM",
-        msg: `${userInfo.name} left the chat`,
-        type: "system",
-        ts: Date.now()
-      };
-      
-      chatHistory.push(leaveMsg);
-      io.to(GLOBAL_CHAT_ROOM).emit("chatMessage", leaveMsg);
-      
-      onlineUsers.delete(socket.id);
-      
-      // If host disconnects
-      if (socket.id === hostSocketId) {
-        console.log("🛑 Host Offline");
-        hostPeerId = null;
-        hostSocketId = null;
-        currentStream = null;
-        
-        const offlineMsg = {
-          user: "SYSTEM",
-          msg: "🎤 Host went offline",
-          type: "system",
-          ts: Date.now()
-        };
-        
-        chatHistory.push(offlineMsg);
-        io.to(GLOBAL_CHAT_ROOM).emit("chatMessage", offlineMsg);
+  // LISTENER: Join Stream
+  socket.on("join-stream", (roomPeerId) => {
+    socket.join(roomPeerId);
+    // Find host socket to notify
+    for (let [id, stream] of activeStreams) {
+      if (stream.peerId === roomPeerId) {
+        io.to(id).emit("new-listener", socket.id);
+        break;
       }
     }
-    
-    broadcastStatus();
-    broadcastOnlineUsers();
-    console.log(`❌ User disconnected (${onlineUsers.size} online)`);
   });
 
-  // Ping for latency
-  socket.on("ping", () => {
-    socket.emit("pong");
+  // CHAT & GIFTS
+  socket.on('chatMessage', (data) => {
+    if (data.room) socket.to(data.room).emit('chatMessage', data);
+  });
+  
+  socket.on('sendGift', (data) => {
+    if (data.room) io.to(data.room).emit('giftReceived', data);
+  });
+
+  // DISCONNECT
+  socket.on("disconnect", () => {
+    if (activeStreams.has(socket.id)) {
+      activeStreams.delete(socket.id);
+      io.emit("stream-list", Array.from(activeStreams.values()));
+    }
   });
 });
 
 server.listen(PORT, () => {
-  console.log(`🚀 Airvibe Server Running on Port ${PORT}`);
-  console.log(`➡️ Studio: /studio`);
-  console.log(`➡️ Listen: /listen`);
-  console.log(`💬 Global Chat: Enabled`);
+  console.log(`🚀 Airvibe running on port ${PORT}`);
 });
