@@ -141,9 +141,7 @@
     <!-- External Libraries -->
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/wavesurfer.js@7/dist/wavesurfer.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/howler@2.2.4/dist/howler.min.js"></script>
     
     <style>
         * {
@@ -158,6 +156,9 @@
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
             overflow-x: hidden;
             position: relative;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
         }
         
         body::before {
@@ -200,23 +201,6 @@
             background-size: 200% auto;
         }
         
-        .gradient-border {
-            position: relative;
-            background: linear-gradient(45deg, #8B5CF6, #06B6D4, #F59E0B);
-            padding: 1px;
-            border-radius: 16px;
-        }
-        
-        .gradient-border > div {
-            background: #161622;
-            border-radius: 15px;
-        }
-        
-        .live-indicator {
-            background: linear-gradient(90deg, #EF4444, #F59E0B);
-            animation: pulse-glow 2s ease-in-out infinite;
-        }
-        
         .channel-strip {
             background: linear-gradient(180deg, #1a1a22 0%, #141419 100%);
             border: 1px solid rgba(255, 255, 255, 0.08);
@@ -239,51 +223,32 @@
             transition: height 0.1s ease-out;
         }
         
-        .knob {
-            background: conic-gradient(from 0deg, #8B5CF6, #06B6D4, #8B5CF6);
-            border-radius: 50%;
+        .meter-container {
             position: relative;
-            transform-origin: center;
+            overflow: hidden;
         }
         
-        .knob::before {
+        .meter-container::before {
             content: '';
             position: absolute;
-            width: 4px;
-            height: 40%;
-            background: white;
-            top: 10%;
-            left: 50%;
-            transform: translateX(-50%);
-            border-radius: 2px;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(transparent 70%, rgba(255,255,255,0.1) 71%, rgba(255,255,255,0.1) 74%, transparent 75%),
+                      linear-gradient(transparent 85%, rgba(255,255,255,0.1) 86%, rgba(255,255,255,0.1) 89%, transparent 90%),
+                      linear-gradient(transparent 95%, rgba(255,255,255,0.2) 96%, rgba(255,255,255,0.2) 99%, transparent 100%);
+            pointer-events: none;
         }
         
-        .fader-track {
-            background: linear-gradient(to top, #222233, #161622);
-            border-radius: 4px;
-            position: relative;
+        .record-btn {
+            background: radial-gradient(circle, #EF4444, #DC2626);
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+            animation: record-pulse 1.5s ease-in-out infinite;
         }
         
-        .fader-handle {
-            background: linear-gradient(135deg, #8B5CF6, #7C3AED);
-            border-radius: 6px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-            cursor: grab;
-        }
-        
-        .fader-handle:active {
-            cursor: grabbing;
-        }
-        
-        .eq-band {
-            background: linear-gradient(to top, #1a1a22, #222233);
-            border-radius: 4px;
-            position: relative;
-        }
-        
-        .eq-knob {
-            background: conic-gradient(from 0deg, #F59E0B, #06B6D4, #F59E0B);
-            border-radius: 50%;
+        .record-btn.recording {
+            animation: record-pulse 0.5s ease-in-out infinite;
         }
         
         .soundboard-btn {
@@ -303,12 +268,6 @@
             transform: translateY(0);
         }
         
-        .record-btn {
-            background: radial-gradient(circle, #EF4444, #DC2626);
-            box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
-            animation: record-pulse 1.5s ease-in-out infinite;
-        }
-        
         .btn-primary {
             background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
             box-shadow: 0 4px 20px rgba(139, 92, 246, 0.3);
@@ -319,15 +278,6 @@
             background: linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%);
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
-        }
-        
-        .scrollbar-hide::-webkit-scrollbar {
-            display: none;
-        }
-        
-        .scrollbar-hide {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
         }
         
         .scrollbar-custom::-webkit-scrollbar {
@@ -365,89 +315,246 @@
             border-radius: 4px;
         }
         
-        .gauge-ring {
-            fill: none;
-            stroke-linecap: round;
-            transition: stroke-dasharray 0.3s ease;
+        .upload-zone {
+            border: 2px dashed rgba(139, 92, 246, 0.3);
+            border-radius: 12px;
+            transition: all 0.3s ease;
         }
         
-        @supports (-webkit-touch-callout: none) {
-            .safe-area-inset-bottom {
-                padding-bottom: env(safe-area-inset-bottom);
-            }
+        .upload-zone:hover {
+            border-color: rgba(139, 92, 246, 0.6);
+            background: rgba(139, 92, 246, 0.05);
         }
         
+        .upload-zone.dragover {
+            border-color: rgba(139, 92, 246, 0.8);
+            background: rgba(139, 92, 246, 0.1);
+        }
+        
+        .audio-file-item {
+            transition: all 0.3s ease;
+        }
+        
+        .audio-file-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateX(4px);
+        }
+        
+        .audio-file-item.playing {
+            background: rgba(139, 92, 246, 0.15);
+            border-left: 3px solid #8B5CF6;
+        }
+        
+        .level-meter {
+            background: linear-gradient(to right, 
+                #10B981 0%, 
+                #10B981 30%, 
+                #F59E0B 31%, 
+                #F59E0B 80%, 
+                #EF4444 81%, 
+                #EF4444 100%);
+            transition: width 0.1s ease;
+        }
+        
+        .peaks-visualizer {
+            background: linear-gradient(180deg, 
+                rgba(139, 92, 246, 0.1) 0%, 
+                rgba(6, 182, 212, 0.1) 50%, 
+                rgba(245, 158, 11, 0.1) 100%);
+        }
+        
+        .progress-wave {
+            fill: rgba(139, 92, 246, 0.3);
+            stroke: #8B5CF6;
+            stroke-width: 1;
+        }
+        
+        /* Mobile-specific styles */
         @media (max-width: 768px) {
             .mobile-stack {
-                flex-direction: column;
+                flex-direction: column !important;
             }
             
             .mobile-full {
-                width: 100%;
+                width: 100% !important;
+            }
+            
+            .mobile-h-auto {
+                height: auto !important;
+            }
+            
+            .mobile-h-48 {
+                height: 12rem !important;
+            }
+            
+            .mobile-h-64 {
+                height: 16rem !important;
+            }
+            
+            .mobile-h-96 {
+                height: 24rem !important;
+            }
+            
+            .mobile-text-sm {
+                font-size: 0.875rem !important;
+            }
+            
+            .mobile-text-xs {
+                font-size: 0.75rem !important;
+            }
+            
+            .mobile-p-3 {
+                padding: 0.75rem !important;
+            }
+            
+            .mobile-p-2 {
+                padding: 0.5rem !important;
+            }
+            
+            .mobile-gap-2 {
+                gap: 0.5rem !important;
+            }
+            
+            .mobile-grid-cols-2 {
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            }
+            
+            .mobile-overflow-x-auto {
+                overflow-x: auto !important;
+            }
+            
+            .mobile-min-w-32 {
+                min-width: 8rem !important;
+            }
+            
+            .mobile-scale-95 {
+                transform: scale(0.95) !important;
+            }
+            
+            .mobile-touch-target {
+                min-height: 44px !important;
+                min-width: 44px !important;
+            }
+            
+            .mobile-hidden {
+                display: none !important;
+            }
+            
+            .mobile-flex-col {
+                flex-direction: column !important;
+            }
+            
+            .mobile-justify-start {
+                justify-content: flex-start !important;
+            }
+            
+            .mobile-items-start {
+                align-items: flex-start !important;
+            }
+            
+            .mobile-space-y-2 > * + * {
+                margin-top: 0.5rem !important;
+            }
+            
+            .mobile-truncate {
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+                white-space: nowrap !important;
+            }
+            
+            .mobile-border-none {
+                border: none !important;
+            }
+            
+            .mobile-rounded-lg {
+                border-radius: 0.5rem !important;
+            }
+        }
+        
+        /* Tablet-specific styles */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .tablet-w-64 {
+                width: 16rem !important;
+            }
+            
+            .tablet-w-80 {
+                width: 20rem !important;
+            }
+            
+            .tablet-grid-cols-2 {
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            }
+        }
+        
+        /* Safe area insets for mobile */
+        @supports (-webkit-touch-callout: none) {
+            .safe-area-inset-top {
+                padding-top: env(safe-area-inset-top);
+            }
+            
+            .safe-area-inset-bottom {
+                padding-bottom: env(safe-area-inset-bottom);
+            }
+            
+            .safe-area-inset-left {
+                padding-left: env(safe-area-inset-left);
+            }
+            
+            .safe-area-inset-right {
+                padding-right: env(safe-area-inset-right);
             }
         }
     </style>
 </head>
 <body class="antialiased overflow-hidden h-screen">
     <!-- Setup Modal -->
-    <div id="setupModal" class="fixed inset-0 bg-black/90 z-[1000] flex items-center justify-center p-4">
-        <div class="glass-card rounded-2xl p-8 max-w-2xl w-full">
-            <div class="text-center mb-8">
-                <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-airvibe-primary to-airvibe-secondary flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-broadcast-tower text-2xl text-white"></i>
+    <div id="setupModal" class="fixed inset-0 bg-black/90 z-[1000] flex items-center justify-center p-4 safe-area-inset-top safe-area-inset-bottom">
+        <div class="glass-card rounded-2xl p-6 md:p-8 max-w-2xl w-full mx-4 mobile-p-3">
+            <div class="text-center mb-6 md:mb-8">
+                <div class="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-gradient-to-br from-airvibe-primary to-airvibe-secondary flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-broadcast-tower text-xl md:text-2xl text-white"></i>
                 </div>
-                <h1 class="text-3xl font-bold font-heading mb-2">Airvibe Studio 4000</h1>
-                <p class="text-airvibe-text-light">Professional Broadcasting Suite</p>
+                <h1 class="text-2xl md:text-3xl font-bold font-heading mb-2">Airvibe Studio 4000</h1>
+                <p class="text-sm md:text-base text-airvibe-text-light">Professional Broadcasting Suite</p>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
                 <div>
-                    <label class="block text-sm font-medium mb-2">Studio Name</label>
+                    <label class="block text-sm font-medium mb-2 mobile-text-xs">Studio Name</label>
                     <input type="text" 
                         id="studioName"
-                        class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none placeholder-airvibe-text-light"
+                        class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none placeholder-airvibe-text-light mobile-text-sm mobile-p-2"
                         placeholder="e.g. Midnight Sessions"
                         value="My Studio">
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium mb-2">Host Name</label>
+                    <label class="block text-sm font-medium mb-2 mobile-text-xs">Host Name</label>
                     <input type="text" 
                         id="hostName"
-                        class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none placeholder-airvibe-text-light"
+                        class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none placeholder-airvibe-text-light mobile-text-sm mobile-p-2"
                         placeholder="e.g. DJ Vibe"
                         value="Host">
                 </div>
                 
-                <div>
-                    <label class="block text-sm font-medium mb-2">Category</label>
-                    <select id="streamCategory" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none">
-                        <option value="music">Music</option>
-                        <option value="talk">Talk Show</option>
-                        <option value="gaming">Gaming</option>
-                        <option value="podcast">Podcast</option>
-                        <option value="education">Education</option>
-                    </select>
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-medium mb-2">Audio Input</label>
-                    <select id="audioInput" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none">
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium mb-2 mobile-text-xs">Audio Input</label>
+                    <select id="audioInput" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none mobile-text-sm mobile-p-2">
                         <!-- Populated by JavaScript -->
                     </select>
                 </div>
                 
                 <div class="md:col-span-2">
-                    <label class="block text-sm font-medium mb-2">Description (Optional)</label>
+                    <label class="block text-sm font-medium mb-2 mobile-text-xs">Description (Optional)</label>
                     <textarea 
                         id="streamDescription"
-                        class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none placeholder-airvibe-text-light h-24"
+                        class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none placeholder-airvibe-text-light h-20 mobile-text-sm mobile-p-2"
                         placeholder="Describe your broadcast..."></textarea>
                 </div>
             </div>
             
             <div class="flex gap-4">
-                <button onclick="initializeStudio()" class="flex-1 btn-primary py-4 rounded-xl font-bold text-lg">
+                <button onclick="initializeStudio()" class="flex-1 btn-primary py-4 rounded-xl font-bold text-lg mobile-text-base mobile-p-2 mobile-touch-target">
                     <i class="fas fa-play-circle mr-2"></i> Initialize Studio
                 </button>
             </div>
@@ -455,419 +562,388 @@
     </div>
 
     <!-- Main Studio Interface -->
-    <div id="studioInterface" class="h-screen flex flex-col hidden">
-        <!-- Top Bar -->
-        <div class="glass-nav p-4 flex items-center justify-between">
-            <div class="flex items-center gap-4">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-airvibe-primary to-airvibe-secondary flex items-center justify-center font-bold text-white">
-                        <i class="fas fa-wave-square"></i>
+    <div id="studioInterface" class="h-screen flex flex-col hidden safe-area-inset-top">
+        <!-- Top Bar - Mobile Optimized -->
+        <div class="glass-nav p-3 md:p-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 md:gap-4 mobile-stack">
+            <!-- Logo and Status -->
+            <div class="flex items-center justify-between md:justify-start gap-3">
+                <div class="flex items-center gap-2 md:gap-3">
+                    <div class="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-gradient-to-br from-airvibe-primary to-airvibe-secondary flex items-center justify-center font-bold text-white">
+                        <i class="fas fa-wave-square text-sm md:text-base"></i>
                     </div>
                     <div>
-                        <div class="text-lg font-bold font-heading">AIRVIBE STUDIO</div>
-                        <div class="text-xs text-airvibe-text-light font-mono" id="studioVersion">v4.0.0</div>
+                        <div class="text-base md:text-lg font-bold font-heading mobile-text-sm">AIRVIBE STUDIO</div>
+                        <div class="text-[10px] md:text-xs text-airvibe-text-light font-mono mobile-text-xs" id="studioVersion">v4.0.0</div>
                     </div>
                 </div>
                 
-                <div id="connectionStatus" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-500/20 border border-green-500/30">
+                <div id="connectionStatus" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-500/20 border border-green-500/30 md:hidden">
                     <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    <span class="text-xs font-medium text-green-400">CONNECTED</span>
+                    <span class="text-xs font-medium text-green-400">LIVE</span>
                 </div>
             </div>
             
-            <div class="flex items-center gap-4">
+            <!-- Time and Controls -->
+            <div class="flex items-center justify-between md:justify-end gap-3 md:gap-4">
                 <div class="text-right">
-                    <div class="text-sm font-medium" id="currentTime">--:--:--</div>
-                    <div class="text-xs text-airvibe-text-light" id="broadcastTimer">00:00:00</div>
+                    <div class="text-sm md:text-sm font-medium mobile-text-xs" id="currentTime">--:--:--</div>
+                    <div class="text-xs text-airvibe-text-light mobile-text-xs" id="broadcastTimer">00:00:00</div>
                 </div>
                 
-                <div id="onAirIndicator" class="flex items-center gap-2 px-4 py-2 rounded-full bg-red-500/20 border border-red-500/30 hidden">
+                <div id="onAirIndicator" class="hidden md:flex items-center gap-2 px-4 py-2 rounded-full bg-red-500/20 border border-red-500/30">
                     <div class="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
                     <span class="text-sm font-bold text-red-400">ON AIR</span>
                 </div>
                 
-                <button id="endStreamBtn" class="px-4 py-2 rounded-xl bg-airvibe-danger/20 border border-airvibe-danger/30 text-airvibe-danger font-medium hover:bg-airvibe-danger/30 transition">
-                    <i class="fas fa-power-off mr-2"></i> End Stream
+                <button id="endStreamBtn" class="px-3 md:px-4 py-2 rounded-xl bg-airvibe-danger/20 border border-airvibe-danger/30 text-airvibe-danger font-medium hover:bg-airvibe-danger/30 transition mobile-text-sm mobile-touch-target">
+                    <i class="fas fa-power-off mr-1 md:mr-2"></i> End
                 </button>
             </div>
         </div>
         
-        <!-- Main Content -->
-        <div class="flex-1 flex overflow-hidden">
-            <!-- Left Sidebar - Input Sources -->
-            <div class="w-80 border-r border-airvibe-border flex flex-col">
-                <!-- Microphone Channel -->
-                <div class="p-4 border-b border-airvibe-border">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="font-bold text-lg flex items-center gap-2">
-                            <i class="fas fa-microphone text-airvibe-primary"></i>
-                            Microphone
-                        </h3>
-                        <div class="flex items-center gap-2">
-                            <button id="micMuteBtn" class="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition">
-                                <i class="fas fa-microphone-slash text-sm"></i>
-                            </button>
-                            <button id="micSoloBtn" class="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition">
-                                <i class="fas fa-headphones text-sm"></i>
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="space-y-4">
-                        <!-- Volume Meter -->
-                        <div>
-                            <div class="flex justify-between text-xs text-airvibe-text-light mb-1">
-                                <span>Input Level</span>
-                                <span id="micLevel">-∞ dB</span>
-                            </div>
-                            <div class="h-2 bg-white/5 rounded-full overflow-hidden">
-                                <div id="micMeter" class="h-full meter-bar rounded-full" style="width: 0%"></div>
-                            </div>
-                        </div>
-                        
-                        <!-- Volume Fader -->
-                        <div class="relative h-40">
-                            <div class="fader-track absolute inset-x-4 top-0 bottom-0">
-                                <div id="micFader" class="fader-handle absolute w-10 h-6 -ml-5 -mt-3" style="top: 50%"></div>
-                            </div>
-                            <div class="absolute right-4 top-0 bottom-0 flex flex-col items-center justify-between py-4">
-                                <span class="text-xs">+12</span>
-                                <span class="text-xs">0</span>
-                                <span class="text-xs">-∞</span>
-                            </div>
-                        </div>
-                        
-                        <!-- EQ Controls -->
-                        <div class="grid grid-cols-3 gap-2">
-                            <div class="text-center">
-                                <div class="text-xs text-airvibe-text-light mb-2">LOW</div>
-                                <div class="eq-band h-32 mx-auto relative">
-                                    <div class="eq-knob absolute w-8 h-8 -ml-4 -mt-4 cursor-ns-resize" style="top: 50%"></div>
-                                </div>
-                            </div>
-                            <div class="text-center">
-                                <div class="text-xs text-airvibe-text-light mb-2">MID</div>
-                                <div class="eq-band h-32 mx-auto relative">
-                                    <div class="eq-knob absolute w-8 h-8 -ml-4 -mt-4 cursor-ns-resize" style="top: 50%"></div>
-                                </div>
-                            </div>
-                            <div class="text-center">
-                                <div class="text-xs text-airvibe-text-light mb-2">HIGH</div>
-                                <div class="eq-band h-32 mx-auto relative">
-                                    <div class="eq-knob absolute w-8 h-8 -ml-4 -mt-4 cursor-ns-resize" style="top: 50%"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Music Player -->
-                <div class="p-4 border-b border-airvibe-border">
-                    <h3 class="font-bold text-lg flex items-center gap-2 mb-4">
-                        <i class="fas fa-music text-airvibe-secondary"></i>
-                        Music Player
+        <!-- Main Content Area - Mobile Responsive -->
+        <div class="flex-1 flex flex-col md:flex-row overflow-hidden mobile-stack">
+            <!-- Left Sidebar - Input Sources & Recording (Hidden on mobile, accessible via menu) -->
+            <div id="leftSidebar" class="hidden md:flex md:w-96 border-r border-airvibe-border flex-col mobile-full mobile-h-96 mobile-overflow-y-auto">
+                <!-- Recording Section -->
+                <div class="p-4 border-b border-airvibe-border mobile-p-3">
+                    <h3 class="font-bold text-lg flex items-center gap-2 mb-4 mobile-text-base">
+                        <i class="fas fa-record-vinyl text-airvibe-danger"></i>
+                        Recording Studio
                     </h3>
                     
-                    <div class="space-y-4">
-                        <div class="bg-black/30 rounded-xl p-4">
-                            <div class="flex items-center gap-3 mb-3">
-                                <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-airvibe-primary/20 to-airvibe-secondary/20 flex items-center justify-center">
-                                    <i class="fas fa-compact-disc text-lg"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <div class="font-medium truncate" id="currentTrack">No Track Loaded</div>
-                                    <div class="text-xs text-airvibe-text-light">--:-- / --:--</div>
-                                </div>
+                    <div class="space-y-4 mobile-space-y-2">
+                        <!-- Recording Controls -->
+                        <div class="flex items-center justify-center gap-2 md:gap-4 mb-4">
+                            <button id="recordStartBtn" class="flex-1 py-3 rounded-xl bg-airvibe-danger/20 border border-airvibe-danger/30 text-airvibe-danger font-medium hover:bg-airvibe-danger/30 transition mobile-text-sm mobile-p-2 mobile-touch-target">
+                                <i class="fas fa-circle mr-2"></i> Record
+                            </button>
+                            <button id="recordStopBtn" class="flex-1 py-3 rounded-xl bg-gray-600/20 border border-gray-600/30 text-gray-400 font-medium hover:bg-gray-600/30 transition mobile-text-sm mobile-p-2 mobile-touch-target" disabled>
+                                <i class="fas fa-stop mr-2"></i> Stop
+                            </button>
+                        </div>
+                        
+                        <!-- Recording Timer & Status -->
+                        <div class="glass-card rounded-xl p-4 mobile-p-3">
+                            <div class="flex justify-between items-center mb-3">
+                                <div class="text-sm font-medium mobile-text-xs">Recording Status</div>
+                                <div id="recordingTimer" class="text-lg font-mono font-bold text-airvibe-danger mobile-text-base">00:00:00</div>
                             </div>
                             
-                            <div class="flex items-center gap-2">
-                                <button id="prevTrackBtn" class="flex-1 py-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition">
-                                    <i class="fas fa-step-backward"></i>
-                                </button>
-                                <button id="playPauseBtn" class="flex-1 py-2 rounded-lg bg-airvibe-primary/20 border border-airvibe-primary/30 hover:bg-airvibe-primary/30 transition">
-                                    <i class="fas fa-play"></i>
-                                </button>
-                                <button id="nextTrackBtn" class="flex-1 py-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition">
-                                    <i class="fas fa-step-forward"></i>
-                                </button>
-                                <button onclick="document.getElementById('musicUpload').click()" class="flex-1 py-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition">
-                                    <i class="fas fa-upload"></i>
-                                </button>
+                            <div class="flex items-center gap-2 mb-3">
+                                <div class="flex-1 h-2 bg-white/5 rounded-full overflow-hidden">
+                                    <div id="recordingLevel" class="level-meter h-full" style="width: 0%"></div>
+                                </div>
+                                <div id="recordingLevelDb" class="text-xs text-airvibe-text-light w-12 text-right mobile-text-xs">-∞ dB</div>
                             </div>
-                        </div>
-                        
-                        <!-- Playlist -->
-                        <div class="h-32 overflow-y-auto scrollbar-custom">
-                            <div id="playlist" class="space-y-1">
-                                <!-- Playlist items will be added here -->
+                            
+                            <div class="text-xs text-airvibe-text-light flex justify-between mobile-text-xs">
+                                <span id="recordingStatus">Ready to record</span>
+                                <span id="recordingSize">0 MB</span>
                             </div>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Soundboard -->
-                <div class="p-4 flex-1">
-                    <h3 class="font-bold text-lg flex items-center gap-2 mb-4">
-                        <i class="fas fa-drum text-airvibe-accent"></i>
-                        Soundboard
+                <!-- File Upload Section -->
+                <div class="p-4 border-b border-airvibe-border mobile-p-3">
+                    <h3 class="font-bold text-lg flex items-center gap-2 mb-4 mobile-text-base">
+                        <i class="fas fa-cloud-upload-alt text-airvibe-secondary"></i>
+                        Audio Library
                     </h3>
                     
-                    <div class="grid grid-cols-3 gap-2">
-                        <button onclick="playSound('applause')" class="soundboard-btn aspect-square flex flex-col items-center justify-center">
-                            <span class="text-2xl mb-1">👏</span>
-                            <span class="text-[10px]">Applause</span>
-                        </button>
-                        <button onclick="playSound('laugh')" class="soundboard-btn aspect-square flex flex-col items-center justify-center">
-                            <span class="text-2xl mb-1">😂</span>
-                            <span class="text-[10px]">Laugh</span>
-                        </button>
-                        <button onclick="playSound('horn')" class="soundboard-btn aspect-square flex flex-col items-center justify-center">
-                            <span class="text-2xl mb-1">📯</span>
-                            <span class="text-[10px]">Air Horn</span>
-                        </button>
-                        <button onclick="playSound('swoosh')" class="soundboard-btn aspect-square flex flex-col items-center justify-center">
-                            <span class="text-2xl mb-1">💨</span>
-                            <span class="text-[10px]">Swoosh</span>
-                        </button>
-                        <button onclick="playSound('ding')" class="soundboard-btn aspect-square flex flex-col items-center justify-center">
-                            <span class="text-2xl mb-1">🔔</span>
-                            <span class="text-[10px]">Bell</span>
-                        </button>
-                        <button onclick="playSound('record')" class="soundboard-btn aspect-square flex flex-col items-center justify-center">
-                            <span class="text-2xl mb-1">📼</span>
-                            <span class="text-[10px]">Scratch</span>
-                        </button>
-                        <button onclick="playSound('censor')" class="soundboard-btn aspect-square flex flex-col items-center justify-center">
-                            <span class="text-2xl mb-1">🚫</span>
-                            <span class="text-[10px]">Censor</span>
-                        </button>
-                        <button onclick="playSound('transition')" class="soundboard-btn aspect-square flex flex-col items-center justify-center">
-                            <span class="text-2xl mb-1">🌀</span>
-                            <span class="text-[10px]">Transition</span>
-                        </button>
-                        <button onclick="playSound('alert')" class="soundboard-btn aspect-square flex flex-col items-center justify-center">
-                            <span class="text-2xl mb-1">🚨</span>
-                            <span class="text-[10px]">Alert</span>
-                        </button>
+                    <div class="space-y-4 mobile-space-y-2">
+                        <!-- Upload Zone -->
+                        <div id="uploadZone" class="upload-zone p-4 md:p-6 text-center cursor-pointer mobile-p-3">
+                            <div class="mb-3">
+                                <i class="fas fa-file-audio text-2xl md:text-3xl text-airvibe-primary/50 mb-2"></i>
+                                <div class="text-sm font-medium mobile-text-xs">Drop audio files here</div>
+                                <div class="text-xs text-airvibe-text-light mt-1 mobile-text-xs">or click to browse</div>
+                            </div>
+                            <input type="file" id="audioUpload" hidden accept="audio/*" multiple>
+                            <button onclick="document.getElementById('audioUpload').click()" class="btn-primary px-3 md:px-4 py-2 rounded-lg text-sm mobile-text-xs mobile-touch-target">
+                                <i class="fas fa-folder-open mr-1 md:mr-2"></i> Browse Files
+                            </button>
+                        </div>
+                        
+                        <!-- Audio Files List -->
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <div class="text-sm font-medium mobile-text-xs">Audio Files</div>
+                                <div class="text-xs text-airvibe-text-light mobile-text-xs" id="audioFileCount">0 files</div>
+                            </div>
+                            <div id="audioFilesList" class="max-h-40 md:max-h-60 overflow-y-auto scrollbar-custom space-y-2">
+                                <!-- Audio files will appear here -->
+                                <div class="text-xs text-airvibe-text-light text-center py-4 mobile-text-xs">
+                                    Upload audio files to get started
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Background Sounds Manager -->
+                <div class="p-4 flex-1 mobile-p-3">
+                    <h3 class="font-bold text-lg flex items-center gap-2 mb-4 mobile-text-base">
+                        <i class="fas fa-layer-group text-airvibe-accent"></i>
+                        Background Sounds
+                    </h3>
+                    
+                    <div class="space-y-4 mobile-space-y-2">
+                        <!-- Background Sounds Controls -->
+                        <div class="grid grid-cols-3 md:grid-cols-3 gap-2 mb-4">
+                            <button onclick="playBackgroundSound('rain')" class="soundboard-btn py-2 flex flex-col items-center justify-center mobile-p-2 mobile-touch-target">
+                                <span class="text-xl mb-1">🌧️</span>
+                                <span class="text-[10px] md:text-[10px]">Rain</span>
+                            </button>
+                            <button onclick="playBackgroundSound('cafe')" class="soundboard-btn py-2 flex flex-col items-center justify-center mobile-p-2 mobile-touch-target">
+                                <span class="text-xl mb-1">☕</span>
+                                <span class="text-[10px] md:text-[10px]">Cafe</span>
+                            </button>
+                            <button onclick="playBackgroundSound('fire')" class="soundboard-btn py-2 flex flex-col items-center justify-center mobile-p-2 mobile-touch-target">
+                                <span class="text-xl mb-1">🔥</span>
+                                <span class="text-[10px] md:text-[10px]">Fireplace</span>
+                            </button>
+                            <button onclick="playBackgroundSound('waves')" class="soundboard-btn py-2 flex flex-col items-center justify-center mobile-p-2 mobile-touch-target">
+                                <span class="text-xl mb-1">🌊</span>
+                                <span class="text-[10px] md:text-[10px]">Waves</span>
+                            </button>
+                            <button onclick="playBackgroundSound('forest')" class="soundboard-btn py-2 flex flex-col items-center justify-center mobile-p-2 mobile-touch-target">
+                                <span class="text-xl mb-1">🌲</span>
+                                <span class="text-[10px] md:text-[10px]">Forest</span>
+                            </button>
+                            <button onclick="playBackgroundSound('white')" class="soundboard-btn py-2 flex flex-col items-center justify-center mobile-p-2 mobile-touch-target">
+                                <span class="text-xl mb-1">📻</span>
+                                <span class="text-[10px] md:text-[10px]">White Noise</span>
+                            </button>
+                        </div>
+                        
+                        <!-- Background Sound Mixer -->
+                        <div class="space-y-3 mobile-space-y-2">
+                            <div>
+                                <div class="flex justify-between text-xs mb-1 mobile-text-xs">
+                                    <span>Background Volume</span>
+                                    <span id="bgVolumeValue">50%</span>
+                                </div>
+                                <input type="range" id="bgVolume" min="0" max="100" value="50" class="w-full mobile-touch-target">
+                            </div>
+                            
+                            <div class="flex gap-2">
+                                <button id="stopAllBgBtn" class="flex-1 py-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition text-sm mobile-text-xs mobile-touch-target">
+                                    <i class="fas fa-stop mr-1"></i> Stop All
+                                </button>
+                                <button id="fadeOutBtn" class="flex-1 py-2 rounded-lg bg-airvibe-primary/20 border border-airvibe-primary/30 hover:bg-airvibe-primary/30 transition text-sm mobile-text-xs mobile-touch-target">
+                                    <i class="fas fa-volume-down mr-1"></i> Fade Out
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
             
             <!-- Center - Mixer & Visualizers -->
-            <div class="flex-1 flex flex-col">
+            <div class="flex-1 flex flex-col mobile-full">
                 <!-- Audio Analyzers -->
-                <div class="h-48 border-b border-airvibe-border p-4">
-                    <div class="grid grid-cols-2 gap-4 h-full">
+                <div class="h-32 md:h-48 border-b border-airvibe-border p-3 md:p-4 mobile-p-2">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 h-full">
                         <!-- Spectrum Analyzer -->
-                        <div class="glass-card rounded-xl p-4">
+                        <div class="glass-card rounded-xl p-3 md:p-4 mobile-p-2">
                             <div class="flex items-center justify-between mb-2">
-                                <h4 class="font-medium">Spectrum Analyzer</h4>
-                                <div class="text-xs text-airvibe-text-light">Live</div>
+                                <h4 class="font-medium text-sm md:text-base mobile-text-sm">Spectrum Analyzer</h4>
+                                <div class="text-xs text-airvibe-text-light mobile-text-xs">Live</div>
                             </div>
-                            <div class="analyser-grid h-24 rounded-lg overflow-hidden relative">
-                                <div id="spectrumBars" class="absolute inset-0 flex items-end gap-px px-2 pb-1">
+                            <div class="analyser-grid h-16 md:h-24 rounded-lg overflow-hidden relative">
+                                <div id="spectrumBars" class="absolute inset-0 flex items-end gap-px px-1 md:px-2 pb-1">
                                     <!-- Spectrum bars will be generated here -->
                                 </div>
                             </div>
                         </div>
                         
-                        <!-- Waveform Display -->
-                        <div class="glass-card rounded-xl p-4">
+                        <!-- Peak Meters -->
+                        <div class="glass-card rounded-xl p-3 md:p-4 mobile-p-2">
                             <div class="flex items-center justify-between mb-2">
-                                <h4 class="font-medium">Waveform</h4>
-                                <div class="text-xs text-airvibe-text-light" id="peakLevel">-∞ dB</div>
+                                <h4 class="font-medium text-sm md:text-base mobile-text-sm">Peak Meters</h4>
+                                <div class="text-xs text-airvibe-text-light mobile-text-xs" id="peakLevel">-∞ dB</div>
                             </div>
-                            <canvas id="waveformCanvas" class="w-full h-24 waveform-canvas"></canvas>
+                            <div class="space-y-2 md:space-y-3">
+                                <div>
+                                    <div class="flex justify-between text-xs mb-1 mobile-text-xs">
+                                        <span>Microphone</span>
+                                        <span id="micLevelDb">-∞ dB</span>
+                                    </div>
+                                    <div class="h-2 bg-white/5 rounded-full overflow-hidden">
+                                        <div id="micLevelMeter" class="level-meter h-full" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs mb-1 mobile-text-xs">
+                                        <span>Master</span>
+                                        <span id="masterLevelDb">-∞ dB</span>
+                                    </div>
+                                    <div class="h-2 bg-white/5 rounded-full overflow-hidden">
+                                        <div id="masterLevelMeter" class="level-meter h-full" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Main Mixer -->
-                <div class="flex-1 p-4">
-                    <div class="grid grid-cols-4 gap-4 h-full">
+                <!-- Main Mixer - Mobile Optimized -->
+                <div class="flex-1 p-3 md:p-4 mobile-p-2">
+                    <div class="flex md:grid md:grid-cols-4 gap-3 md:gap-4 h-full overflow-x-auto md:overflow-visible mobile-overflow-x-auto">
                         <!-- Channel 1: Mic -->
-                        <div class="channel-strip p-4 flex flex-col">
-                            <div class="text-center mb-4">
-                                <div class="text-sm font-bold">MIC</div>
-                                <div class="text-xs text-airvibe-text-light">Input</div>
+                        <div class="channel-strip p-3 md:p-4 flex flex-col mobile-min-w-32 mobile-p-2">
+                            <div class="text-center mb-3 md:mb-4">
+                                <div class="text-sm font-bold mobile-text-xs">MIC</div>
+                                <div class="text-xs text-airvibe-text-light mobile-text-xs">Input</div>
                             </div>
                             
                             <div class="flex-1 flex flex-col items-center">
                                 <!-- VU Meter -->
-                                <div class="w-6 h-32 bg-black/30 rounded-lg mb-4 overflow-hidden relative">
+                                <div class="meter-container w-4 md:w-6 h-32 md:h-48 bg-black/30 rounded-lg mb-3 md:mb-4 overflow-hidden relative">
                                     <div class="absolute inset-0 flex flex-col-reverse">
                                         <div id="channel1Meter" class="meter-bar w-full" style="height: 0%"></div>
                                     </div>
                                 </div>
                                 
                                 <!-- Channel Fader -->
-                                <div class="relative h-48 w-12">
-                                    <div class="fader-track absolute inset-x-0 top-0 bottom-0">
-                                        <div class="fader-handle absolute w-10 h-6 -ml-1 -mt-3" style="top: 50%"></div>
-                                    </div>
+                                <div class="relative h-40 md:h-56 w-8 md:w-12">
+                                    <div class="absolute inset-x-0 top-0 bottom-0 bg-gradient-to-b from-gray-900 to-black rounded-lg"></div>
+                                    <div id="micFader" class="absolute w-6 md:w-10 h-4 md:h-6 -ml-2 md:-ml-5 bg-gradient-to-b from-airvibe-primary to-airvibe-secondary rounded-lg cursor-ns-resize shadow-lg" style="top: 50%"></div>
                                 </div>
                             </div>
                         </div>
                         
                         <!-- Channel 2: Music -->
-                        <div class="channel-strip p-4 flex flex-col">
-                            <div class="text-center mb-4">
-                                <div class="text-sm font-bold">MUSIC</div>
-                                <div class="text-xs text-airvibe-text-light">Player</div>
+                        <div class="channel-strip p-3 md:p-4 flex flex-col mobile-min-w-32 mobile-p-2">
+                            <div class="text-center mb-3 md:mb-4">
+                                <div class="text-sm font-bold mobile-text-xs">MUSIC</div>
+                                <div class="text-xs text-airvibe-text-light mobile-text-xs">Player</div>
                             </div>
                             
                             <div class="flex-1 flex flex-col items-center">
                                 <!-- VU Meter -->
-                                <div class="w-6 h-32 bg-black/30 rounded-lg mb-4 overflow-hidden relative">
+                                <div class="meter-container w-4 md:w-6 h-32 md:h-48 bg-black/30 rounded-lg mb-3 md:mb-4 overflow-hidden relative">
                                     <div class="absolute inset-0 flex flex-col-reverse">
                                         <div id="channel2Meter" class="meter-bar w-full" style="height: 0%"></div>
                                     </div>
                                 </div>
                                 
                                 <!-- Channel Fader -->
-                                <div class="relative h-48 w-12">
-                                    <div class="fader-track absolute inset-x-0 top-0 bottom-0">
-                                        <div class="fader-handle absolute w-10 h-6 -ml-1 -mt-3" style="top: 50%"></div>
-                                    </div>
+                                <div class="relative h-40 md:h-56 w-8 md:w-12">
+                                    <div class="absolute inset-x-0 top-0 bottom-0 bg-gradient-to-b from-gray-900 to-black rounded-lg"></div>
+                                    <div id="musicFader" class="absolute w-6 md:w-10 h-4 md:h-6 -ml-2 md:-ml-5 bg-gradient-to-b from-airvibe-secondary to-airvibe-accent rounded-lg cursor-ns-resize shadow-lg" style="top: 50%"></div>
                                 </div>
                             </div>
                         </div>
                         
                         <!-- Channel 3: Soundboard -->
-                        <div class="channel-strip p-4 flex flex-col">
-                            <div class="text-center mb-4">
-                                <div class="text-sm font-bold">SFX</div>
-                                <div class="text-xs text-airvibe-text-light">Board</div>
+                        <div class="channel-strip p-3 md:p-4 flex flex-col mobile-min-w-32 mobile-p-2">
+                            <div class="text-center mb-3 md:mb-4">
+                                <div class="text-sm font-bold mobile-text-xs">SFX</div>
+                                <div class="text-xs text-airvibe-text-light mobile-text-xs">Board</div>
                             </div>
                             
                             <div class="flex-1 flex flex-col items-center">
                                 <!-- VU Meter -->
-                                <div class="w-6 h-32 bg-black/30 rounded-lg mb-4 overflow-hidden relative">
+                                <div class="meter-container w-4 md:w-6 h-32 md:h-48 bg-black/30 rounded-lg mb-3 md:mb-4 overflow-hidden relative">
                                     <div class="absolute inset-0 flex flex-col-reverse">
                                         <div id="channel3Meter" class="meter-bar w-full" style="height: 0%"></div>
                                     </div>
                                 </div>
                                 
                                 <!-- Channel Fader -->
-                                <div class="relative h-48 w-12">
-                                    <div class="fader-track absolute inset-x-0 top-0 bottom-0">
-                                        <div class="fader-handle absolute w-10 h-6 -ml-1 -mt-3" style="top: 50%"></div>
-                                    </div>
+                                <div class="relative h-40 md:h-56 w-8 md:w-12">
+                                    <div class="absolute inset-x-0 top-0 bottom-0 bg-gradient-to-b from-gray-900 to-black rounded-lg"></div>
+                                    <div id="sfxFader" class="absolute w-6 md:w-10 h-4 md:h-6 -ml-2 md:-ml-5 bg-gradient-to-b from-airvibe-accent to-airvibe-danger rounded-lg cursor-ns-resize shadow-lg" style="top: 50%"></div>
                                 </div>
                             </div>
                         </div>
                         
                         <!-- Master Channel -->
-                        <div class="channel-strip p-4 flex flex-col border-2 border-airvibe-primary/30">
-                            <div class="text-center mb-4">
-                                <div class="text-sm font-bold">MASTER</div>
-                                <div class="text-xs text-airvibe-primary">Output</div>
+                        <div class="channel-strip p-3 md:p-4 flex flex-col border-2 border-airvibe-primary/30 mobile-min-w-32 mobile-p-2">
+                            <div class="text-center mb-3 md:mb-4">
+                                <div class="text-sm font-bold mobile-text-xs">MASTER</div>
+                                <div class="text-xs text-airvibe-primary mobile-text-xs">Output</div>
                             </div>
                             
                             <div class="flex-1 flex flex-col items-center">
                                 <!-- Master VU Meter -->
-                                <div class="w-8 h-48 bg-black/30 rounded-lg mb-4 overflow-hidden relative">
+                                <div class="meter-container w-6 md:w-8 h-40 md:h-64 bg-black/30 rounded-lg mb-3 md:mb-4 overflow-hidden relative">
                                     <div class="absolute inset-0 flex flex-col-reverse">
                                         <div id="masterMeter" class="meter-bar w-full" style="height: 0%"></div>
-                                    </div>
-                                    <div class="absolute inset-0 flex flex-col justify-between py-1">
-                                        <div class="w-full h-px bg-white/20"></div>
-                                        <div class="w-full h-px bg-white/20"></div>
-                                        <div class="w-full h-px bg-white/20"></div>
-                                        <div class="w-full h-px bg-white/20"></div>
                                     </div>
                                 </div>
                                 
                                 <!-- Master Fader -->
-                                <div class="relative h-56 w-12">
-                                    <div class="fader-track absolute inset-x-0 top-0 bottom-0">
-                                        <div class="fader-handle absolute w-10 h-8 -ml-1 -mt-4 bg-gradient-to-b from-airvibe-primary to-airvibe-secondary" style="top: 50%"></div>
-                                    </div>
+                                <div class="relative h-48 md:h-64 w-8 md:w-12">
+                                    <div class="absolute inset-x-0 top-0 bottom-0 bg-gradient-to-b from-gray-900 to-black rounded-lg"></div>
+                                    <div id="masterFader" class="absolute w-6 md:w-10 h-5 md:h-8 -ml-2 md:-ml-5 bg-gradient-to-b from-airvibe-primary via-airvibe-secondary to-airvibe-accent rounded-lg cursor-ns-resize shadow-xl" style="top: 50%"></div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Transport Controls -->
-                <div class="h-20 border-t border-airvibe-border p-4">
-                    <div class="flex items-center justify-center gap-6 h-full">
-                        <button id="recordBtn" class="w-16 h-16 rounded-full record-btn flex items-center justify-center text-white">
-                            <i class="fas fa-circle text-2xl"></i>
+                <!-- Transport Controls - Mobile Optimized -->
+                <div class="h-20 md:h-20 border-t border-airvibe-border p-3 md:p-4 mobile-p-2">
+                    <div class="flex items-center justify-center gap-3 md:gap-6 h-full overflow-x-auto mobile-overflow-x-auto">
+                        <!-- Mobile Menu Button -->
+                        <button id="mobileMenuBtn" class="md:hidden w-12 h-12 rounded-xl bg-airvibe-primary/20 border border-airvibe-primary/30 flex items-center justify-center mobile-touch-target">
+                            <i class="fas fa-bars text-airvibe-primary"></i>
                         </button>
                         
-                        <button id="talkoverBtn" class="px-6 py-3 rounded-xl bg-airvibe-accent/20 border border-airvibe-accent/30 text-airvibe-accent font-medium hover:bg-airvibe-accent/30 transition">
-                            <i class="fas fa-microphone-alt mr-2"></i> Talkover
+                        <button id="talkoverBtn" class="px-4 md:px-6 py-2 md:py-3 rounded-xl bg-airvibe-accent/20 border border-airvibe-accent/30 text-airvibe-accent font-medium hover:bg-airvibe-accent/30 transition mobile-text-sm mobile-touch-target">
+                            <i class="fas fa-microphone-alt mr-1 md:mr-2"></i> Talkover
                         </button>
                         
-                        <button id="autoDJBtn" class="px-6 py-3 rounded-xl bg-airvibe-success/20 border border-airvibe-success/30 text-airvibe-success font-medium hover:bg-airvibe-success/30 transition">
-                            <i class="fas fa-robot mr-2"></i> Auto DJ
+                        <button onclick="showEffectsModal()" class="px-4 md:px-6 py-2 md:py-3 rounded-xl bg-airvibe-primary/20 border border-airvibe-primary/30 text-airvibe-primary font-medium hover:bg-airvibe-primary/30 transition mobile-text-sm mobile-touch-target">
+                            <i class="fas fa-magic mr-1 md:mr-2"></i> Effects
                         </button>
                         
-                        <button onclick="showEffectsModal()" class="px-6 py-3 rounded-xl bg-airvibe-primary/20 border border-airvibe-primary/30 text-airvibe-primary font-medium hover:bg-airvibe-primary/30 transition">
-                            <i class="fas fa-magic mr-2"></i> Effects
+                        <!-- Start Broadcast Button -->
+                        <button id="startBroadcastBtn" class="px-4 md:px-6 py-2 md:py-3 rounded-xl bg-airvibe-success/20 border border-airvibe-success/30 text-airvibe-success font-medium hover:bg-airvibe-success/30 transition mobile-text-sm mobile-touch-target">
+                            <i class="fas fa-broadcast-tower mr-1 md:mr-2"></i> Go Live
                         </button>
                     </div>
                 </div>
             </div>
             
-            <!-- Right Sidebar - Stats & Chat -->
-            <div class="w-96 border-l border-airvibe-border flex flex-col">
+            <!-- Right Sidebar - Stats & Chat (Hidden on mobile) -->
+            <div id="rightSidebar" class="hidden md:flex md:w-96 border-l border-airvibe-border flex-col mobile-full mobile-h-96">
                 <!-- Stream Stats -->
-                <div class="p-4 border-b border-airvibe-border">
-                    <h3 class="font-bold text-lg mb-4">Stream Analytics</h3>
+                <div class="p-4 border-b border-airvibe-border mobile-p-3">
+                    <h3 class="font-bold text-lg mb-4 mobile-text-base">Stream Analytics</h3>
                     
                     <div class="grid grid-cols-2 gap-3">
                         <div class="glass-card rounded-xl p-3 text-center">
-                            <div class="text-2xl font-bold" id="listenerCount">0</div>
-                            <div class="text-xs text-airvibe-text-light">Listeners</div>
+                            <div class="text-xl md:text-2xl font-bold" id="listenerCount">0</div>
+                            <div class="text-xs text-airvibe-text-light mobile-text-xs">Listeners</div>
                         </div>
                         
                         <div class="glass-card rounded-xl p-3 text-center">
-                            <div class="text-2xl font-bold" id="bitrateDisplay">--</div>
-                            <div class="text-xs text-airvibe-text-light">kbps</div>
+                            <div class="text-xl md:text-2xl font-bold" id="bitrateDisplay">--</div>
+                            <div class="text-xs text-airvibe-text-light mobile-text-xs">kbps</div>
                         </div>
                         
                         <div class="glass-card rounded-xl p-3 text-center">
-                            <div class="text-2xl font-bold" id="latencyDisplay">--</div>
-                            <div class="text-xs text-airvibe-text-light">ms</div>
+                            <div class="text-xl md:text-2xl font-bold" id="latencyDisplay">--</div>
+                            <div class="text-xs text-airvibe-text-light mobile-text-xs">ms</div>
                         </div>
                         
                         <div class="glass-card rounded-xl p-3 text-center">
-                            <div class="text-2xl font-bold" id="cpuUsage">--%</div>
-                            <div class="text-xs text-airvibe-text-light">CPU</div>
-                        </div>
-                    </div>
-                    
-                    <!-- CPU/RAM Usage Bars -->
-                    <div class="mt-4 space-y-2">
-                        <div>
-                            <div class="flex justify-between text-xs mb-1">
-                                <span>CPU Usage</span>
-                                <span id="cpuPercent">0%</span>
-                            </div>
-                            <div class="h-2 bg-white/5 rounded-full overflow-hidden">
-                                <div id="cpuBar" class="h-full bg-gradient-to-r from-airvibe-primary to-airvibe-secondary rounded-full" style="width: 0%"></div>
-                            </div>
-                        </div>
-                        
-                        <div>
-                            <div class="flex justify-between text-xs mb-1">
-                                <span>Memory</span>
-                                <span id="memoryPercent">0%</span>
-                            </div>
-                            <div class="h-2 bg-white/5 rounded-full overflow-hidden">
-                                <div id="memoryBar" class="h-full bg-gradient-to-r from-airvibe-secondary to-airvibe-accent rounded-full" style="width: 0%"></div>
-                            </div>
+                            <div class="text-xl md:text-2xl font-bold" id="cpuUsage">--%</div>
+                            <div class="text-xs text-airvibe-text-light mobile-text-xs">CPU</div>
                         </div>
                     </div>
                 </div>
                 
                 <!-- Live Chat -->
                 <div class="flex-1 flex flex-col">
-                    <div class="p-4 border-b border-airvibe-border">
-                        <h3 class="font-bold text-lg">Live Chat</h3>
-                        <div class="text-xs text-airvibe-text-light mt-1" id="chatRoomName">Studio Chat</div>
+                    <div class="p-4 border-b border-airvibe-border mobile-p-3">
+                        <h3 class="font-bold text-lg mobile-text-base">Live Chat</h3>
+                        <div class="text-xs text-airvibe-text-light mt-1 mobile-text-xs" id="chatRoomName">Studio Chat</div>
                     </div>
                     
                     <div id="chatMessages" class="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-custom">
@@ -878,9 +954,9 @@
                         <div class="flex items-center gap-2">
                             <input type="text" 
                                 id="chatInput"
-                                class="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none placeholder-airvibe-text-light"
+                                class="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none placeholder-airvibe-text-light mobile-text-sm mobile-p-2"
                                 placeholder="Type a message...">
-                            <button id="sendChatBtn" class="w-12 h-12 rounded-xl bg-airvibe-primary flex items-center justify-center hover:bg-airvibe-primary/80 transition">
+                            <button id="sendChatBtn" class="w-12 h-12 rounded-xl bg-airvibe-primary flex items-center justify-center hover:bg-airvibe-primary/80 transition mobile-touch-target">
                                 <i class="fas fa-paper-plane text-white"></i>
                             </button>
                         </div>
@@ -891,11 +967,11 @@
     </div>
 
     <!-- Effects Modal -->
-    <div id="effectsModal" class="fixed inset-0 bg-black/90 z-[1000] flex items-center justify-center p-4 hidden">
-        <div class="glass-card rounded-2xl p-6 max-w-4xl w-full">
+    <div id="effectsModal" class="fixed inset-0 bg-black/90 z-[1000] flex items-center justify-center p-4 hidden safe-area-inset-top safe-area-inset-bottom">
+        <div class="glass-card rounded-2xl p-6 max-w-4xl w-full mx-4">
             <div class="flex items-center justify-between mb-6">
-                <h2 class="text-2xl font-bold">Audio Effects Rack</h2>
-                <button onclick="hideEffectsModal()" class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition">
+                <h2 class="text-2xl font-bold mobile-text-xl">Audio Effects Rack</h2>
+                <button onclick="hideEffectsModal()" class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition mobile-touch-target">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
@@ -903,43 +979,145 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium mb-2">Compressor</label>
-                        <input type="range" id="compressorAmount" min="0" max="100" value="0" class="w-full">
+                        <label class="block text-sm font-medium mb-2 mobile-text-xs">Compressor</label>
+                        <input type="range" id="compressorAmount" min="0" max="100" value="0" class="w-full mobile-touch-target">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium mb-2">Reverb</label>
-                        <input type="range" id="reverbAmount" min="0" max="100" value="0" class="w-full">
-                    </div>
-                </div>
-                
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Delay</label>
-                        <input type="range" id="delayAmount" min="0" max="100" value="0" class="w-full">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Chorus</label>
-                        <input type="range" id="chorusAmount" min="0" max="100" value="0" class="w-full">
+                        <label class="block text-sm font-medium mb-2 mobile-text-xs">Reverb</label>
+                        <input type="range" id="reverbAmount" min="0" max="100" value="0" class="w-full mobile-touch-target">
                     </div>
                 </div>
                 
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium mb-2">Pitch Shift</label>
-                        <input type="range" id="pitchAmount" min="-12" max="12" value="0" class="w-full">
+                        <label class="block text-sm font-medium mb-2 mobile-text-xs">Delay</label>
+                        <input type="range" id="delayAmount" min="0" max="100" value="0" class="w-full mobile-touch-target">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium mb-2">Distortion</label>
-                        <input type="range" id="distortionAmount" min="0" max="100" value="0" class="w-full">
+                        <label class="block text-sm font-medium mb-2 mobile-text-xs">Chorus</label>
+                        <input type="range" id="chorusAmount" min="0" max="100" value="0" class="w-full mobile-touch-target">
+                    </div>
+                </div>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2 mobile-text-xs">Pitch Shift</label>
+                        <input type="range" id="pitchAmount" min="-12" max="12" value="0" class="w-full mobile-touch-target">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2 mobile-text-xs">Distortion</label>
+                        <input type="range" id="distortionAmount" min="0" max="100" value="0" class="w-full mobile-touch-target">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-6">
+                <button onclick="hideEffectsModal()" class="w-full btn-primary py-3 rounded-xl font-medium mobile-touch-target">
+                    Apply Effects
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Menu Modal -->
+    <div id="mobileMenuModal" class="fixed inset-0 bg-black/90 z-[1000] flex flex-col hidden safe-area-inset-top safe-area-inset-bottom">
+        <div class="glass-nav p-4 flex items-center justify-between">
+            <h2 class="text-xl font-bold">Studio Menu</h2>
+            <button onclick="hideMobileMenu()" class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition mobile-touch-target">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="flex-1 overflow-y-auto p-4 space-y-4">
+            <!-- Recording Section -->
+            <div class="glass-card rounded-xl p-4">
+                <h3 class="font-bold text-lg flex items-center gap-2 mb-4">
+                    <i class="fas fa-record-vinyl text-airvibe-danger"></i>
+                    Recording
+                </h3>
+                
+                <div class="space-y-4">
+                    <div class="flex items-center justify-center gap-2 mb-4">
+                        <button onclick="startRecording()" class="flex-1 py-3 rounded-xl bg-airvibe-danger/20 border border-airvibe-danger/30 text-airvibe-danger font-medium hover:bg-airvibe-danger/30 transition mobile-touch-target">
+                            <i class="fas fa-circle mr-2"></i> Record
+                        </button>
+                        <button onclick="stopRecording()" class="flex-1 py-3 rounded-xl bg-gray-600/20 border border-gray-600/30 text-gray-400 font-medium hover:bg-gray-600/30 transition mobile-touch-target">
+                            <i class="fas fa-stop mr-2"></i> Stop
+                        </button>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div id="mobileRecordingTimer" class="text-lg font-mono font-bold text-airvibe-danger mb-2">00:00:00</div>
+                        <div id="mobileRecordingStatus" class="text-sm text-airvibe-text-light">Ready to record</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- File Upload -->
+            <div class="glass-card rounded-xl p-4">
+                <h3 class="font-bold text-lg flex items-center gap-2 mb-4">
+                    <i class="fas fa-cloud-upload-alt text-airvibe-secondary"></i>
+                    Audio Files
+                </h3>
+                
+                <div class="space-y-3">
+                    <input type="file" id="mobileAudioUpload" hidden accept="audio/*" multiple>
+                    <button onclick="document.getElementById('mobileAudioUpload').click()" class="w-full btn-primary py-3 rounded-xl font-medium mobile-touch-target">
+                        <i class="fas fa-upload mr-2"></i> Upload Audio
+                    </button>
+                    
+                    <div class="text-center text-sm text-airvibe-text-light" id="mobileFileCount">
+                        0 files uploaded
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Background Sounds -->
+            <div class="glass-card rounded-xl p-4">
+                <h3 class="font-bold text-lg flex items-center gap-2 mb-4">
+                    <i class="fas fa-layer-group text-airvibe-accent"></i>
+                    Background Sounds
+                </h3>
+                
+                <div class="grid grid-cols-3 gap-2">
+                    <button onclick="playBackgroundSound('rain')" class="soundboard-btn py-3 flex flex-col items-center justify-center mobile-touch-target">
+                        <span class="text-xl mb-1">🌧️</span>
+                        <span class="text-xs">Rain</span>
+                    </button>
+                    <button onclick="playBackgroundSound('cafe')" class="soundboard-btn py-3 flex flex-col items-center justify-center mobile-touch-target">
+                        <span class="text-xl mb-1">☕</span>
+                        <span class="text-xs">Cafe</span>
+                    </button>
+                    <button onclick="playBackgroundSound('fire')" class="soundboard-btn py-3 flex flex-col items-center justify-center mobile-touch-target">
+                        <span class="text-xl mb-1">🔥</span>
+                        <span class="text-xs">Fire</span>
+                    </button>
+                </div>
+                
+                <div class="mt-4">
+                    <button onclick="stopAllBackgroundSounds()" class="w-full py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition mobile-touch-target">
+                        <i class="fas fa-stop mr-2"></i> Stop All Sounds
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Stream Stats -->
+            <div class="glass-card rounded-xl p-4">
+                <h3 class="font-bold text-lg mb-4">Stream Stats</h3>
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="text-center">
+                        <div class="text-2xl font-bold" id="mobileListenerCount">0</div>
+                        <div class="text-xs text-airvibe-text-light">Listeners</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold" id="mobileLatency">--</div>
+                        <div class="text-xs text-airvibe-text-light">ms</div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- Upload Modal -->
-    <input type="file" id="musicUpload" hidden accept="audio/*" multiple>
-    <input type="file" id="sfxUpload" hidden accept="audio/*" multiple>
 
     <!-- Toast Notification -->
     <div id="toast" class="fixed top-6 left-1/2 -translate-x-1/2 bg-gradient-to-r from-airvibe-primary to-airvibe-secondary text-white px-6 py-3 rounded-full text-sm font-medium shadow-2xl z-[2000] hidden animate-slide-up">
@@ -948,7 +1126,7 @@
     </div>
 
     <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="fixed inset-0 bg-black/90 z-[1000] flex items-center justify-center hidden">
+    <div id="loadingOverlay" class="fixed inset-0 bg-black/90 z-[1000] flex items-center justify-center hidden safe-area-inset-top safe-area-inset-bottom">
         <div class="text-center">
             <div class="w-16 h-16 border-4 border-airvibe-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
             <div class="text-xl font-bold mb-2" id="loadingText">Initializing Audio Engine</div>
@@ -968,26 +1146,47 @@
         let micGainNode = null;
         let musicGainNode = null;
         let sfxGainNode = null;
+        let bgGainNode = null;
         let masterGainNode = null;
         let compressorNode = null;
-        let reverbNode = null;
-        let delayNode = null;
         let isStreaming = false;
         let isRecording = false;
         let isMuted = false;
         let isTalkover = false;
         let broadcastStartTime = null;
+        let recordingStartTime = null;
         let timerInterval = null;
+        let recordingInterval = null;
         let listenerCount = 0;
         let soundEffects = {};
+        let backgroundSounds = {};
         let playlist = [];
+        let uploadedFiles = [];
+        let recordings = [];
         let currentTrack = -1;
         let currentSound = null;
+        let currentPlayerSound = null;
         let activeCalls = new Map();
-        let audioNodes = new Set();
-        let waveformCanvas = null;
-        let waveformCtx = null;
-        let spectrumData = null;
+        let analysers = {
+            mic: null,
+            music: null,
+            sfx: null,
+            bg: null,
+            master: null
+        };
+        let meterData = {
+            mic: -60,
+            music: -60,
+            sfx: -60,
+            bg: -60,
+            master: -60
+        };
+        let faderValues = {
+            mic: 50,
+            music: 50,
+            sfx: 50,
+            master: 50
+        };
 
         // ========== INITIALIZATION ==========
         document.addEventListener('DOMContentLoaded', async () => {
@@ -998,6 +1197,9 @@
             
             // Generate spectrum bars
             generateSpectrumBars();
+            
+            // Setup drag and drop
+            setupDragAndDrop();
             
             console.log('🎚️ Airvibe Studio 4000 initialized');
         });
@@ -1020,10 +1222,9 @@
             }
         }
 
-        function initializeStudio() {
+        async function initializeStudio() {
             const studioName = document.getElementById('studioName').value.trim();
             const hostName = document.getElementById('hostName').value.trim();
-            const category = document.getElementById('streamCategory').value;
             const description = document.getElementById('streamDescription').value;
             const audioInput = document.getElementById('audioInput').value;
             
@@ -1034,38 +1235,75 @@
             
             showLoading('Initializing audio engine...');
             
-            setTimeout(async () => {
+            try {
                 await setupAudioEngine(audioInput);
-                setupSocketConnection();
-                setupPeerConnection();
                 
-                document.getElementById('setupModal').classList.add('hidden');
-                document.getElementById('studioInterface').classList.remove('hidden');
-                
+                // Set up the rest after audio engine is ready
+                setTimeout(() => {
+                    setupSocketConnection();
+                    setupPeerConnection();
+                    
+                    document.getElementById('setupModal').classList.add('hidden');
+                    document.getElementById('studioInterface').classList.remove('hidden');
+                    
+                    hideLoading();
+                    showToast('Studio initialized successfully');
+                    
+                    // Update UI
+                    document.getElementById('chatRoomName').textContent = studioName;
+                    startBroadcastTimer();
+                    
+                    // Start meter updates
+                    requestAnimationFrame(updateMeters);
+                    
+                    // Load default background sounds
+                    loadDefaultBackgroundSounds();
+                    
+                    // Setup fader controls
+                    setupFaderControls();
+                }, 500);
+            } catch (error) {
+                console.error('Initialization error:', error);
                 hideLoading();
-                showToast('Studio initialized successfully');
-                
-                // Update UI
-                document.getElementById('chatRoomName').textContent = studioName;
-                startBroadcastTimer();
-            }, 1000);
+                showToast('Failed to initialize studio. Please check your microphone permissions.');
+            }
         }
 
         // ========== AUDIO ENGINE ==========
         async function setupAudioEngine(deviceId) {
             try {
+                // Create audio context
                 audioContext = new (window.AudioContext || window.webkitAudioContext)({
                     sampleRate: 48000,
                     latencyHint: 'interactive'
                 });
                 
+                // Resume audio context (required for Chrome autoplay policy)
+                if (audioContext.state === 'suspended') {
+                    await audioContext.resume();
+                }
+                
                 // Create audio nodes
                 micGainNode = audioContext.createGain();
                 musicGainNode = audioContext.createGain();
                 sfxGainNode = audioContext.createGain();
+                bgGainNode = audioContext.createGain();
                 masterGainNode = audioContext.createGain();
                 
-                // Create effects nodes
+                // Setup analysers for each channel
+                analysers.mic = audioContext.createAnalyser();
+                analysers.music = audioContext.createAnalyser();
+                analysers.sfx = audioContext.createAnalyser();
+                analysers.bg = audioContext.createAnalyser();
+                analysers.master = audioContext.createAnalyser();
+                
+                analysers.mic.fftSize = 256;
+                analysers.music.fftSize = 256;
+                analysers.sfx.fftSize = 256;
+                analysers.bg.fftSize = 256;
+                analysers.master.fftSize = 2048;
+                
+                // Create compressor
                 compressorNode = audioContext.createDynamicsCompressor();
                 compressorNode.threshold.value = -24;
                 compressorNode.knee.value = 30;
@@ -1073,17 +1311,21 @@
                 compressorNode.attack.value = 0.003;
                 compressorNode.release.value = 0.25;
                 
-                // Create analyser for visualization
-                audioAnalyser = audioContext.createAnalyser();
-                audioAnalyser.fftSize = 2048;
-                audioAnalyser.smoothingTimeConstant = 0.8;
+                // Connect nodes: Mic -> Analyser -> Compressor -> Master -> Destination
+                micGainNode.connect(analysers.mic);
+                analysers.mic.connect(compressorNode);
                 
-                // Connect nodes: Sources -> Gains -> Effects -> Master -> Analyser -> Destination
-                micGainNode.connect(compressorNode);
+                // Connect other channels directly to compressor
                 musicGainNode.connect(compressorNode);
                 sfxGainNode.connect(compressorNode);
+                bgGainNode.connect(compressorNode);
+                
+                // Compressor to master to destination
                 compressorNode.connect(masterGainNode);
-                masterGainNode.connect(audioAnalyser);
+                masterGainNode.connect(analysers.master);
+                
+                // IMPORTANT: Only connect master to destination for monitoring
+                // This allows host to hear everything
                 masterGainNode.connect(audioContext.destination);
                 
                 // Setup microphone input
@@ -1101,26 +1343,692 @@
                 const micSource = audioContext.createMediaStreamSource(mediaStream);
                 micSource.connect(micGainNode);
                 
-                // Setup analyser
-                spectrumData = new Uint8Array(audioAnalyser.frequencyBinCount);
-                
-                // Setup waveform canvas
-                waveformCanvas = document.getElementById('waveformCanvas');
-                waveformCtx = waveformCanvas.getContext('2d');
-                waveformCanvas.width = waveformCanvas.offsetWidth * 2;
-                waveformCanvas.height = waveformCanvas.offsetHeight * 2;
-                
-                // Start visualization loop
-                requestAnimationFrame(updateVisualizations);
+                // Set initial gains
+                micGainNode.gain.value = 1.0;
+                musicGainNode.gain.value = 0.5;
+                sfxGainNode.gain.value = 0.7;
+                bgGainNode.gain.value = 0.3;
+                masterGainNode.gain.value = 0.8;
                 
                 console.log('✅ Audio engine initialized');
+                return true;
             } catch (error) {
                 console.error('Audio engine error:', error);
-                showToast('Failed to initialize audio engine');
+                showToast('Failed to access microphone. Please check permissions.');
+                return false;
             }
         }
 
-        // ========== SOCKET.IO CONNECTION ==========
+        // ========== METER FUNCTIONS ==========
+        function updateMeters() {
+            if (!audioContext || audioContext.state !== 'running') {
+                requestAnimationFrame(updateMeters);
+                return;
+            }
+            
+            // Update each meter
+            updateMeter('mic', analysers.mic);
+            updateMeter('music', analysers.music);
+            updateMeter('sfx', analysers.sfx);
+            updateMeter('master', analysers.master);
+            
+            // Update spectrum analyzer
+            updateSpectrumAnalyzer();
+            
+            // Update recording level if recording
+            if (isRecording) {
+                updateRecordingLevel();
+            }
+            
+            requestAnimationFrame(updateMeters);
+        }
+
+        function updateMeter(channel, analyser) {
+            if (!analyser) return;
+            
+            const dataArray = new Uint8Array(analyser.frequencyBinCount);
+            analyser.getByteFrequencyData(dataArray);
+            
+            // Calculate RMS
+            let sum = 0;
+            const samples = Math.min(100, dataArray.length);
+            for (let i = 0; i < samples; i++) {
+                const value = (dataArray[i] - 128) / 128;
+                sum += value * value;
+            }
+            const rms = Math.sqrt(sum / samples);
+            const dB = rms > 0 ? 20 * Math.log10(rms) : -60;
+            
+            // Store meter data
+            meterData[channel] = dB;
+            
+            // Update UI
+            updateMeterUI(channel, dB);
+        }
+
+        function updateMeterUI(channel, dB) {
+            // Convert dB to percentage (0 to 100)
+            const minDB = -60;
+            const maxDB = 0;
+            const percent = Math.max(0, Math.min(100, ((dB - minDB) / (maxDB - minDB)) * 100));
+            
+            // Update meter bars
+            const meterId = `${channel}Meter`;
+            const meterElement = document.getElementById(meterId);
+            if (meterElement) {
+                meterElement.style.height = `${percent}%`;
+            }
+            
+            // Update level meters
+            const levelMeterId = `${channel}LevelMeter`;
+            const levelMeterElement = document.getElementById(levelMeterId);
+            if (levelMeterElement) {
+                levelMeterElement.style.width = `${percent}%`;
+            }
+            
+            // Update dB display
+            const dbElement = document.getElementById(`${channel}LevelDb`);
+            if (dbElement) {
+                dbElement.textContent = `${dB.toFixed(1)} dB`;
+            }
+            
+            // Update peak level
+            if (channel === 'master') {
+                const peakElement = document.getElementById('peakLevel');
+                if (peakElement) {
+                    peakElement.textContent = `${dB.toFixed(1)} dB`;
+                }
+            }
+        }
+
+        function updateSpectrumAnalyzer() {
+            if (!analysers.master) return;
+            
+            const dataArray = new Uint8Array(analysers.master.frequencyBinCount);
+            analysers.master.getByteFrequencyData(dataArray);
+            
+            const bars = document.querySelectorAll('#spectrumBars .frequency-band');
+            const length = Math.min(bars.length, 64);
+            
+            for (let i = 0; i < length; i++) {
+                const index = Math.floor(i * (dataArray.length / length));
+                const value = dataArray[index] / 255;
+                const height = Math.max(1, value * 100);
+                
+                if (bars[i]) {
+                    bars[i].style.height = `${height}%`;
+                    
+                    // Color based on frequency and intensity
+                    const hue = (i / length) * 240 + 180;
+                    const saturation = 80 + (value * 20);
+                    const lightness = 40 + (value * 30);
+                    bars[i].style.background = `linear-gradient(to top, hsl(${hue}, ${saturation}%, ${lightness}%), hsl(${hue + 30}, ${saturation}%, ${lightness - 10}%))`;
+                }
+            }
+        }
+
+        function generateSpectrumBars() {
+            const container = document.getElementById('spectrumBars');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            for (let i = 0; i < 32; i++) { // Reduced for mobile
+                const bar = document.createElement('div');
+                bar.className = 'frequency-band flex-1 rounded-t-sm';
+                bar.style.height = '1px';
+                container.appendChild(bar);
+            }
+        }
+
+        // ========== FADER CONTROLS ==========
+        function setupFaderControls() {
+            setupFaderControl('micFader', micGainNode, 'mic');
+            setupFaderControl('musicFader', musicGainNode, 'music');
+            setupFaderControl('sfxFader', sfxGainNode, 'sfx');
+            setupFaderControl('masterFader', masterGainNode, 'master');
+        }
+
+        function setupFaderControl(faderId, gainNode, channel) {
+            const fader = document.getElementById(faderId);
+            if (!fader) return;
+            
+            let isDragging = false;
+            
+            // Set initial position based on stored value
+            const container = fader.parentElement;
+            const percent = faderValues[channel];
+            const y = container.clientHeight * (1 - (percent / 100));
+            fader.style.top = `${y}px`;
+            
+            // Set initial gain
+            updateGainFromFaderPosition(gainNode, percent);
+            
+            // Mouse/touch events
+            fader.addEventListener('mousedown', startDrag);
+            fader.addEventListener('touchstart', startDrag);
+            
+            function startDrag(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                isDragging = true;
+                document.addEventListener('mousemove', onDrag);
+                document.addEventListener('touchmove', onDrag);
+                document.addEventListener('mouseup', stopDrag);
+                document.addEventListener('touchend', stopDrag);
+                
+                // Add active class
+                fader.classList.add('scale-110');
+            }
+            
+            function onDrag(e) {
+                if (!isDragging) return;
+                
+                const container = fader.parentElement;
+                const rect = container.getBoundingClientRect();
+                let clientY;
+                
+                if (e.type.includes('touch')) {
+                    clientY = e.touches[0].clientY;
+                } else {
+                    clientY = e.clientY;
+                }
+                
+                if (clientY) {
+                    let y = clientY - rect.top;
+                    y = Math.max(0, Math.min(y, rect.height));
+                    
+                    // Calculate percentage (0 at bottom, 100 at top)
+                    const percent = 100 - (y / rect.height) * 100;
+                    
+                    // Update position
+                    fader.style.top = `${y}px`;
+                    
+                    // Update gain
+                    updateGainFromFaderPosition(gainNode, percent);
+                    
+                    // Store value
+                    faderValues[channel] = percent;
+                }
+            }
+            
+            function stopDrag() {
+                isDragging = false;
+                document.removeEventListener('mousemove', onDrag);
+                document.removeEventListener('touchmove', onDrag);
+                document.removeEventListener('mouseup', stopDrag);
+                document.removeEventListener('touchend', stopDrag);
+                
+                // Remove active class
+                fader.classList.remove('scale-110');
+            }
+            
+            // Prevent parent scrolling when dragging
+            fader.addEventListener('touchstart', (e) => {
+                e.stopPropagation();
+            });
+        }
+
+        function updateGainFromFaderPosition(gainNode, percent) {
+            if (!gainNode) return;
+            
+            // Convert percentage to gain value (logarithmic scale)
+            // 0% = 0.0 gain, 50% = 0.5 gain, 100% = 2.0 gain
+            const minGain = 0.0;
+            const maxGain = 2.0;
+            
+            // Use logarithmic scale for more natural feel
+            const logPercent = percent / 100;
+            const gain = minGain + (maxGain - minGain) * Math.pow(logPercent, 2);
+            
+            gainNode.gain.value = gain;
+        }
+
+        // ========== RECORDING FUNCTIONS ==========
+        function startRecording() {
+            if (!audioContext || isRecording) return;
+            
+            try {
+                // Create media stream destination
+                const destination = audioContext.createMediaStreamDestination();
+                masterGainNode.connect(destination);
+                
+                // Get the stream
+                const stream = destination.stream;
+                
+                // Create MediaRecorder
+                const options = { mimeType: 'audio/webm;codecs=opus' };
+                mediaRecorder = new MediaRecorder(stream, options);
+                
+                const chunks = [];
+                
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) {
+                        chunks.push(event.data);
+                    }
+                };
+                
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(chunks, { type: 'audio/webm' });
+                    saveRecording(blob);
+                };
+                
+                // Start recording
+                mediaRecorder.start(1000);
+                isRecording = true;
+                recordingStartTime = Date.now();
+                
+                // Update UI
+                document.getElementById('recordStartBtn').disabled = true;
+                document.getElementById('recordStopBtn').disabled = false;
+                document.getElementById('recordingStatus').textContent = 'Recording...';
+                document.getElementById('recordingStatus').className = 'text-airvibe-danger';
+                
+                // Start timer
+                recordingInterval = setInterval(updateRecordingTimer, 1000);
+                
+                showToast('Recording started');
+            } catch (error) {
+                console.error('Recording error:', error);
+                showToast('Failed to start recording');
+            }
+        }
+
+        function stopRecording() {
+            if (!mediaRecorder || !isRecording) return;
+            
+            mediaRecorder.stop();
+            isRecording = false;
+            
+            // Update UI
+            document.getElementById('recordStartBtn').disabled = false;
+            document.getElementById('recordStopBtn').disabled = true;
+            document.getElementById('recordingStatus').textContent = 'Recording saved';
+            document.getElementById('recordingStatus').className = 'text-airvibe-success';
+            
+            // Clear timer
+            if (recordingInterval) {
+                clearInterval(recordingInterval);
+                recordingInterval = null;
+            }
+            
+            showToast('Recording stopped');
+        }
+
+        function updateRecordingTimer() {
+            if (!recordingStartTime) return;
+            
+            const elapsed = Date.now() - recordingStartTime;
+            const hours = Math.floor(elapsed / 3600000);
+            const minutes = Math.floor((elapsed % 3600000) / 60000);
+            const seconds = Math.floor((elapsed % 60000) / 1000);
+            
+            const timerText = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            document.getElementById('recordingTimer').textContent = timerText;
+            document.getElementById('mobileRecordingTimer').textContent = timerText;
+            
+            // Update file size estimate
+            const sizeMB = (elapsed * 0.064 / 1000).toFixed(2); // Approximate 64kbps
+            document.getElementById('recordingSize').textContent = `${sizeMB} MB`;
+        }
+
+        function updateRecordingLevel() {
+            const dB = meterData.master;
+            const percent = Math.max(0, Math.min(100, ((dB + 60) / 60) * 100));
+            
+            document.getElementById('recordingLevel').style.width = `${percent}%`;
+            document.getElementById('recordingLevelDb').textContent = `${dB.toFixed(1)} dB`;
+        }
+
+        function saveRecording(blob) {
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            const filename = `recording-${timestamp}.webm`;
+            
+            // Create download link
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            
+            // Add to recordings list
+            recordings.unshift({
+                name: filename,
+                url: url,
+                size: blob.size,
+                date: new Date(),
+                format: 'webm'
+            });
+            
+            // Auto-download
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            showToast(`Recording saved: ${filename}`);
+        }
+
+        // ========== FILE UPLOAD FUNCTIONS ==========
+        function setupDragAndDrop() {
+            const uploadZone = document.getElementById('uploadZone');
+            const fileInput = document.getElementById('audioUpload');
+            
+            if (!uploadZone || !fileInput) return;
+            
+            // Click to browse
+            uploadZone.addEventListener('click', () => {
+                fileInput.click();
+            });
+            
+            // Handle file input change
+            fileInput.addEventListener('change', (e) => {
+                handleFiles(e.target.files);
+            });
+            
+            // Mobile upload
+            const mobileUpload = document.getElementById('mobileAudioUpload');
+            if (mobileUpload) {
+                mobileUpload.addEventListener('change', (e) => {
+                    handleFiles(e.target.files);
+                });
+            }
+        }
+
+        function handleFiles(files) {
+            if (!files.length) return;
+            
+            Array.from(files).forEach((file, index) => {
+                if (!file.type.startsWith('audio/')) {
+                    showToast(`${file.name} is not an audio file`);
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const url = e.target.result;
+                    
+                    uploadedFiles.push({
+                        id: Date.now() + index,
+                        name: file.name,
+                        url: url,
+                        size: file.size,
+                        type: file.type
+                    });
+                    
+                    updateAudioFilesList();
+                    showToast(`Added ${file.name}`);
+                };
+                
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function updateAudioFilesList() {
+            const container = document.getElementById('audioFilesList');
+            const countElement = document.getElementById('audioFileCount');
+            const mobileCountElement = document.getElementById('mobileFileCount');
+            
+            if (!container) return;
+            
+            const count = uploadedFiles.length;
+            const countText = `${count} file${count !== 1 ? 's' : ''}`;
+            
+            if (countElement) countElement.textContent = countText;
+            if (mobileCountElement) mobileCountElement.textContent = countText;
+            
+            if (uploadedFiles.length === 0) {
+                container.innerHTML = `
+                    <div class="text-xs text-airvibe-text-light text-center py-4">
+                        Upload audio files to get started
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = '';
+            
+            uploadedFiles.forEach((file, index) => {
+                const div = document.createElement('div');
+                div.className = 'audio-file-item p-3 rounded-lg bg-white/5 hover:bg-white/10 cursor-pointer';
+                div.onclick = () => playAudioFile(file);
+                
+                const sizeMB = (file.size / 1024 / 1024).toFixed(2);
+                const format = file.type.split('/')[1].toUpperCase();
+                
+                div.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-airvibe-primary/20 to-airvibe-secondary/10 flex items-center justify-center">
+                            <i class="fas fa-file-audio text-airvibe-primary text-sm"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="text-sm truncate">${file.name}</div>
+                            <div class="text-xs text-airvibe-text-light">
+                                ${format} • ${sizeMB} MB
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(div);
+            });
+        }
+
+        function playAudioFile(file) {
+            if (currentPlayerSound) {
+                currentPlayerSound.stop();
+            }
+            
+            currentPlayerSound = new Howl({
+                src: [file.url],
+                format: file.type.split('/')[1],
+                volume: 0.5,
+                onplay: () => {
+                    showToast(`Playing ${file.name}`);
+                }
+            });
+            
+            currentPlayerSound.play();
+        }
+
+        // ========== BACKGROUND SOUNDS ==========
+        function loadDefaultBackgroundSounds() {
+            // These are sample sounds - you can replace with actual URLs
+            backgroundSounds = {
+                rain: {
+                    name: 'Rain',
+                    icon: '🌧️',
+                    url: 'https://assets.mixkit.co/music/preview/mixkit-rain-03-2053.mp3',
+                    volume: 0.3,
+                    howl: null
+                },
+                cafe: {
+                    name: 'Coffee Shop',
+                    icon: '☕',
+                    url: 'https://assets.mixkit.co/music/preview/mixkit-coffee-shop-ambience-170.mp3',
+                    volume: 0.4,
+                    howl: null
+                },
+                fire: {
+                    name: 'Fireplace',
+                    icon: '🔥',
+                    url: 'https://assets.mixkit.co/music/preview/mixkit-crackling-fireplace-1997.mp3',
+                    volume: 0.3,
+                    howl: null
+                },
+                waves: {
+                    name: 'Ocean Waves',
+                    icon: '🌊',
+                    url: 'https://assets.mixkit.co/music/preview/mixkit-ocean-waves-2014.mp3',
+                    volume: 0.4,
+                    howl: null
+                },
+                forest: {
+                    name: 'Forest',
+                    icon: '🌲',
+                    url: 'https://assets.mixkit.co/music/preview/mixkit-forest-ambience-443.mp3',
+                    volume: 0.3,
+                    howl: null
+                },
+                white: {
+                    name: 'White Noise',
+                    icon: '📻',
+                    url: 'https://assets.mixkit.co/music/preview/mixkit-white-noise-ambience-235.mp3',
+                    volume: 0.2,
+                    howl: null
+                }
+            };
+            
+            // Set volume from slider
+            const volumeSlider = document.getElementById('bgVolume');
+            if (volumeSlider) {
+                const volume = volumeSlider.value / 100;
+                Object.values(backgroundSounds).forEach(sound => {
+                    sound.volume = volume;
+                });
+            }
+        }
+
+        function playBackgroundSound(type) {
+            if (!backgroundSounds[type]) return;
+            
+            const sound = backgroundSounds[type];
+            
+            // Stop if already playing
+            if (sound.howl && sound.howl.playing()) {
+                sound.howl.stop();
+                sound.howl = null;
+                showToast(`Stopped ${sound.name}`);
+                return;
+            }
+            
+            // Create and play sound
+            sound.howl = new Howl({
+                src: [sound.url],
+                volume: sound.volume,
+                loop: true,
+                onplay: () => {
+                    showToast(`Playing ${sound.name}`);
+                },
+                onloaderror: () => {
+                    showToast(`Failed to load ${sound.name}`);
+                }
+            });
+            
+            sound.howl.play();
+            
+            // Connect to audio graph
+            if (bgGainNode && audioContext) {
+                // Create a source from the Howl instance
+                const source = audioContext.createMediaElementSource(sound.howl._sounds[0]._node);
+                source.connect(bgGainNode);
+            }
+        }
+
+        function stopAllBackgroundSounds() {
+            Object.values(backgroundSounds).forEach(sound => {
+                if (sound.howl) {
+                    sound.howl.stop();
+                    sound.howl = null;
+                }
+            });
+            showToast('All background sounds stopped');
+        }
+
+        // ========== BROADCAST FUNCTIONS ==========
+        function startBroadcasting() {
+            if (!audioContext || !mediaStream) {
+                showToast('Audio engine not ready');
+                return;
+            }
+            
+            if (!peer) {
+                setupPeerConnection();
+                return;
+            }
+            
+            // Wait for peer to be ready
+            if (!myPeerId) {
+                showToast('Connecting to broadcast server...');
+                return;
+            }
+            
+            // Create a stream destination for broadcasting
+            const streamDestination = audioContext.createMediaStreamDestination();
+            masterGainNode.connect(streamDestination);
+            
+            // Send broadcast stream to listeners
+            if (peer) {
+                // The host does NOT call himself - only listeners call the host
+                console.log('🎙️ Host ready for listeners');
+            }
+            
+            isStreaming = true;
+            broadcastStartTime = Date.now();
+            
+            // Update UI
+            document.getElementById('onAirIndicator').classList.remove('hidden');
+            document.getElementById('startBroadcastBtn').innerHTML = '<i class="fas fa-broadcast-tower mr-2"></i> Live';
+            document.getElementById('startBroadcastBtn').classList.remove('bg-airvibe-success/20');
+            document.getElementById('startBroadcastBtn').classList.add('bg-red-500/20', 'text-red-400');
+            
+            showToast('Broadcast started! Listeners can now join.');
+        }
+
+        function setupPeerConnection() {
+            peer = new Peer(undefined, {
+                host: window.location.hostname,
+                port: window.location.port || (window.location.protocol === 'https:' ? 443 : 80),
+                path: '/peerjs/peerjs',
+                secure: window.location.protocol === 'https:',
+                debug: 1
+            });
+
+            peer.on('open', (id) => {
+                myPeerId = id;
+                console.log('🎧 PeerJS ID:', id);
+                
+                // Now we can start broadcasting
+                startBroadcasting();
+            });
+
+            peer.on('call', (call) => {
+                // A listener is calling to receive audio
+                console.log('📞 Incoming call from listener:', call.peer);
+                
+                // Create stream destination for broadcasting
+                const streamDestination = audioContext.createMediaStreamDestination();
+                masterGainNode.connect(streamDestination);
+                
+                // Answer the call with our audio stream
+                call.answer(streamDestination.stream);
+                
+                call.on('stream', (remoteStream) => {
+                    // We don't need to do anything with the listener's stream
+                    // since the host shouldn't hear listeners
+                    console.log('✅ Listener connected');
+                    
+                    // Update listener count
+                    listenerCount++;
+                    updateListenerCount();
+                });
+                
+                call.on('close', () => {
+                    console.log('❌ Listener disconnected');
+                    listenerCount--;
+                    updateListenerCount();
+                });
+                
+                call.on('error', (err) => {
+                    console.error('Call error:', err);
+                });
+                
+                activeCalls.set(call.peer, call);
+            });
+
+            peer.on('error', (err) => {
+                console.error('PeerJS error:', err);
+                showToast('Connection error');
+            });
+        }
+
         function setupSocketConnection() {
             socket = io({
                 reconnection: true,
@@ -1130,28 +2038,10 @@
 
             socket.on('connect', () => {
                 console.log('✅ Connected to server');
-                showToast('Connected to broadcast server');
             });
 
             socket.on('disconnect', () => {
                 console.log('🔌 Disconnected from server');
-                showToast('Disconnected from server');
-            });
-
-            socket.on('new-listener', (data) => {
-                console.log('🎧 New listener:', data);
-                listenerCount++;
-                updateListenerCount();
-                showToast(`${data.name} joined the stream`);
-                
-                // Add to chat
-                addChatMessage('SYSTEM', `${data.name} joined the stream`, true);
-            });
-
-            socket.on('listener-left', (data) => {
-                listenerCount--;
-                updateListenerCount();
-                addChatMessage('SYSTEM', `${data.name} left the stream`, true);
             });
 
             socket.on('chat-message', (message) => {
@@ -1159,349 +2049,11 @@
             });
         }
 
-        // ========== PEERJS CONNECTION ==========
-        function setupPeerConnection() {
-            peer = new Peer(undefined, {
-                host: window.location.hostname,
-                port: window.location.port || (window.location.protocol === 'https:' ? 443 : 80),
-                path: '/peerjs/peerjs',
-                secure: window.location.protocol === 'https:',
-                config: {
-                    iceServers: [
-                        { urls: 'stun:stun.l.google.com:19302' },
-                        { urls: 'stun:global.stun.twilio.com:3478' }
-                    ]
-                },
-                debug: 2
-            });
-
-            peer.on('open', (id) => {
-                myPeerId = id;
-                console.log('🎧 PeerJS ID:', id);
-                
-                // Start broadcasting
-                startBroadcasting();
-            });
-
-            peer.on('call', (call) => {
-                // Handle incoming calls (for listener audio)
-                call.answer();
-                activeCalls.set(call.peer, call);
-                
-                call.on('stream', (remoteStream) => {
-                    // Handle incoming audio from listeners (for talkback)
-                });
-                
-                call.on('close', () => {
-                    activeCalls.delete(call.peer);
-                });
-            });
-
-            peer.on('error', (err) => {
-                console.error('PeerJS error:', err);
-                showToast('Connection error');
-            });
-        }
-
-        function startBroadcasting() {
-            if (!peer || !mediaStream) return;
-            
-            // Create a stream destination for broadcasting
-            const streamDestination = audioContext.createMediaStreamDestination();
-            masterGainNode.connect(streamDestination);
-            
-            // Emit stream creation event
-            const studioName = document.getElementById('studioName').value.trim();
-            const hostName = document.getElementById('hostName').value.trim();
-            const category = document.getElementById('streamCategory').value;
-            
-            socket.emit('create-stream', {
-                title: studioName,
-                description: document.getElementById('streamDescription').value || 'Live broadcast from Airvibe Studio',
-                hostName: hostName,
-                category: category,
-                peerId: myPeerId,
-                maxListeners: 1000,
-                thumbnail: `https://api.dicebear.com/7.x/shapes/svg?seed=${studioName}`
-            });
-            
-            isStreaming = true;
-            broadcastStartTime = Date.now();
-            
-            // Update UI
-            document.getElementById('onAirIndicator').classList.remove('hidden');
-            document.getElementById('connectionStatus').innerHTML = `
-                <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span class="text-xs font-medium text-green-400">BROADCASTING</span>
-            `;
-            
-            showToast('Broadcast started successfully');
-        }
-
-        // ========== VISUALIZATIONS ==========
-        function updateVisualizations() {
-            if (!audioAnalyser) {
-                requestAnimationFrame(updateVisualizations);
-                return;
-            }
-            
-            // Update spectrum analyzer
-            audioAnalyser.getByteFrequencyData(spectrumData);
-            updateSpectrumBars(spectrumData);
-            
-            // Update waveform
-            audioAnalyser.getByteTimeDomainData(spectrumData);
-            drawWaveform(spectrumData);
-            
-            // Update meters
-            updateAudioMeters(spectrumData);
-            
-            requestAnimationFrame(updateVisualizations);
-        }
-
-        function generateSpectrumBars() {
-            const container = document.getElementById('spectrumBars');
-            container.innerHTML = '';
-            
-            for (let i = 0; i < 64; i++) {
-                const bar = document.createElement('div');
-                bar.className = 'frequency-band flex-1 rounded-t-sm';
-                bar.style.height = '1px';
-                container.appendChild(bar);
-            }
-        }
-
-        function updateSpectrumBars(data) {
-            const bars = document.querySelectorAll('#spectrumBars .frequency-band');
-            const length = Math.min(bars.length, 64);
-            
-            for (let i = 0; i < length; i++) {
-                const index = Math.floor(i * (data.length / length));
-                const value = data[index] / 255;
-                const height = Math.max(1, value * 100);
-                
-                bars[i].style.height = `${height}%`;
-                
-                // Color based on frequency and intensity
-                const hue = (i / length) * 240 + 180; // 180-420 hue range
-                const saturation = 80 + (value * 20);
-                const lightness = 40 + (value * 30);
-                bars[i].style.background = `linear-gradient(to top, hsl(${hue}, ${saturation}%, ${lightness}%), hsl(${hue + 30}, ${saturation}%, ${lightness - 10}%))`;
-            }
-        }
-
-        function drawWaveform(data) {
-            if (!waveformCtx || !waveformCanvas) return;
-            
-            const width = waveformCanvas.width;
-            const height = waveformCanvas.height;
-            
-            // Clear canvas
-            waveformCtx.clearRect(0, 0, width, height);
-            
-            // Draw waveform
-            waveformCtx.beginPath();
-            waveformCtx.lineWidth = 2;
-            waveformCtx.strokeStyle = '#8B5CF6';
-            
-            const sliceWidth = width * 1.0 / data.length;
-            let x = 0;
-            
-            for (let i = 0; i < data.length; i++) {
-                const v = data[i] / 128.0;
-                const y = v * height / 2;
-                
-                if (i === 0) {
-                    waveformCtx.moveTo(x, y);
-                } else {
-                    waveformCtx.lineTo(x, y);
-                }
-                
-                x += sliceWidth;
-            }
-            
-            waveformCtx.lineTo(width, height / 2);
-            waveformCtx.stroke();
-            
-            // Draw gradient fill
-            const gradient = waveformCtx.createLinearGradient(0, 0, 0, height);
-            gradient.addColorStop(0, 'rgba(139, 92, 246, 0.3)');
-            gradient.addColorStop(1, 'rgba(139, 92, 246, 0)');
-            
-            waveformCtx.lineTo(width, height);
-            waveformCtx.lineTo(0, height);
-            waveformCtx.closePath();
-            waveformCtx.fillStyle = gradient;
-            waveformCtx.fill();
-            
-            // Update peak level
-            const peak = Math.max(...data);
-            const dB = 20 * Math.log10(peak / 128);
-            document.getElementById('peakLevel').textContent = `${dB.toFixed(1)} dB`;
-        }
-
-        function updateAudioMeters(data) {
-            // Calculate RMS for each channel
-            let sum = 0;
-            for (let i = 0; i < data.length; i++) {
-                const value = (data[i] - 128) / 128;
-                sum += value * value;
-            }
-            const rms = Math.sqrt(sum / data.length);
-            const dB = 20 * Math.log10(rms);
-            
-            // Update meters
-            updateMeter('micMeter', Math.max(-60, dB));
-            updateMeter('channel1Meter', Math.max(-60, dB));
-            updateMeter('masterMeter', Math.max(-60, dB));
-            
-            // Update level display
-            document.getElementById('micLevel').textContent = `${dB.toFixed(1)} dB`;
-        }
-
-        function updateMeter(elementId, dB) {
-            const element = document.getElementById(elementId);
-            if (!element) return;
-            
-            // Convert dB to percentage (0 to 100)
-            const minDB = -60;
-            const maxDB = 0;
-            const percent = Math.max(0, Math.min(100, ((dB - minDB) / (maxDB - minDB)) * 100));
-            
-            if (elementId.includes('Meter')) {
-                element.style.height = `${percent}%`;
-            } else {
-                element.style.width = `${percent}%`;
-            }
-            
-            // Color based on level
-            if (dB > -3) {
-                element.style.background = 'linear-gradient(to top, #EF4444, #F59E0B)';
-            } else if (dB > -12) {
-                element.style.background = 'linear-gradient(to top, #F59E0B, #10B981)';
-            } else {
-                element.style.background = 'linear-gradient(to top, #10B981, #06B6D4)';
-            }
-        }
-
-        // ========== MUSIC PLAYER ==========
-        function loadMusicFiles(files) {
-            for (let i = 0; i < files.length; i++) {
-                const file = files[i];
-                const url = URL.createObjectURL(file);
-                
-                playlist.push({
-                    name: file.name,
-                    url: url,
-                    type: file.type
-                });
-                
-                // Add to playlist UI
-                const playlistDiv = document.getElementById('playlist');
-                const item = document.createElement('div');
-                item.className = 'flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 cursor-pointer';
-                item.onclick = () => playTrack(i);
-                
-                item.innerHTML = `
-                    <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-airvibe-primary/20 to-airvibe-secondary/20 flex items-center justify-center">
-                        <i class="fas fa-music text-xs"></i>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <div class="text-sm truncate">${file.name}</div>
-                        <div class="text-xs text-airvibe-text-light">${formatFileSize(file.size)}</div>
-                    </div>
-                `;
-                
-                playlistDiv.appendChild(item);
-            }
-            
-            if (playlist.length > 0 && currentTrack === -1) {
-                currentTrack = 0;
-                document.getElementById('playPauseBtn').disabled = false;
-                updateTrackInfo();
-            }
-            
-            showToast(`Added ${files.length} tracks to playlist`);
-        }
-
-        function playTrack(index) {
-            if (index < 0 || index >= playlist.length) return;
-            
-            currentTrack = index;
-            
-            if (currentSound) {
-                currentSound.stop();
-            }
-            
-            const track = playlist[index];
-            currentSound = new Howl({
-                src: [track.url],
-                format: track.type.split('/')[1],
-                volume: musicGainNode ? musicGainNode.gain.value : 0.5,
-                onplay: () => {
-                    document.getElementById('playPauseBtn').innerHTML = '<i class="fas fa-pause"></i>';
-                },
-                onpause: () => {
-                    document.getElementById('playPauseBtn').innerHTML = '<i class="fas fa-play"></i>';
-                },
-                onend: () => {
-                    playNextTrack();
-                }
-            });
-            
-            currentSound.play();
-            updateTrackInfo();
-        }
-
-        function playNextTrack() {
-            if (playlist.length === 0) return;
-            
-            currentTrack = (currentTrack + 1) % playlist.length;
-            playTrack(currentTrack);
-        }
-
-        function playPrevTrack() {
-            if (playlist.length === 0) return;
-            
-            currentTrack = (currentTrack - 1 + playlist.length) % playlist.length;
-            playTrack(currentTrack);
-        }
-
-        function updateTrackInfo() {
-            if (currentTrack >= 0 && currentTrack < playlist.length) {
-                document.getElementById('currentTrack').textContent = playlist[currentTrack].name;
-            }
-        }
-
-        // ========== SOUNDBOARD ==========
-        function playSound(type) {
-            const sounds = {
-                applause: 'https://assets.mixkit.co/sfx/preview/mixkit-audience-clapping-loudly-478.mp3',
-                laugh: 'https://assets.mixkit.co/sfx/preview/mixkit-crowd-laugh-464.mp3',
-                horn: 'https://assets.mixkit.co/sfx/preview/mixkit-car-horn-truck-711.mp3',
-                swoosh: 'https://assets.mixkit.co/sfx/preview/mixkit-fast-swoosh-103.mp3',
-                ding: 'https://assets.mixkit.co/sfx/preview/mixkit-bell-notification-933.mp3',
-                record: 'https://assets.mixkit.co/sfx/preview/mixkit-vinyl-record-scratch-2995.mp3',
-                censor: 'https://assets.mixkit.co/sfx/preview/mixkit-censorship-beep-1082.mp3',
-                transition: 'https://assets.mixkit.co/sfx/preview/mixkit-whoosh-transition-1171.mp3',
-                alert: 'https://assets.mixkit.co/sfx/preview/mixkit-warning-alarm-buzzer-959.mp3'
-            };
-            
-            const sound = new Howl({
-                src: [sounds[type]],
-                volume: 0.5,
-                onplay: () => {
-                    // Visual feedback
-                    showToast(`Playing ${type} sound`);
-                }
-            });
-            
-            sound.play();
-        }
-
         // ========== CHAT FUNCTIONS ==========
         function addChatMessage(user, message, isSystem) {
             const container = document.getElementById('chatMessages');
+            if (!container) return;
+            
             const div = document.createElement('div');
             div.className = 'animate-slide-up';
             
@@ -1518,7 +2070,7 @@
             } else {
                 div.innerHTML = `
                     <div class="flex items-start gap-3">
-                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-airvibe-primary/20 to-airvibe-secondary/20 flex items-center justify-center">
+                        <div class="w-6 h-6 rounded-full bg-gradient-to-br from-airvibe-primary/20 to-airvibe-secondary/20 flex items-center justify-center">
                             <i class="fas fa-user text-xs"></i>
                         </div>
                         <div class="flex-1">
@@ -1557,28 +2109,12 @@
         }
 
         // ========== UI CONTROLS ==========
-        function toggleMicMute() {
-            if (!micGainNode) return;
-            
-            isMuted = !isMuted;
-            micGainNode.gain.value = isMuted ? 0 : 1;
-            
-            const btn = document.getElementById('micMuteBtn');
-            btn.innerHTML = isMuted ? 
-                '<i class="fas fa-microphone text-red-500 text-sm"></i>' :
-                '<i class="fas fa-microphone-slash text-sm"></i>';
-            
-            btn.classList.toggle('bg-red-500/20', isMuted);
-            btn.classList.toggle('border-red-500/30', isMuted);
-            
-            showToast(isMuted ? 'Microphone muted' : 'Microphone unmuted');
-        }
-
         function toggleTalkover() {
             if (!musicGainNode) return;
             
             isTalkover = !isTalkover;
-            musicGainNode.gain.value = isTalkover ? 0.2 : 0.5;
+            const newVolume = isTalkover ? 0.2 : 0.5;
+            musicGainNode.gain.value = newVolume;
             
             const btn = document.getElementById('talkoverBtn');
             btn.classList.toggle('bg-airvibe-accent/30', isTalkover);
@@ -1587,25 +2123,6 @@
             showToast(isTalkover ? 'Talkover enabled' : 'Talkover disabled');
         }
 
-        function toggleRecording() {
-            if (!mediaStream) return;
-            
-            isRecording = !isRecording;
-            
-            const btn = document.getElementById('recordBtn');
-            btn.classList.toggle('record-btn', isRecording);
-            btn.classList.toggle('bg-gray-600', !isRecording);
-            
-            if (isRecording) {
-                btn.innerHTML = '<i class="fas fa-square text-2xl"></i>';
-                showToast('Recording started');
-            } else {
-                btn.innerHTML = '<i class="fas fa-circle text-2xl"></i>';
-                showToast('Recording stopped');
-            }
-        }
-
-        // ========== UTILITY FUNCTIONS ==========
         function updateCurrentTime() {
             const now = new Date();
             document.getElementById('currentTime').textContent = 
@@ -1632,36 +2149,30 @@
 
         function updateListenerCount() {
             document.getElementById('listenerCount').textContent = listenerCount;
+            document.getElementById('mobileListenerCount').textContent = listenerCount;
             
-            // Update system stats periodically
+            // Update other stats
             updateSystemStats();
         }
 
         function updateSystemStats() {
-            // Simulate CPU/RAM usage (in real app, you'd use performance.memory and navigator.hardwareConcurrency)
-            const cpu = Math.min(100, Math.floor(Math.random() * 40 + 10));
-            const memory = Math.min(100, Math.floor(Math.random() * 50 + 20));
-            
-            document.getElementById('cpuPercent').textContent = `${cpu}%`;
-            document.getElementById('memoryPercent').textContent = `${memory}%`;
-            document.getElementById('cpuBar').style.width = `${cpu}%`;
-            document.getElementById('memoryBar').style.width = `${memory}%`;
-            document.getElementById('cpuUsage').textContent = `${cpu}%`;
-            
-            // Update bitrate and latency
+            // Simulate stats for demo
             const bitrate = Math.floor(Math.random() * 256 + 128);
             const latency = Math.floor(Math.random() * 50 + 20);
+            const cpu = Math.min(100, Math.floor(Math.random() * 40 + 10));
             
             document.getElementById('bitrateDisplay').textContent = bitrate;
             document.getElementById('latencyDisplay').textContent = latency;
+            document.getElementById('mobileLatency').textContent = latency;
+            document.getElementById('cpuUsage').textContent = `${cpu}%`;
         }
 
-        function formatFileSize(bytes) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        function showMobileMenu() {
+            document.getElementById('mobileMenuModal').classList.remove('hidden');
+        }
+
+        function hideMobileMenu() {
+            document.getElementById('mobileMenuModal').classList.add('hidden');
         }
 
         function showEffectsModal() {
@@ -1693,128 +2204,130 @@
             }, 3000);
         }
 
+        function endStream() {
+            if (confirm('Are you sure you want to end the broadcast?')) {
+                // Close all peer connections
+                activeCalls.forEach(call => call.close());
+                activeCalls.clear();
+                
+                if (peer) {
+                    peer.destroy();
+                    peer = null;
+                }
+                
+                // Reset streaming state
+                isStreaming = false;
+                listenerCount = 0;
+                
+                // Update UI
+                document.getElementById('onAirIndicator').classList.add('hidden');
+                document.getElementById('startBroadcastBtn').innerHTML = '<i class="fas fa-broadcast-tower mr-2"></i> Go Live';
+                document.getElementById('startBroadcastBtn').classList.remove('bg-red-500/20', 'text-red-400');
+                document.getElementById('startBroadcastBtn').classList.add('bg-airvibe-success/20', 'text-airvibe-success');
+                
+                updateListenerCount();
+                showToast('Broadcast ended');
+            }
+        }
+
         // ========== EVENT LISTENERS ==========
         function setupEventListeners() {
-            // Mic controls
-            document.getElementById('micMuteBtn').addEventListener('click', toggleMicMute);
-            document.getElementById('micSoloBtn').addEventListener('click', () => {
-                showToast('Solo feature activated');
-            });
+            // Recording controls
+            const recordStartBtn = document.getElementById('recordStartBtn');
+            const recordStopBtn = document.getElementById('recordStopBtn');
+            if (recordStartBtn) recordStartBtn.addEventListener('click', startRecording);
+            if (recordStopBtn) recordStopBtn.addEventListener('click', stopRecording);
             
-            // Music player controls
-            document.getElementById('playPauseBtn').addEventListener('click', () => {
-                if (!currentSound) return;
-                
-                if (currentSound.playing()) {
-                    currentSound.pause();
-                } else {
-                    currentSound.play();
-                }
-            });
+            // Background sounds volume
+            const bgVolume = document.getElementById('bgVolume');
+            if (bgVolume) {
+                bgVolume.addEventListener('input', (e) => {
+                    const value = e.target.value;
+                    document.getElementById('bgVolumeValue').textContent = `${value}%`;
+                    
+                    // Update background sound volumes
+                    Object.values(backgroundSounds).forEach(sound => {
+                        sound.volume = value / 100;
+                        if (sound.howl) {
+                            sound.howl.volume(sound.volume);
+                        }
+                    });
+                });
+            }
             
-            document.getElementById('prevTrackBtn').addEventListener('click', playPrevTrack);
-            document.getElementById('nextTrackBtn').addEventListener('click', playNextTrack);
+            // Stop all background sounds
+            const stopAllBgBtn = document.getElementById('stopAllBgBtn');
+            if (stopAllBgBtn) stopAllBgBtn.addEventListener('click', stopAllBackgroundSounds);
             
-            // Transport controls
-            document.getElementById('recordBtn').addEventListener('click', toggleRecording);
-            document.getElementById('talkoverBtn').addEventListener('click', toggleTalkover);
-            document.getElementById('autoDJBtn').addEventListener('click', () => {
-                showToast('Auto DJ mode activated');
-            });
+            // Talkover button
+            const talkoverBtn = document.getElementById('talkoverBtn');
+            if (talkoverBtn) talkoverBtn.addEventListener('click', toggleTalkover);
+            
+            // Start broadcast button
+            const startBroadcastBtn = document.getElementById('startBroadcastBtn');
+            if (startBroadcastBtn) startBroadcastBtn.addEventListener('click', startBroadcasting);
+            
+            // End stream button
+            const endStreamBtn = document.getElementById('endStreamBtn');
+            if (endStreamBtn) endStreamBtn.addEventListener('click', endStream);
             
             // Chat
-            document.getElementById('sendChatBtn').addEventListener('click', sendChatMessage);
-            document.getElementById('chatInput').addEventListener('keypress', (e) => {
+            const sendChatBtn = document.getElementById('sendChatBtn');
+            const chatInput = document.getElementById('chatInput');
+            if (sendChatBtn) sendChatBtn.addEventListener('click', sendChatMessage);
+            if (chatInput) chatInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') sendChatMessage();
             });
             
-            // End stream
-            document.getElementById('endStreamBtn').addEventListener('click', () => {
-                if (confirm('Are you sure you want to end the broadcast?')) {
-                    endBroadcast();
-                }
-            });
+            // Mobile menu
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            if (mobileMenuBtn) mobileMenuBtn.addEventListener('click', showMobileMenu);
             
-            // File uploads
-            document.getElementById('musicUpload').addEventListener('change', (e) => {
-                loadMusicFiles(Array.from(e.target.files));
-            });
-            
-            // Effects controls
-            document.getElementById('compressorAmount').addEventListener('input', (e) => {
-                if (compressorNode) {
-                    compressorNode.threshold.value = -50 + (e.target.value / 100) * 40;
+            // Effects
+            const effectsControls = ['compressorAmount', 'reverbAmount', 'delayAmount', 'chorusAmount', 'pitchAmount', 'distortionAmount'];
+            effectsControls.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.addEventListener('input', (e) => {
+                        // Update effects in real-time
+                        const value = e.target.value;
+                        console.log(`${id}: ${value}`);
+                    });
                 }
             });
             
             // Window resize
-            window.addEventListener('resize', () => {
-                if (waveformCanvas) {
-                    waveformCanvas.width = waveformCanvas.offsetWidth * 2;
-                    waveformCanvas.height = waveformCanvas.offsetHeight * 2;
-                }
-            });
+            window.addEventListener('resize', handleResize);
+            handleResize(); // Initial call
         }
 
-        // ========== CLEANUP ==========
-        function endBroadcast() {
-            // Stop streaming
-            if (socket) {
-                socket.emit('end-stream', { streamId: myPeerId });
+        function handleResize() {
+            const isMobile = window.innerWidth <= 768;
+            
+            // Update mobile-specific UI
+            if (isMobile) {
+                // Hide sidebars on mobile
+                document.getElementById('leftSidebar')?.classList.add('hidden');
+                document.getElementById('rightSidebar')?.classList.add('hidden');
+            } else {
+                // Show sidebars on desktop
+                document.getElementById('leftSidebar')?.classList.remove('hidden');
+                document.getElementById('rightSidebar')?.classList.remove('hidden');
             }
-            
-            // Stop audio
-            if (currentSound) {
-                currentSound.stop();
-            }
-            
-            // Close audio context
-            if (audioContext && audioContext.state !== 'closed') {
-                audioContext.close();
-            }
-            
-            // Clear intervals
-            if (timerInterval) {
-                clearInterval(timerInterval);
-            }
-            
-            // Show message
-            showToast('Broadcast ended');
-            
-            // Redirect to dashboard
-            setTimeout(() => {
-                window.location.href = '/dashboard';
-            }, 2000);
         }
 
         // Clean up on page unload
         window.addEventListener('beforeunload', () => {
-            if (socket && myPeerId) {
+            if (isStreaming && socket && myPeerId) {
                 socket.emit('end-stream', { streamId: myPeerId });
+            }
+            
+            if (peer) {
+                peer.destroy();
             }
         });
 
-        console.log('🚀 Airvibe Studio 4000 loaded with 20+ features:');
-        console.log('1. Professional Mixer Interface');
-        console.log('2. Multi-channel Audio Routing');
-        console.log('3. Real-time Spectrum Analyzer');
-        console.log('4. Waveform Visualization');
-        console.log('5. VU Meters for All Channels');
-        console.log('6. 3-Band EQ per Channel');
-        console.log('7. Built-in Compressor');
-        console.log('8. Reverb & Delay Effects');
-        console.log('9. Soundboard with 9 Effects');
-        console.log('10. Music Player with Playlist');
-        console.log('11. Auto-DJ Mode');
-        console.log('12. Talkover (Ducking)');
-        console.log('13. Live Recording');
-        console.log('14. Real-time Chat Integration');
-        console.log('15. Listener Analytics');
-        console.log('16. System Monitoring (CPU/RAM)');
-        console.log('17. Bitrate & Latency Display');
-        console.log('18. Broadcast Timer');
-        console.log('19. Multi-device Audio Input');
-        console.log('20. Professional Studio Theme');
+        console.log('🎚️ Airvibe Studio 4000 loaded - Mobile Ready!');
     </script>
 </body>
 </html>
