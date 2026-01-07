@@ -7,12 +7,15 @@
     "start": "node server.js"
   },
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "bcryptjs": "^2.4.3",
     "compression": "^1.8.1",
+    "connect-sqlite3": "^0.9.16",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "express": "^4.22.1",
     "express-rate-limit": "^7.5.1",
+    "express-session": "^1.18.2",
     "helmet": "^8.1.0",
     "peer": "^1.0.2",
     "peerjs": "^1.5.5",
