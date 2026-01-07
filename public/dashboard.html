@@ -3,336 +3,487 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Airvibe | Stable Listener</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <title>Airvibe | Ultimate Listener V9</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    
-    <script>
-        tailwind.config = { 
-            theme: { 
-                extend: { 
-                    fontFamily: { sans: ['Outfit', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
-                    colors: { bg: '#030305', surface: '#121214', primary: '#6366f1', accent: '#a855f7', success: '#22c55e' },
-                    animation: { 'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite' }
-                } 
-            } 
-        }
-    </script>
+
     <style>
-        body { background: #030305; color: white; overflow: hidden; height: 100vh; -webkit-tap-highlight-color: transparent; }
-        .glass-panel { background: rgba(20, 20, 25, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid rgba(255,255,255,0.08); }
-        .hide-scroll::-webkit-scrollbar { display: none; }
-        
-        /* Debug Console */
-        #debug-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100px;
-            background: rgba(0,0,0,0.8); color: lime; font-family: monospace; font-size: 10px;
-            pointer-events: none; z-index: 9999; padding: 10px; overflow: hidden;
-            display: none; /* Hidden by default, toggleable if needed */
-        }
+        body { background: #000; color: white; font-family: 'Outfit', sans-serif; overflow: hidden; height: 100vh; width: 100vw; }
+        .glass { background: rgba(10, 10, 12, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid rgba(255,255,255,0.08); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .float-emoji { position: absolute; pointer-events: none; animation: floatUp 2s ease-out forwards; font-size: 24px; z-index: 50; }
+        @keyframes floatUp { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-150px) scale(1.5); opacity: 0; } }
+        .safe-pb { padding-bottom: env(safe-area-inset-bottom, 20px); }
     </style>
 </head>
-<body class="flex flex-col relative">
+<body class="flex flex-col relative bg-gradient-to-br from-black via-[#050505] to-[#111]">
 
-    <div id="debug-overlay"></div>
-    <audio id="remoteAudio" playsinline crossorigin="anonymous"></audio>
+    <audio id="remoteAudio" autoplay playsinline></audio>
 
-    <div id="start-overlay" class="fixed inset-0 z-50 bg-[#030305] flex flex-col items-center justify-center p-6 transition-opacity duration-500">
-        <div class="relative mb-10">
-            <div class="absolute inset-0 bg-primary/40 blur-[60px] rounded-full animate-pulse"></div>
-            <div class="w-40 h-40 rounded-full border-2 border-white/10 flex items-center justify-center relative z-10 bg-surface/50 backdrop-blur-xl">
-                <span class="text-5xl animate-bounce">📡</span>
+    <div id="overlay" class="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center p-6 transition-opacity duration-500">
+        <div class="relative mb-8 group">
+            <div class="absolute inset-0 bg-indigo-500/30 blur-3xl rounded-full animate-pulse group-hover:bg-indigo-500/50 transition"></div>
+            <div class="w-32 h-32 rounded-full border border-white/10 bg-[#080808] flex items-center justify-center relative z-10">
+                <i class="fas fa-headphones-simple text-4xl text-white"></i>
             </div>
         </div>
-        <h1 class="text-3xl font-black mb-2 tracking-tight">AIRVIBE <span class="text-primary">PRO</span></h1>
-        <p class="text-gray-400 mb-10 text-center max-w-xs font-light">Stable Stream Ready.<br>Tap to Connect.</p>
-        
-        <button onclick="unlockAudioEngine()" class="w-full max-w-xs h-14 bg-white text-black font-bold rounded-full text-lg shadow-[0_0_40px_rgba(255,255,255,0.3)] hover:scale-105 active:scale-95 transition flex items-center justify-center gap-2">
-            <span>▶</span> CONNECT AUDIO
-        </button>
-        <div id="connection-debug" class="mt-6 text-[10px] font-mono text-gray-600">Initializing...</div>
+        <h1 class="text-3xl font-black mb-1">AIRVIBE <span class="text-indigo-500">V9</span></h1>
+        <p id="conn-status" class="text-gray-500 mb-8 font-mono text-xs uppercase tracking-widest">Searching for Host...</p>
+        <button id="tune-in-btn" onclick="startEngine()" class="w-full max-w-[200px] bg-white text-black font-bold py-4 rounded-full shadow-[0_0_30px_rgba(255,255,255,0.2)] active:scale-95 transition disabled:opacity-50 disabled:cursor-not-allowed" disabled>TUNE IN</button>
     </div>
 
-    <div id="main-ui" class="flex-1 flex flex-col h-full opacity-0 transition-opacity duration-700 pointer-events-none">
-        
-        <header class="h-16 flex items-center justify-between px-6 z-20">
-            <div class="flex items-center gap-3 bg-surface/80 px-4 py-2 rounded-full border border-white/5">
-                <div id="status-dot" class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
-                <div class="text-xs font-bold tracking-widest text-gray-300" id="live-status">OFFLINE</div>
+    <div id="ui-layer" class="flex-1 flex flex-col h-full opacity-0 pointer-events-none transition-opacity duration-700">
+        <header class="h-14 flex items-center justify-between px-4 z-20 bg-gradient-to-b from-black/80 to-transparent">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-gray-800 border border-white/10 overflow-hidden">
+                  <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Host" class="w-full h-full object-cover">
+                </div>
+                <div class="flex flex-col">
+                  <span class="text-xs font-bold leading-none">LIVE HOST</span>
+                  <div class="flex items-center gap-1 mt-0.5">
+                    <div id="live-dot" class="w-1.5 h-1.5 rounded-full bg-gray-500"></div>
+                    <span id="live-text" class="text-[9px] font-mono text-gray-500 uppercase">OFFLINE</span>
+                  </div>
+                </div>
             </div>
-            <div class="flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/5">
-                <span class="text-xs text-gray-400" id="debug-stats">0s / 0 pkt</span>
+            <div class="flex items-center gap-3">
+                <div class="flex items-center gap-1 bg-white/5 px-2 py-1 rounded text-[10px] font-mono border border-white/5">
+                  <i class="fas fa-signal text-green-500"></i><span id="ping-stat">--ms</span>
+                </div>
+                <div class="flex items-center gap-1 bg-white/5 px-2 py-1 rounded text-[10px] font-mono border border-white/5">
+                  <i class="fas fa-user text-indigo-400"></i><span id="listener-count">0</span>
+                </div>
             </div>
         </header>
 
-        <div class="flex-1 relative flex flex-col items-center justify-center">
-            <canvas id="visualizer" class="absolute inset-0 w-full h-full opacity-40"></canvas>
-            <div class="relative z-10 text-center p-6">
-                <div class="w-48 h-48 mx-auto rounded-3xl overflow-hidden border-4 border-white/5 shadow-2xl mb-6 relative">
-                    <img id="host-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Airvibe" class="w-full h-full object-cover">
-                </div>
-                <h2 id="room-title" class="text-2xl font-bold mb-1">Searching...</h2>
-                <p id="room-host" class="text-primary font-medium">@System</p>
+        <div class="flex-1 relative flex flex-col items-center justify-center cursor-pointer" onclick="toggleVisMode()">
+            <canvas id="vis-canvas" class="absolute inset-0 w-full h-full opacity-60"></canvas>
+            <div class="relative z-10 text-center pointer-events-none">
+                <h2 class="text-2xl font-bold tracking-tight mb-1 drop-shadow-lg">Now Playing</h2>
+                <p class="text-indigo-400 text-sm font-mono">Airvibe Radio</p>
             </div>
+            <div class="absolute inset-0 z-0" ondblclick="sendReaction('❤️')"></div>
         </div>
 
-        <div class="glass-panel h-[35vh] min-h-[250px] flex flex-col rounded-t-[2rem] relative z-30">
-            <div class="w-full h-1 bg-white/5">
-                <div id="buffer-bar" class="h-full bg-primary w-0 transition-all duration-300"></div>
+        <div class="glass flex flex-col rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.5)] h-[45vh] max-h-[400px]">
+            <div class="flex items-center justify-center gap-6 py-2 border-b border-white/5">
+                <button onclick="toggleAudioBoost()" class="text-xs text-gray-400 hover:text-white flex flex-col items-center gap-1"><i class="fas fa-volume-high"></i> <span class="text-[9px]">BOOST</span></button>
+                <button onclick="toggleSleepTimer()" class="text-xs text-gray-400 hover:text-white flex flex-col items-center gap-1"><i class="fas fa-moon"></i> <span class="text-[9px]">SLEEP</span></button>
+                <button onclick="shareStation()" class="text-xs text-gray-400 hover:text-white flex flex-col items-center gap-1"><i class="fas fa-share-nodes"></i> <span class="text-[9px]">SHARE</span></button>
+                <button onclick="reloadAudio()" class="text-xs text-gray-400 hover:text-white flex flex-col items-center gap-1"><i class="fas fa-rotate"></i> <span class="text-[9px]">RELOAD</span></button>
             </div>
-            <div id="chat-feed" class="flex-1 overflow-y-auto p-6 space-y-4 hide-scroll mask-image-gradient">
-                <div class="text-center text-xs text-gray-600">Waiting for chat...</div>
+
+            <div id="chat-box" class="flex-1 overflow-y-auto p-4 space-y-3 no-scrollbar relative">
+                <div class="absolute inset-0 pointer-events-none bg-gradient-to-t from-black/20 to-transparent"></div>
+                <div class="text-center text-[10px] text-gray-600 mt-4">-- Global Chat Connected --</div>
             </div>
-            <div class="p-4 pb-8 bg-black/20">
-                <form onsubmit="sendChat(event)" class="flex gap-3">
-                    <input id="chat-inp" class="flex-1 bg-white/5 border border-white/10 rounded-full px-5 h-12 text-sm text-white focus:outline-none focus:border-primary" placeholder="Message..." autocomplete="off">
-                    <button class="h-12 w-12 rounded-full bg-primary text-white flex items-center justify-center shadow-lg">➤</button>
+
+            <div class="p-3 pb-6 safe-pb bg-black/40">
+                <div class="absolute -top-12 right-4 flex gap-2">
+                    <button onclick="sendGift('🔥')" class="w-10 h-10 rounded-full bg-gray-800/80 backdrop-blur border border-white/10 text-lg shadow-lg active:scale-90 transition">🔥</button>
+                    <button onclick="sendGift('🚀')" class="w-10 h-10 rounded-full bg-indigo-600/80 backdrop-blur border border-indigo-400 text-lg shadow-lg active:scale-90 transition">🚀</button>
+                </div>
+                <form onsubmit="sendMessage(event)" class="flex gap-2">
+                    <div class="relative flex-1">
+                        <input id="msg-input" type="text" class="w-full bg-[#1a1a1a] border border-white/10 rounded-full pl-4 pr-10 h-10 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 transition" placeholder="Say something..." autocomplete="off">
+                        <i class="fas fa-smile absolute right-3 top-3 text-gray-500 text-xs"></i>
+                    </div>
+                    <button type="submit" class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center hover:bg-indigo-500 active:scale-95 transition"><i class="fas fa-paper-plane text-xs"></i></button>
                 </form>
             </div>
         </div>
     </div>
 
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
-        const socket = io();
-        
-        // --- STABILITY ENGINE VARIABLES ---
-        let mediaSource, sourceBuffer;
-        let isConnected = false; 
-        let audioCtx, analyser;
-        let packetCount = 0;
-        
-        // 🔥 AGGREGATOR BUFFER (The Fix)
-        let chunkQueue = []; // Holds raw ArrayBuffers
-        let isAppending = false;
-        let bufferInterval;
+    <div id="toast" class="fixed top-4 left-1/2 -translate-x-1/2 bg-white text-black px-4 py-2 rounded-full text-xs font-bold shadow-xl translate-y-[-100px] transition duration-300 z-[200]">Notification</div>
 
-        // --- LOGGING ---
-        function debug(msg) {
-            console.log(`[SYS] ${msg}`);
-            document.getElementById('connection-debug').innerText = msg;
-        }
+   <script>
+    const socket = io();
+    const audio = document.getElementById('remoteAudio');
+    let peer, myId, audioCtx, analyser, gainNode, isBoosted = false, visMode = 0, pingStart;
+    let hostPeerId = null;
+    let typingTimeout;
 
-        // --- 1. USER INTERACTION (UNLOCK) ---
-        function unlockAudioEngine() {
-            const audio = document.getElementById('remoteAudio');
-            
-            // Setup Visualizer Context
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                analyser = audioCtx.createAnalyser();
-                analyser.fftSize = 64;
-                const source = audioCtx.createMediaElementSource(audio);
-                source.connect(analyser);
-                analyser.connect(audioCtx.destination);
-                startVisualizer();
-            }
-            if (audioCtx.state === 'suspended') audioCtx.resume();
+    // ✅ User Configuration
+    const MY_NAME = localStorage.getItem('airvibe-username') || `Guest${Math.floor(1000 + Math.random() * 9000)}`;
+    const MY_COLOR = '#3b82f6';
+    let isTyping = false;
 
-            // UI Reveal
-            document.getElementById('start-overlay').classList.add('opacity-0', 'pointer-events-none');
-            document.getElementById('main-ui').classList.remove('opacity-0', 'pointer-events-none');
-            document.getElementById('main-ui').classList.add('opacity-100');
+    // ✅ Join global chat on load
+    function joinGlobalChat() {
+        socket.emit('user-join', {
+            name: MY_NAME,
+            isHost: false,
+            role: 'listener'
+        });
+    }
 
-            // Wake up element
-            audio.play().catch(e => debug("Engine awake, waiting for data..."));
-        }
+    function startEngine() {
+        document.getElementById('overlay').classList.add('opacity-0', 'pointer-events-none');
+        document.getElementById('ui-layer').classList.remove('opacity-0', 'pointer-events-none');
 
-        // --- 2. SOCKET CONNECTION ---
-        socket.on('connect', () => {
-            debug("Connected to Server");
-            socket.emit('requestData');
+        // Join global chat
+        joinGlobalChat();
+
+        initAudioContext();
+
+        peer = new Peer(undefined, {
+          host: location.hostname,
+          port: location.port || 443,
+          path: "/peerjs/peerjs",
+          secure: location.protocol === "https:"
         });
 
-        socket.on('streamList', (streams) => {
-            const list = Object.values(streams);
-            if (list.length > 0) {
-                const stream = list[0];
-                document.getElementById('room-title').innerText = stream.title;
-                document.getElementById('room-host').innerText = '@' + stream.host;
-                document.getElementById('host-avatar').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${stream.host}`;
-                
-                if (!isConnected) joinRoom(stream.id, stream.mimeType);
-            } else {
-                debug("No active broadcasts.");
-                document.getElementById('live-status').innerText = "OFFLINE";
-                document.getElementById('status-dot').className = "w-2 h-2 rounded-full bg-red-500";
-            }
-        });
+        peer.on('open', (id) => {
+            myId = id;
 
-        function joinRoom(id, mimeType) {
-            isConnected = true; 
-            debug("Joining room...");
-            document.getElementById('live-status').innerText = "LIVE SIGNAL";
-            document.getElementById('live-status').className = "text-xs font-bold tracking-widest text-green-400";
-            document.getElementById('status-dot').className = "w-2 h-2 rounded-full bg-green-500 animate-pulse";
+            // ✅ tell server we are ready to receive the call
+            socket.emit('listener-ready', id);
 
-            socket.emit('joinEvent', { targetId: id });
-            initPipeline(mimeType || 'audio/webm;codecs=opus');
-        }
-
-        // --- 3. THE "AGGREGATOR" AUDIO PIPELINE ---
-        function initPipeline(mimeType) {
-            const audio = document.getElementById('remoteAudio');
-            
-            if (mediaSource) {
-                try { if (mediaSource.readyState === 'open') mediaSource.endOfStream(); } catch(e){}
-            }
-
-            mediaSource = new MediaSource();
-            audio.src = URL.createObjectURL(mediaSource);
-
-            mediaSource.addEventListener('sourceopen', () => {
-                debug("Buffer Open");
-                try {
-                    if (!MediaSource.isTypeSupported(mimeType)) mimeType = 'audio/mp4'; 
-                    
-                    sourceBuffer = mediaSource.addSourceBuffer(mimeType);
-                    sourceBuffer.mode = 'sequence'; 
-                    
-                    sourceBuffer.addEventListener('updateend', () => { 
-                        isAppending = false; 
-                    });
-
-                    // 🔥 THE AGGREGATOR LOOP (The Stability Fix)
-                    // Instead of appending every packet instantly, we wait and append in chunks.
-                    if (bufferInterval) clearInterval(bufferInterval);
-                    bufferInterval = setInterval(processAggregatedBuffer, 500); // Run every 500ms
-
-                } catch(e) { debug("SourceBuffer Error: " + e.message); }
-            });
-
-            // HEARTBEAT & JUMPER
             setInterval(() => {
-                if (audio.buffered.length > 0) {
-                    const end = audio.buffered.end(audio.buffered.length - 1);
-                    const diff = end - audio.currentTime;
-                    
-                    // Stats Update
-                    document.getElementById('debug-stats').innerText = `${diff.toFixed(1)}s / ${packetCount} pkt`;
-                    const width = Math.min(100, (diff / 3) * 100);
-                    document.getElementById('buffer-bar').style.width = width + '%';
-
-                    // Jumper Logic (If stuck behind)
-                    if (diff > 4) { 
-                        console.log("Jumping to live...");
-                        audio.currentTime = end - 0.5;
-                    }
-                    
-                    // Force start if stopped
-                    if (audio.paused && diff > 1) {
-                        audio.play().catch(e => console.log("Autoplay check"));
-                    }
-                }
-            }, 1000);
-        }
-
-        // --- 4. DATA HANDLING ---
-        socket.on('audioBuffer', async (data) => {
-            if (!sourceBuffer) return;
-            packetCount++;
-            
-            try {
-                const buf = (data instanceof Blob) ? await data.arrayBuffer() : data;
-                chunkQueue.push(buf); // Push to waiting room
-            } catch(e){}
+              if(document.getElementById('live-text').innerText === "LIVE") {
+                socket.emit('listener-ready', myId);
+              }
+            }, 5000);
         });
 
-        // 🔥 THIS FUNCTION MERGES SMALL CHUNKS INTO ONE BIG BLOCK
-        function processAggregatedBuffer() {
-            if (chunkQueue.length === 0 || isAppending || sourceBuffer.updating) return;
-
-            try {
-                // 1. Calculate total size
-                let totalLen = 0;
-                for(let chunk of chunkQueue) totalLen += chunk.byteLength;
-
-                // 2. Merge all chunks into one Uint8Array
-                const merged = new Uint8Array(totalLen);
-                let offset = 0;
-                for(let chunk of chunkQueue) {
-                    merged.set(new Uint8Array(chunk), offset);
-                    offset += chunk.byteLength;
+        peer.on('call', (call) => {
+            call.answer();
+            call.on('stream', (stream) => {
+                // audio graph for boost/visual
+                if(audioCtx) {
+                  const source = audioCtx.createMediaStreamSource(stream);
+                  source.connect(gainNode);
+                  gainNode.connect(audioCtx.destination);
+                  setupVisualizer(source);
                 }
 
-                // 3. Clear Queue
-                chunkQueue = [];
+                audio.srcObject = stream;
+                audio.play().catch(() => showToast("Tap to Unmute!"));
+            });
+        });
+    }
 
-                // 4. Append the BIG chunk (Stable!)
-                isAppending = true;
-                sourceBuffer.appendBuffer(merged);
+    socket.on('connect', () => {
+      document.getElementById('conn-status').innerText = "Connected. Waiting for Host...";
+      pingStart = Date.now();
+      socket.emit('requestData');
+    });
 
-            } catch (e) {
-                console.error("Append Error:", e);
-                isAppending = false;
-                // Nuclear Clean if stuck
-                if (e.name === 'QuotaExceededError' && sourceBuffer.buffered.length > 0) {
-                    sourceBuffer.remove(0, sourceBuffer.buffered.end(0) - 5);
-                }
-            }
+    socket.on('pong', () => document.getElementById('ping-stat').innerText = (Date.now() - pingStart) + 'ms');
+
+    socket.on('host-status', (data) => {
+        const btn = document.getElementById('tune-in-btn');
+
+        hostPeerId = data.hostPeerId || null;
+        
+        // Update online count
+        document.getElementById('listener-count').innerText = data.onlineCount || 0;
+
+        if(data.live) {
+            btn.disabled = false;
+            document.getElementById('conn-status').innerText = "🟢 Host is LIVE";
+            document.getElementById('conn-status').classList.add('text-green-500');
+            document.getElementById('live-dot').className = "w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse";
+            document.getElementById('live-text').innerText = "LIVE";
+            document.getElementById('live-text').className = "text-[9px] font-mono text-red-500 font-bold uppercase";
+
+            addChatBubble("SYSTEM", "Host is LIVE 🎤", false, true, "#ef4444");
+        } else {
+            btn.disabled = true;
+            document.getElementById('conn-status').innerText = "Host is Offline";
+            document.getElementById('conn-status').classList.remove('text-green-500');
+            document.getElementById('live-dot').className = "w-1.5 h-1.5 rounded-full bg-gray-500";
+            document.getElementById('live-text').innerText = "OFFLINE";
+            document.getElementById('live-text').className = "text-[9px] font-mono text-gray-500 uppercase";
+
+            addChatBubble("SYSTEM", "Host went offline ⚠️", false, true, "#ef4444");
         }
+    });
 
-        // --- 5. VISUALIZER ---
-        function startVisualizer() {
-            const canvas = document.getElementById('visualizer');
-            const ctx = canvas.getContext('2d');
+    // ✅ Receive chat history
+    socket.on('chat-history', (history) => {
+        const chatBox = document.getElementById('chat-box');
+        chatBox.innerHTML = '<div class="text-center text-[10px] text-gray-600 mt-4">-- Global Chat Connected --</div>';
+        
+        history.forEach(msg => {
+            const isMe = msg.user === MY_NAME;
+            const isHost = msg.type === 'host';
+            const isSystem = msg.type === 'system';
             
-            const resize = () => { canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; };
-            window.addEventListener('resize', resize);
-            resize();
+            addChatBubble(msg.user, msg.msg, isMe, isHost, isSystem ? '#fbbf24' : (isHost ? '#ef4444' : msg.color || '#3b82f6'));
+        });
+    });
 
-            const bufferLength = analyser.frequencyBinCount;
-            const dataArray = new Uint8Array(bufferLength);
+    // ✅ Receive chat messages
+    socket.on('chatMessage', (data) => {
+        const isMe = data.user === MY_NAME;
+        const isHost = data.type === 'host';
+        const isSystem = data.type === 'system' || data.user === 'SYSTEM';
+        const color = isSystem ? '#fbbf24' : (isHost ? '#ef4444' : data.color || '#3b82f6');
+        
+        addChatBubble(data.user, data.msg, isMe, isHost, color, isSystem);
+        
+        // Play sound for new messages (except your own)
+        if (!isMe) {
+            playMessageSound();
+        }
+    });
 
-            function draw() {
-                requestAnimationFrame(draw);
-                analyser.getByteFrequencyData(dataArray);
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                
-                const barWidth = (canvas.width / bufferLength) * 2;
-                let x = 0;
+    // ✅ Receive online users
+    socket.on('online-users', (users) => {
+        const hostCount = users.filter(u => u.isHost).length;
+        const listenerCount = users.filter(u => !u.isHost).length;
+        
+        document.getElementById('listener-count').innerText = users.length;
+        
+        // Update status indicator
+        const statusEl = document.querySelector('.flex.items-center.gap-1');
+        if (statusEl) {
+            statusEl.innerHTML = `
+                <div id="live-dot" class="w-1.5 h-1.5 rounded-full ${hostCount > 0 ? 'bg-red-500 animate-pulse' : 'bg-gray-500'}"></div>
+                <span id="live-text" class="text-[9px] font-mono ${hostCount > 0 ? 'text-red-500 font-bold' : 'text-gray-500'} uppercase">
+                    ${hostCount > 0 ? 'LIVE' : 'OFFLINE'} • ${users.length} online
+                </span>
+            `;
+        }
+    });
 
-                for(let i = 0; i < bufferLength; i++) {
-                    const v = dataArray[i] / 255;
-                    const barHeight = v * canvas.height * 0.8;
-                    const gradient = ctx.createLinearGradient(0, canvas.height, 0, 0);
-                    gradient.addColorStop(0, 'rgba(99, 102, 241, 0.2)');
-                    gradient.addColorStop(1, 'rgba(168, 85, 247, 0.8)');
-                    ctx.fillStyle = gradient;
-                    ctx.fillRect(x, (canvas.height - barHeight) / 2, barWidth, barHeight);
-                    x += barWidth + 2;
-                }
+    // ✅ Typing indicator
+    socket.on('user-typing', (data) => {
+        const typingIndicator = document.getElementById('typing-indicator');
+        if (!typingIndicator) return;
+        
+        if (data.isTyping) {
+            typingIndicator.innerHTML = `${data.user} is typing...`;
+            typingIndicator.classList.remove('hidden');
+        } else {
+            typingIndicator.classList.add('hidden');
+        }
+    });
+
+    // ✅ Gift receive
+    socket.on('giftReceived', (data) => {
+        addChatBubble("SYSTEM", `${data.user} sent ${data.gift}`, false, false, '#fbbf24');
+        sendReaction(data.gift);
+    });
+
+    function sendMessage(e) {
+        e.preventDefault();
+        const inp = document.getElementById('msg-input');
+        const txt = inp.value.trim();
+        if(!txt) return;
+
+        // show instantly
+        addChatBubble(MY_NAME, txt, true, false, MY_COLOR);
+
+        // send to global chat
+        socket.emit('chatMessage', { 
+            user: MY_NAME, 
+            msg: txt,
+            color: MY_COLOR
+        });
+
+        // Stop typing indicator
+        socket.emit('typing', false);
+        isTyping = false;
+        
+        inp.value = '';
+    }
+
+    // ✅ Typing detection
+    function handleTyping() {
+        const inp = document.getElementById('msg-input');
+        if (!isTyping && inp.value.length > 0) {
+            isTyping = true;
+            socket.emit('typing', true);
+        }
+        
+        clearTimeout(typingTimeout);
+        typingTimeout = setTimeout(() => {
+            if (isTyping) {
+                isTyping = false;
+                socket.emit('typing', false);
             }
-            draw();
+        }, 1000);
+    }
+
+    function addChatBubble(user, msg, isMe, isHost, color = '#3b82f6', isSystem = false) {
+        const div = document.createElement('div');
+        const align = isMe ? 'items-end' : 'items-start';
+
+        let bg, nameColor;
+        if (isSystem) {
+            bg = 'bg-yellow-900/20 border border-yellow-500/20 text-yellow-200';
+            nameColor = 'text-yellow-400';
+        } else if (isMe) {
+            bg = 'bg-indigo-600 text-white';
+            nameColor = 'text-indigo-300';
+        } else if (isHost) {
+            bg = 'bg-red-900/30 border border-red-500/30 text-white';
+            nameColor = 'text-red-300';
+        } else {
+            bg = 'bg-gray-800/50 border border-gray-700/50 text-gray-200';
+            nameColor = 'text-gray-400';
         }
 
-        // --- 6. CHAT ---
-        function sendChat(e) {
-            e.preventDefault();
-            const inp = document.getElementById('chat-inp');
-            const txt = inp.value.trim();
-            if(!txt || !isConnected) return;
-            addChatLog('Me', txt, true);
-            socket.emit('chatMessage', { room: 1, user: 'Guest', msg: txt });
-            inp.value = '';
-        }
+        div.className = `flex flex-col ${align} mb-3 animate-fadeIn`;
+        div.innerHTML = `
+            <div class="flex items-center gap-2 mb-0.5">
+                <span class="text-[9px] ${nameColor} font-bold ml-1">${escapeHtml(user)}</span>
+                ${isHost ? '<span class="text-[8px] bg-red-500 px-1 py-0.5 rounded uppercase">HOST</span>' : ''}
+                ${isMe ? '<span class="text-[8px] bg-indigo-500 px-1 py-0.5 rounded uppercase">YOU</span>' : ''}
+            </div>
+            <div class="${bg} px-3 py-2 rounded-2xl text-xs max-w-[85%] shadow-sm break-words">${escapeHtml(msg)}</div>
+            <span class="text-[8px] text-gray-500 mt-0.5 ml-1">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+        `;
 
-        function addChatLog(user, txt, isMe) {
-            const div = document.createElement('div');
-            div.className = `flex ${isMe ? 'justify-end' : 'justify-start'} animate-pulse-fast`;
-            div.style.animationIterationCount = "1"; 
-            div.innerHTML = `
-                <div class="max-w-[85%] rounded-2xl px-4 py-2 text-sm shadow-md ${isMe ? 'bg-primary text-white rounded-br-none' : 'bg-white/10 text-gray-200 rounded-bl-none'}">
-                    ${!isMe ? `<div class="text-[10px] text-gray-400 mb-1 font-bold tracking-wider uppercase">${user}</div>` : ''}
-                    ${txt}
-                </div>`;
-            const box = document.getElementById('chat-feed');
-            box.appendChild(div);
-            box.scrollTop = box.scrollHeight;
-        }
+        const box = document.getElementById('chat-box');
+        box.appendChild(div);
+        box.scrollTop = box.scrollHeight;
+    }
 
-        socket.on('chatMessage', d => { if(d.user !== 'Guest') addChatLog(d.user, d.msg, false); });
-    </script>
+    function sendGift(icon) {
+      socket.emit('sendGift', { 
+          user: MY_NAME, 
+          gift: icon,
+          color: MY_COLOR
+      });
+      sendReaction(icon);
+    }
+
+    function sendReaction(emoji) {
+        const el = document.createElement('div');
+        el.innerText = emoji;
+        el.className = 'float-emoji';
+        el.style.left = Math.random() * 80 + 10 + '%';
+        el.style.bottom = '150px';
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 2000);
+    }
+
+    function playMessageSound() {
+        try {
+            const audio = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==');
+            audio.volume = 0.1;
+            audio.play();
+        } catch(e) {}
+    }
+
+    function initAudioContext() {
+      if(audioCtx) return;
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      gainNode = audioCtx.createGain();
+      gainNode.gain.value = 1.0;
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 128;
+    }
+
+    function toggleAudioBoost() {
+      if(!gainNode) return;
+      isBoosted = !isBoosted;
+      gainNode.gain.value = isBoosted ? 3.0 : 1.0;
+      showToast(isBoosted ? "🚀 Audio Boost: ON" : "Audio Boost: OFF");
+    }
+
+    function reloadAudio() {
+      audio.load();
+      audio.play();
+      showToast("Reloading Audio...");
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.innerText = msg;
+      t.style.transform = "translate(-50%, 0)";
+      setTimeout(() => t.style.transform = "translate(-50%, -100px)", 2000);
+    }
+
+    function shareStation() {
+      navigator.clipboard.writeText(window.location.href);
+      showToast("Link Copied!");
+    }
+
+    function toggleSleepTimer() {
+      showToast("Sleep Timer: 30m set");
+      setTimeout(() => { audio.pause(); showToast("Sleep Timer: End"); }, 30 * 60000);
+    }
+
+    function setupVisualizer(sourceNode) {
+      sourceNode.connect(analyser);
+      const canvas = document.getElementById('vis-canvas');
+      const ctx = canvas.getContext('2d');
+      const bufferLen = analyser.frequencyBinCount;
+      const data = new Uint8Array(bufferLen);
+
+      const resize = () => { canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; };
+      window.addEventListener('resize', resize);
+      resize();
+
+      function draw() {
+        requestAnimationFrame(draw);
+        if(visMode === 0) analyser.getByteFrequencyData(data);
+        else analyser.getByteTimeDomainData(data);
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const barW = (canvas.width / bufferLen) * 2.5;
+        let x = 0;
+
+        for(let i=0; i<bufferLen; i++) {
+          const v = data[i] / 128.0;
+          const h = visMode === 0 ? (data[i]/255) * canvas.height * 0.8 : (v * canvas.height/4);
+          const y = visMode === 0 ? (canvas.height - h)/2 : v * canvas.height/2;
+
+          ctx.fillStyle = `rgba(99, 102, 241, ${visMode===0 ? data[i]/255 : 0.8})`;
+          if(visMode === 0) {
+            ctx.fillRect(x, y, barW - 2, h);
+          } else {
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(x, y, 2, 2);
+          }
+          x += barW;
+        }
+      }
+      draw();
+    }
+
+    function toggleVisMode() {
+      visMode = visMode === 0 ? 1 : 0;
+      showToast(visMode === 0 ? "Visual: Spectrum" : "Visual: Waveform");
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, (m) => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+      }[m]));
+    }
+
+    // Add typing indicator to chat box
+    const chatBox = document.getElementById('chat-box');
+    const typingDiv = document.createElement('div');
+    typingDiv.id = 'typing-indicator';
+    typingDiv.className = 'hidden text-[10px] text-gray-500 italic px-3 py-1';
+    chatBox.appendChild(typingDiv);
+
+    // Add username prompt if not set
+    if (!localStorage.getItem('airvibe-username')) {
+        setTimeout(() => {
+            const name = prompt("Enter your display name for chat:", MY_NAME);
+            if (name && name.trim()) {
+                localStorage.setItem('airvibe-username', name.trim());
+                location.reload();
+            }
+        }, 1000);
+    }
+
+    setInterval(() => { pingStart = Date.now(); socket.emit('ping'); }, 2000);
+    
+    // Add typing event listener
+    document.getElementById('msg-input').addEventListener('input', handleTyping);
+</script>
 </body>
 </html>

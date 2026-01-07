@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Airvibe Studio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+</head>
+
+<body class="bg-black text-white min-h-screen flex items-center justify-center p-6">
+  <div class="max-w-lg w-full space-y-4">
+    <div class="flex items-center justify-between">
+      <h1 class="text-2xl font-black">🎙️ Airvibe Studio (Testing)</h1>
+      <span class="text-xs font-mono px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-500/40 text-indigo-300">
+        V2-STABLE-AUDIO
+      </span>
+    </div>
+
+    <div class="p-4 rounded-xl bg-white/5 border border-white/10 space-y-2">
+      <div class="text-sm text-gray-300">Status</div>
+      <div id="status" class="font-mono text-sm">idle</div>
+
+      <div class="font-mono text-xs text-gray-400">Peer: <span id="peerId">—</span></div>
+      <div class="font-mono text-xs text-gray-500">Peer path: /peerjs/peerjs</div>
+      <div class="font-mono text-xs text-gray-400 mt-2">Listeners: <span id="listenerCount">0</span></div>
+
+      <div class="text-xs text-yellow-300 mt-2">
+        🔇 Broadcaster is muted locally (no echo). Only listeners will hear audio.
+      </div>
+    </div>
+
+    <button id="goLiveBtn" class="w-full py-4 rounded-xl bg-red-600 font-black text-lg active:scale-95 transition">
+      GO LIVE
+    </button>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <div class="p-4 rounded-xl bg-white/5 border border-white/10">
+        <div class="flex items-center justify-between gap-3">
+          <div class="text-sm font-bold">🎤 Mic</div>
+          <button id="micToggle" class="px-3 py-1 rounded-lg bg-white/10 border border-white/10 text-xs font-bold">
+            MIC: ON
+          </button>
+        </div>
+
+        <label class="text-xs text-gray-400 mt-2 block">Mic volume</label>
+        <input id="micVol" type="range" min="0" max="200" value="100" class="w-full">
+
+        <div class="text-xs text-gray-500 mt-2">
+          For testing, use Tone/Music first. Mic can be noisy in Codespaces.
+        </div>
+      </div>
+
+      <div class="p-4 rounded-xl bg-white/5 border border-white/10">
+        <div class="text-sm font-bold mb-2">🎵 Music Test</div>
+        <input id="musicFile" type="file" accept="audio/*" class="block w-full text-xs text-gray-400" />
+        <div id="trackName" class="text-xs text-gray-500 mt-2 truncate">No track loaded</div>
+
+        <div class="flex gap-2 mt-3">
+          <button id="playMusicBtn" class="flex-1 py-2 rounded-lg bg-white text-black font-bold disabled:opacity-40" disabled>
+            ▶ Play
+          </button>
+          <button id="stopMusicBtn" class="flex-1 py-2 rounded-lg bg-white/10 border border-white/10 font-bold disabled:opacity-40" disabled>
+            ⏹ Stop
+          </button>
+        </div>
+
+        <label class="text-xs text-gray-400 mt-3 block">Music volume</label>
+        <input id="musicVol" type="range" min="0" max="100" value="50" class="w-full">
+      </div>
+    </div>
+
+    <div class="p-4 rounded-xl bg-white/5 border border-white/10">
+      <div class="flex items-center justify-between gap-3">
+        <div>
+          <div class="text-sm font-bold">📢 Test Tone</div>
+          <div class="text-xs text-gray-500">Best way to confirm audio reaches listeners.</div>
+        </div>
+        <button id="toneBtn" class="px-4 py-2 rounded-lg bg-indigo-500 font-bold active:scale-95 transition">
+          START TONE
+        </button>
+      </div>
+    </div>
+
+    <div class="p-3 rounded-xl bg-white/5 border border-white/10 text-xs text-gray-400">
+      ✅ Test flow:
+      <div class="mt-1">1) Host: GO LIVE</div>
+      <div>2) Listener: UNLOCK + START (must show My Peer ID)</div>
+      <div>3) Host: START TONE → Listener should hear it</div>
+      <div class="mt-2 text-gray-500">Tip: use Music if tone works but mic doesn’t.</div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+
+    // WebAudio graph
+    let audioCtx = null;
+    let masterGain = null;
+    let mixDest = null;
+
+    let micSource = null;
+    let micGain = null;
+    let micEnabled = true;
+
+    let musicEl = null;
+    let musicSource = null;
+    let musicGain = null;
+
+    let toneOsc = null;
+    let toneGain = null;
+    let toneOn = false;
+
+    // Peer/WebRTC
+    let peer = null;
+    let peerId = null;
+    const activeCalls = new Map(); // listenerPeerId -> call
+    let listenerCount = 0;
+
+    function setStatus(msg) {
+      document.getElementById("status").innerText = msg;
+      console.log("[STUDIO]", msg);
+    }
+
+    function createPeer() {
+      const secure = location.protocol === "https:";
+      const port = location.port ? Number(location.port) : (secure ? 443 : 80);
+      return new Peer(undefined, {
+        host: location.hostname,
+        port,
+        path: "/peerjs/peerjs",
+        secure
+      });
+    }
+
+    async function initAudio() {
+      if (audioCtx) return;
+
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+      // master chain
+      masterGain = audioCtx.createGain();
+      masterGain.gain.value = 1;
+
+      // destination for WebRTC stream
+      mixDest = audioCtx.createMediaStreamDestination();
+
+      // ✅ listeners ONLY (no local monitoring)
+      masterGain.connect(mixDest);
+
+      // mic gain
+      micGain = audioCtx.createGain();
+      micGain.gain.value = 1;
+      micGain.connect(masterGain);
+
+      // music gain
+      musicGain = audioCtx.createGain();
+      musicGain.gain.value = 0.5;
+      musicGain.connect(masterGain);
+
+      // tone gain (default silent)
+      toneGain = audioCtx.createGain();
+      toneGain.gain.value = 0;
+      toneGain.connect(masterGain);
+
+      // mic
+      setStatus("requesting microphone…");
+      const micStream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        }
+      });
+
+      micSource = audioCtx.createMediaStreamSource(micStream);
+      micSource.connect(micGain);
+
+      setStatus("audio engine ready ✅ (silent locally)");
+    }
+
+    async function goLive() {
+      try {
+        document.getElementById("goLiveBtn").disabled = true;
+
+        await initAudio();
+        if (audioCtx.state === "suspended") await audioCtx.resume();
+
+        setStatus("starting peer…");
+        peer = createPeer();
+
+        peer.on("open", (id) => {
+          peerId = id;
+          document.getElementById("peerId").innerText = id;
+          setStatus("LIVE ✅ Waiting for listeners…");
+
+          // ✅ announce host is ready
+          socket.emit("host-ready", peerId);
+        });
+
+        peer.on("error", (err) => {
+          setStatus("peer error: " + (err.message || err.type || err));
+          document.getElementById("goLiveBtn").disabled = false;
+        });
+
+        // When a listener is ready, call them with our mixed stream
+        socket.off("new-listener");
+        socket.on("new-listener", (listenerPeerId) => {
+          if (!peer || !mixDest) return;
+          if (!listenerPeerId) return;
+
+          // Prevent duplicates
+          if (activeCalls.has(listenerPeerId)) return;
+
+          setStatus("calling listener: " + listenerPeerId);
+
+          const call = peer.call(listenerPeerId, mixDest.stream);
+          activeCalls.set(listenerPeerId, call);
+
+          // ✅ only increase once we have the call object
+          listenerCount++;
+          document.getElementById("listenerCount").innerText = String(listenerCount);
+
+          call.on("close", () => {
+            activeCalls.delete(listenerPeerId);
+            listenerCount = Math.max(0, listenerCount - 1);
+            document.getElementById("listenerCount").innerText = String(listenerCount);
+            setStatus("listener left");
+          });
+
+          call.on("error", (e) => {
+            activeCalls.delete(listenerPeerId);
+            listenerCount = Math.max(0, listenerCount - 1);
+            document.getElementById("listenerCount").innerText = String(listenerCount);
+            setStatus("call error: " + (e.message || e));
+          });
+        });
+
+      } catch (e) {
+        setStatus("ERROR: " + (e.message || e));
+        document.getElementById("goLiveBtn").disabled = false;
+      }
+    }
+
+    // MIC toggle
+    document.getElementById("micToggle").addEventListener("click", () => {
+      micEnabled = !micEnabled;
+      if (micGain) micGain.gain.value = micEnabled ? (Number(document.getElementById("micVol").value) / 100) : 0;
+      document.getElementById("micToggle").innerText = micEnabled ? "MIC: ON" : "MIC: OFF";
+      setStatus(micEnabled ? "mic ON (listeners may hear mic)" : "mic OFF (silent mic)");
+    });
+
+    // mic volume
+    document.getElementById("micVol").addEventListener("input", (e) => {
+      if (!micGain) return;
+      if (!micEnabled) return;
+      micGain.gain.value = Number(e.target.value) / 100;
+    });
+
+    // music load
+    document.getElementById("musicFile").addEventListener("change", async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      await initAudio();
+      if (audioCtx.state === "suspended") await audioCtx.resume();
+
+      const url = URL.createObjectURL(file);
+
+      if (!musicEl) {
+        musicEl = new Audio();
+        musicEl.crossOrigin = "anonymous";
+        musicEl.loop = true;
+        musicEl.playsInline = true;
+      }
+
+      musicEl.src = url;
+      document.getElementById("trackName").innerText = file.name;
+
+      if (!musicSource) {
+        // Must be created only once per AudioContext
+        musicSource = audioCtx.createMediaElementSource(musicEl);
+        musicSource.connect(musicGain);
+      }
+
+      document.getElementById("playMusicBtn").disabled = false;
+      document.getElementById("stopMusicBtn").disabled = false;
+
+      setStatus("music loaded ✅");
+    });
+
+    document.getElementById("musicVol").addEventListener("input", (e) => {
+      if (!musicGain) return;
+      musicGain.gain.value = Number(e.target.value) / 100;
+    });
+
+    document.getElementById("playMusicBtn").addEventListener("click", async () => {
+      if (!musicEl) return;
+      if (audioCtx && audioCtx.state === "suspended") await audioCtx.resume();
+      await musicEl.play();
+      setStatus("music playing ✅ (listeners should hear)");
+    });
+
+    document.getElementById("stopMusicBtn").addEventListener("click", () => {
+      if (!musicEl) return;
+      musicEl.pause();
+      musicEl.currentTime = 0;
+      setStatus("music stopped");
+    });
+
+    // Tone
+    document.getElementById("toneBtn").addEventListener("click", async () => {
+      await initAudio();
+      if (audioCtx.state === "suspended") await audioCtx.resume();
+
+      toneOn = !toneOn;
+
+      if (toneOn) {
+        if (!toneOsc) {
+          toneOsc = audioCtx.createOscillator();
+          toneOsc.type = "sine";
+          toneOsc.frequency.value = 440;
+          toneOsc.connect(toneGain);
+          toneOsc.start();
+        }
+        toneGain.gain.value = 0.25; // slightly louder for testing
+        document.getElementById("toneBtn").innerText = "STOP TONE";
+        setStatus("tone ON ✅ (listeners should hear)");
+      } else {
+        toneGain.gain.value = 0;
+        document.getElementById("toneBtn").innerText = "START TONE";
+        setStatus("tone OFF");
+      }
+    });
+
+    document.getElementById("goLiveBtn").addEventListener("click", goLive);
+  </script>
+</body>
+</html>

@@ -3,348 +3,558 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Airvibe Studio | Master Control</title>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <title>Airvibe Studio | Commander V8</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = { theme: { extend: { colors: { bg: '#050505', panel: '#111', primary: '#6366f1', danger: '#ef4444', success: '#22c55e' } } } }
-    </script>
-    <style>
-        body { background: #050505; color: #fff; font-family: 'Space Grotesk', sans-serif; overflow: hidden; height: 100vh; }
-        .glass { background: rgba(20,20,20,0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
-        .pulse-live { animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 15px transparent; } }
-        
-        /* DIAGNOSTIC CONSOLE */
-        #console-log {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 10px;
-            color: #0f0;
-            background: #000;
-            border-top: 1px solid #333;
-            height: 120px;
-            overflow-y: auto;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            z-index: 50;
-            padding: 8px;
-        }
-        .log-warn { color: #facc15; }
-        .log-err { color: #ef4444; }
-        .log-info { color: #60a5fa; }
-    </style>
-</head>
-<body class="flex flex-col">
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 
-    <header class="h-14 border-b border-white/10 flex items-center justify-between px-4 bg-panel z-20">
-        <div class="flex items-center gap-2">
-            <div id="conn-dot" class="w-2 h-2 rounded-full bg-gray-500"></div>
-            <h1 class="font-bold tracking-tight">STUDIO <span class="text-xs text-primary align-top">PRO</span></h1>
-        </div>
-        <div class="flex items-center gap-3">
-            <div class="text-[10px] text-gray-400 font-mono">
-                <span id="kbps-counter">0</span> KB/s
+    <style>
+        body { background-color: #030304; color: #e5e5e5; font-family: 'Space Grotesk', sans-serif; overflow: hidden; height: 100vh; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        .glass { background: rgba(20, 20, 25, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.08); }
+        .panel { background: #0a0a0a; border: 1px solid #222; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
+        .panel-header { background: #111; padding: 8px 12px; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; color: #666; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; }
+        .pulse-red { animation: pulseRed 1.5s infinite; }
+        @keyframes pulseRed { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 10px transparent; } }
+        .scroller::-webkit-scrollbar { width: 4px; }
+        .scroller::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        .gift-pop { animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        input[type=range] { -webkit-appearance: none; background: transparent; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%; background: #fff; cursor: pointer; margin-top: -6px; box-shadow: 0 0 10px rgba(255,255,255,0.5); }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: #333; border-radius: 2px; }
+    
+    /* Add these styles to your existing CSS */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadeIn {
+    animation: fadeIn 0.3s ease-out;
+}
+
+.chat-message {
+    transition: all 0.3s ease;
+}
+
+/* Scrollbar styling for chat */
+.scroller::-webkit-scrollbar {
+    width: 6px;
+}
+
+.scroller::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+}
+
+.scroller::-webkit-scrollbar-thumb {
+    background: rgba(99, 102, 241, 0.5);
+    border-radius: 3px;
+}
+
+.scroller::-webkit-scrollbar-thumb:hover {
+    background: rgba(99, 102, 241, 0.7);
+}
+
+/* Typing indicator animation */
+.typing-dots {
+    display: inline-flex;
+    align-items: center;
+}
+
+.typing-dots span {
+    animation: typing 1.4s infinite;
+    background-color: #9ca3af;
+    border-radius: 50%;
+    display: inline-block;
+    height: 4px;
+    margin: 0 1px;
+    width: 4px;
+}
+
+.typing-dots span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-dots span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes typing {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+        </style>
+</head>
+<body class="flex flex-col h-screen">
+
+    <header class="h-14 border-b border-white/10 flex items-center justify-between px-6 bg-[#080808] z-50">
+        <div class="flex items-center gap-4">
+            <div id="on-air-light" class="w-16 h-6 bg-red-900/30 text-red-700 border border-red-900 text-[10px] font-black flex items-center justify-center rounded tracking-widest transition-all duration-300">OFF AIR</div>
+            <div class="flex flex-col">
+                <h1 class="font-bold text-lg leading-none tracking-tight">STUDIO <span class="text-indigo-500">V8</span></h1>
+                <div class="text-[9px] text-gray-500 font-mono mt-0.5" id="peer-display">ID: Waiting...</div>
             </div>
-            <div id="live-badge" class="hidden px-2 py-0.5 bg-danger/20 border border-danger text-danger text-[10px] font-bold rounded">LIVE</div>
+        </div>
+        <div class="flex items-center gap-6">
+            <div class="hidden md:flex flex-col items-end gap-1">
+                <div class="flex gap-1">
+                    <div class="w-1 h-3 bg-green-500 rounded-sm"></div>
+                    <div class="w-1 h-3 bg-green-500 rounded-sm"></div>
+                    <div class="w-1 h-3 bg-green-500 rounded-sm"></div>
+                    <div class="w-1 h-3 bg-gray-700 rounded-sm"></div>
+                </div>
+                <span class="text-[9px] text-gray-500 font-mono">SYS HEALTH</span>
+            </div>
+            <div class="text-right">
+                <div id="session-timer" class="font-mono text-xl text-white font-bold tabular-nums">00:00:00</div>
+                <div class="text-[9px] text-gray-500 font-mono">SESSION TIME</div>
+            </div>
+            <button onclick="endStream()" class="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg text-xs font-bold border-b-4 border-red-800 active:border-b-0 active:translate-y-1 transition">END STREAM</button>
         </div>
     </header>
 
-    <div class="flex-1 overflow-y-auto p-4 pb-40 space-y-6">
-        
-        <div class="p-4 rounded-xl border border-white/10 bg-white/5">
-            <div class="flex justify-between items-center mb-4">
-                <span class="text-xs font-bold text-gray-400">AUDIO ENGINE</span>
-                <span id="engine-status" class="text-xs font-bold text-gray-500">OFFLINE</span>
-            </div>
-            <canvas id="visualizer" class="w-full h-16 bg-black rounded border border-white/5"></canvas>
-        </div>
-
-        <div class="grid grid-cols-2 gap-4">
-            <div class="p-4 rounded-xl border border-white/10 bg-white/5">
-                <label class="text-[10px] font-bold text-gray-400 block mb-2">MICROPHONE</label>
-                <input type="range" class="w-full accent-primary" min="0" max="200" value="100" oninput="setGain('mic', this.value)">
-            </div>
-            <div class="p-4 rounded-xl border border-white/10 bg-white/5 relative">
-                <label class="text-[10px] font-bold text-gray-400 block mb-2">MUSIC DECK</label>
-                <input type="range" class="w-full accent-blue-500" min="0" max="100" value="50" oninput="setGain('bgm', this.value)">
-                
-                <div class="mt-3 flex gap-2">
-                    <button onclick="document.getElementById('music-file').click()" class="bg-white/10 p-2 rounded text-xs flex-1 hover:bg-white/20">📂 Load</button>
-                    <button id="play-btn" onclick="toggleMusic()" class="bg-blue-600 p-2 rounded text-xs flex-1 font-bold disabled:opacity-50" disabled>▶ Play</button>
+    <div class="flex-1 grid grid-cols-12 gap-0 overflow-hidden">
+        <div class="col-span-4 bg-[#0a0a0a] border-r border-white/5 p-4 flex flex-col gap-4 overflow-y-auto scroller">
+            <div class="panel p-4 bg-[#111]">
+                <div class="flex justify-between items-center mb-3">
+                    <label class="text-xs font-bold text-gray-400">MICROPHONE</label>
+                    <button id="micToggle" class="text-[10px] bg-green-500/20 text-green-400 border border-green-500/50 px-2 py-0.5 rounded">LIVE</button>
                 </div>
-                <input type="file" id="music-file" hidden accept="audio/*" onchange="loadTrack(this)">
-                <div id="track-name" class="text-[9px] text-gray-500 mt-2 truncate">No Track Loaded</div>
+                <input id="micVol" type="range" class="w-full mb-2" min="0" max="150" value="100">
+            </div>
+            <div class="panel p-4 bg-[#111]">
+                <div class="flex justify-between items-center mb-3">
+                    <label class="text-xs font-bold text-gray-400">MUSIC DECK</label>
+                    <span id="track-time" class="text-[10px] font-mono text-indigo-400">00:00</span>
+                </div>
+                <div class="bg-black rounded-lg p-3 mb-3 border border-white/5 flex items-center gap-3">
+                    <div id="deck-art" class="w-10 h-10 bg-gray-800 rounded flex items-center justify-center">🎵</div>
+                    <div class="overflow-hidden">
+                        <div id="track-name" class="text-xs font-bold truncate">No Track Loaded</div>
+                        <div class="text-[10px] text-gray-500">Select a file...</div>
+                    </div>
+                </div>
+                <div class="flex gap-2 mb-3">
+                    <button onclick="document.getElementById('musicFile').click()" class="flex-1 bg-white/10 hover:bg-white/20 py-2 rounded text-xs">📂 Load</button>
+                    <button id="playBtn" class="flex-1 bg-indigo-600 hover:bg-indigo-500 py-2 rounded text-xs font-bold" disabled>▶ Play</button>
+                </div>
+                <input type="file" id="musicFile" hidden accept="audio/*">
+                <input id="musicVol" type="range" class="w-full" min="0" max="100" value="50">
+            </div>
+            <button id="talkoverBtn" class="mt-auto py-6 rounded-xl bg-[#1a1a1a] border border-white/10 text-gray-400 font-bold tracking-widest hover:bg-white hover:text-black active:scale-95 transition shadow-lg">HOLD TO TALK</button>
+        </div>
+
+        <div class="col-span-5 bg-black flex flex-col relative">
+            <div class="h-48 bg-[#050505] border-b border-white/5 relative">
+                <div class="absolute top-2 left-2 text-[9px] font-mono text-gray-600">OUTPUT MONITOR</div>
+                <canvas id="scope" class="w-full h-full"></canvas>
+            </div>
+            <div class="grid grid-cols-2 gap-px bg-white/10 flex-1">
+                <div class="bg-[#080808] flex flex-col items-center justify-center p-4">
+                    <div class="text-[10px] text-gray-500 font-mono mb-1">LISTENERS</div>
+                    <div id="listener-count" class="text-3xl font-bold text-white">0</div>
+                </div>
+                <div class="bg-[#080808] flex flex-col items-center justify-center p-4">
+                    <div class="text-[10px] text-gray-500 font-mono mb-1">REVENUE</div>
+                    <div id="gift-count" class="text-3xl font-bold text-yellow-500">0</div>
+                </div>
+                <div class="bg-[#080808] col-span-2 flex flex-col items-center justify-center p-6">
+                    <button id="startBtn" class="w-32 h-32 rounded-full bg-white/5 border-4 border-white/10 flex flex-col items-center justify-center hover:bg-white/10 transition group">
+                        <i class="fas fa-power-off text-3xl text-gray-400 group-hover:text-white mb-2"></i>
+                        <span class="text-[10px] font-bold text-gray-500 group-hover:text-white">START<br>ENGINE</span>
+                    </button>
+                    <div id="engine-status" class="mt-4 text-xs font-mono text-gray-600">SYSTEM OFFLINE</div>
+                </div>
+            </div>
+            <div id="gift-container" class="absolute bottom-4 left-4 right-4 pointer-events-none flex flex-col-reverse gap-2"></div>
+        </div>
+
+        <div class="col-span-3 bg-[#0c0c0c] border-l border-white/5 flex flex-col">
+            <div class="panel-header"><span>LIVE CHAT</span><span class="w-2 h-2 rounded-full bg-green-500"></span></div>
+            <div id="chat-feed" class="flex-1 overflow-y-auto p-4 space-y-3 scroller bg-[#0a0a0a]">
+                <div class="text-center text-[10px] text-gray-600 italic mt-4">Chat is empty. Start streaming!</div>
+            </div>
+            <div class="p-3 bg-[#111] border-t border-white/5">
+                <form onsubmit="sendHostMessage(event)" class="flex gap-2">
+                    <input id="host-msg" class="flex-1 bg-black border border-white/10 rounded px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="Reply as Host...">
+                    <button class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded text-xs font-bold"><i class="fas fa-paper-plane"></i></button>
+                </form>
             </div>
         </div>
-
-        <div class="flex justify-center pt-4">
-            <button id="broadcast-btn" onclick="toggleBroadcast()" class="w-48 h-48 rounded-full bg-white/5 border-4 border-white/10 shadow-[0_0_30px_rgba(0,0,0,0.5)] flex flex-col items-center justify-center gap-2 hover:scale-105 transition-all active:scale-95">
-                <span class="text-3xl">🎙️</span>
-                <span id="btn-text" class="font-black text-xl tracking-widest text-gray-400">START<br>ENGINE</span>
-            </button>
-        </div>
-
-        <div class="text-center text-[10px] text-gray-600 px-8">
-            ⚠️ <b>IMPORTANT:</b> Keep this screen ON. Do not switch tabs or the audio will cut.
-        </div>
     </div>
 
-    <div id="console-log">
-        <div class="text-gray-500">System Initializing...</div>
-    </div>
+    <!-- KEEP YOUR ENTIRE FILE AS IS, ONLY REPLACE THE <script> PART WITH THIS UPDATED SCRIPT BELOW -->
 
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
-        const socket = io();
-        
-        // --- CORE VARIABLES ---
-        let audioCtx, masterDest, micNode, bgmNode, micGain, bgmGain, analyser;
-        let mediaRecorder;
-        let isEngineReady = false;
-        let isLive = false;
-        let chunkCount = 0;
-        
-        // --- ZOMBIE AUDIO (Prevents sleep) ---
-        window.bgmAudio = new Audio();
-        window.bgmAudio.loop = true;
-        window.bgmAudio.crossOrigin = "anonymous";
+<script>
+  const socket = io();
+  let peer, peerId, audioCtx, masterDest, masterGain, micNode, micGain, musicNode, musicGain, musicEl, analyser, startTime, timerInt, activeCalls = new Map(), listenerCount = 0, giftScore = 0;
+  let onlineUsers = [];
+  let typingUsers = new Set();
 
-        // --- LOGGER ---
-        function log(msg, type = '') {
-            const box = document.getElementById('console-log');
-            const time = new Date().toLocaleTimeString().split(' ')[0];
-            const colorClass = type === 'error' ? 'log-err' : type === 'warn' ? 'log-warn' : type === 'info' ? 'log-info' : '';
-            
-            box.innerHTML = `<div class="${colorClass}">[${time}] ${msg}</div>` + box.innerHTML;
-        }
+  // ✅ Host join global chat
+  function joinHostChat() {
+      socket.emit('user-join', {
+          name: 'HOST',
+          isHost: true,
+          role: 'host'
+      });
+  }
 
-        // 1. INITIALIZE ENGINE (Fixed Wiring)
-        async function initAudioEngine() {
-            try {
-                log("🚀 Starting Audio Engine...");
-                const AudioContext = window.AudioContext || window.webkitAudioContext;
-                audioCtx = new AudioContext();
-                
-                // SETUP NODES
-                masterDest = audioCtx.createMediaStreamDestination(); // Goes to Internet
-                analyser = audioCtx.createAnalyser(); // Goes to Visualizer
-                analyser.fftSize = 64;
+  async function initEngine() {
+      if(audioCtx) return;
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      masterGain = audioCtx.createGain();
+      masterDest = audioCtx.createMediaStreamDestination();
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 2048;
 
-                micGain = audioCtx.createGain();
-                bgmGain = audioCtx.createGain();
-                bgmGain.gain.value = 0.5;
+      masterGain.connect(masterDest);
+      masterGain.connect(analyser);
 
-                // --- 🔌 THE FIX: SPLIT WIRING ---
-                // Old broken code: micGain -> masterDest -> analyser (CRASH)
-                // New working code: micGain -> masterDest AND micGain -> analyser
-                
-                // Route 1: To the Internet
-                micGain.connect(masterDest);
-                bgmGain.connect(masterDest);
-                
-                // Route 2: To the Visualizer
-                micGain.connect(analyser);
-                bgmGain.connect(analyser);
+      micGain = audioCtx.createGain();
+      musicGain = audioCtx.createGain();
+      micGain.connect(masterGain);
+      musicGain.connect(masterGain);
+      musicGain.gain.value = 0.5;
 
-                // --- ANTI-SLEEP HEARTBEAT ---
-                const oscillator = audioCtx.createOscillator();
-                const silentGain = audioCtx.createGain();
-                oscillator.type = 'sine';
-                oscillator.frequency.value = 30; 
-                silentGain.gain.value = 0.001; 
-                
-                oscillator.connect(silentGain);
-                silentGain.connect(masterDest); // Keep stream alive
-                oscillator.start();
-                log("💓 Heartbeat Active");
+      try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, autoGainControl: true } });
+          micNode = audioCtx.createMediaStreamSource(stream);
+          micNode.connect(micGain);
+      } catch(e) { alert("Mic Error: " + e.message); }
 
-                // --- GET MICROPHONE (SAFE MODE) ---
-                let stream;
-                try {
-                    // Try Pro Mode (Echo Cancellation OFF)
-                    stream = await navigator.mediaDevices.getUserMedia({
-                        audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }
-                    });
-                    log("✅ Mic Connected (Pro Mode)");
-                } catch (err) {
-                    log("⚠️ Pro Mode Failed, trying Basic Mode...", 'warn');
-                    // Fallback to Basic Mode (Works on all phones)
-                    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    log("✅ Mic Connected (Basic Mode)");
-                }
+      drawScope();
+  }
 
-                micNode = audioCtx.createMediaStreamSource(stream);
-                micNode.connect(micGain);
-                
-                // UI UPDATE
-                isEngineReady = true;
-                document.getElementById('engine-status').innerText = "READY";
-                document.getElementById('engine-status').classList.replace('text-gray-500', 'text-success');
-                
-                // Activate Button
-                const btn = document.getElementById('broadcast-btn');
-                btn.classList.replace('bg-white/5', 'bg-white');
-                document.getElementById('btn-text').innerHTML = "GO<br>LIVE";
-                
-                startVisualizer();
+  document.getElementById('startBtn').onclick = async () => {
+      const btn = document.getElementById('startBtn');
+      if(btn.classList.contains('active')) return;
 
-            } catch(e) {
-                log("❌ ENGINE FAILURE: " + e.message, 'error');
-                alert("Audio Engine Error: " + e.message);
-            }
-        }
-        // 2. TOGGLE BROADCAST
-        function toggleBroadcast() {
-            if(!isEngineReady) {
-                initAudioEngine(); // First click initializes
-                return;
-            }
+      await initEngine();
+      if(audioCtx.state === 'suspended') await audioCtx.resume();
 
-            if(isLive) stopBroadcast();
-            else startBroadcast();
-        }
+      btn.classList.add('active');
+      btn.innerHTML = '<span class="text-2xl animate-pulse">📡</span>';
+      btn.classList.replace('border-white/10', 'border-red-500');
 
-        function startBroadcast() {
-            if(audioCtx.state === 'suspended') audioCtx.resume();
+      document.getElementById('on-air-light').className = "w-16 h-6 bg-red-600 text-white border border-red-500 text-[10px] font-black flex items-center justify-center rounded tracking-widest shadow-[0_0_15px_#ff0000]";
+      document.getElementById('on-air-light').innerText = "ON AIR";
 
-            // CHOOSE ROBUST CODEC
-            let mimeType = 'audio/webm;codecs=opus';
-            if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'audio/mp4';
-            
-            log(`ℹ️ Broadcasting with: ${mimeType}`, 'info');
+      document.getElementById('engine-status').innerText = "BROADCASTING LIVE";
+      document.getElementById('engine-status').className = "mt-4 text-xs font-mono text-red-500 font-bold animate-pulse";
 
-            // SOCKET HANDSHAKE
-            socket.emit('broadcaster', { 
-                title: "Mobile Production", 
-                host: "Host", 
-                mimeType: mimeType 
-            });
+      startTime = Date.now();
+      timerInt = setInterval(() => {
+          const diff = Math.floor((Date.now() - startTime)/1000);
+          const h = Math.floor(diff/3600).toString().padStart(2,'0');
+          const m = Math.floor((diff%3600)/60).toString().padStart(2,'0');
+          const s = (diff%60).toString().padStart(2,'0');
+          document.getElementById('session-timer').innerText = `${h}:${m}:${s}`;
+      }, 1000);
 
-            // RECORDER SETUP (1000ms chunks)
-            mediaRecorder = new MediaRecorder(masterDest.stream, {
-                mimeType: mimeType,
-                audioBitsPerSecond: 128000
-            });
+      peer = new Peer(undefined, { host: location.hostname, port: location.port || 443, path: "/peerjs/peerjs", secure: location.protocol === "https:" });
 
-            mediaRecorder.ondataavailable = async (e) => {
-                if (e.data.size > 0) {
-                    const buffer = await e.data.arrayBuffer();
-                    socket.emit('audioStream', { room: socket.id, chunk: buffer });
-                    
-                    // UPDATE UI METRICS
-                    chunkCount++;
-                    document.getElementById('kbps-counter').innerText = Math.round(e.data.size / 1024);
-                    
-                    if(chunkCount % 10 === 0) log(`📤 Chunk #${chunkCount}: ${e.data.size}b`);
-                }
-            };
+      peer.on('open', (id) => {
+          peerId = id;
+          document.getElementById('peer-display').innerText = `ID: ${id}`;
 
-            mediaRecorder.start(1000);
-            isLive = true;
+          socket.emit('host-ready', id);
+          joinHostChat();
 
-            // UI UPDATE
-            document.getElementById('broadcast-btn').classList.replace('bg-white', 'bg-danger');
-            document.getElementById('broadcast-btn').classList.replace('text-black', 'text-white');
-            document.getElementById('broadcast-btn').classList.add('pulse-live');
-            document.getElementById('btn-text').innerHTML = "ON<br>AIR";
-            document.getElementById('live-badge').classList.remove('hidden');
-            log("🔴 LIVE STREAM STARTED");
-        }
+          addChatBubble("SYSTEM", "You are now LIVE! Global chat connected.", true, "#ef4444");
+      });
 
-        function stopBroadcast() {
-            if(mediaRecorder && mediaRecorder.state !== 'inactive') {
-                mediaRecorder.stop();
-            }
-            isLive = false;
-            socket.emit('stopBroadcast');
-            
-            // UI RESET
-            document.getElementById('broadcast-btn').classList.replace('bg-danger', 'bg-white');
-            document.getElementById('broadcast-btn').classList.replace('text-white', 'text-black');
-            document.getElementById('broadcast-btn').classList.remove('pulse-live');
-            document.getElementById('btn-text').innerHTML = "GO<br>LIVE";
-            document.getElementById('live-badge').classList.add('hidden');
-            document.getElementById('kbps-counter').innerText = "0";
-            log("🛑 Broadcast Stopped");
-        }
+      socket.off('new-listener');
+      socket.on('new-listener', (id) => {
+          if(!activeCalls.has(id)) {
+              const call = peer.call(id, masterDest.stream);
+              activeCalls.set(id, call);
 
-        // 3. MUSIC DECK
-        function loadTrack(input) {
-            const file = input.files[0];
-            if(!file) return;
+              listenerCount++;
+              document.getElementById('listener-count').innerText = listenerCount;
 
-            const url = URL.createObjectURL(file);
-            window.bgmAudio.src = url;
-            
-            if(!bgmNode && audioCtx) {
-                bgmNode = audioCtx.createMediaElementSource(window.bgmAudio);
-                bgmNode.connect(bgmGain);
-            }
+              call.on('close', () => {
+                activeCalls.delete(id);
+                listenerCount--;
+                document.getElementById('listener-count').innerText = listenerCount;
+              });
+          }
+      });
+  };
 
-            document.getElementById('track-name').innerText = file.name;
-            document.getElementById('play-btn').disabled = false;
-            log(`🎵 Loaded: ${file.name}`);
-        }
+  function endStream() { 
+      if(confirm("End broadcast? This will disconnect all listeners.")) {
+          const endMsg = {
+              user: "SYSTEM",
+              msg: "🎤 Broadcast ended by host",
+              type: "system",
+              ts: Date.now()
+          };
+          socket.emit('chatMessage', endMsg);
+          setTimeout(() => location.reload(), 1000);
+      }
+  }
 
-        function toggleMusic() {
-            if(window.bgmAudio.paused) {
-                if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-                window.bgmAudio.play();
-                document.getElementById('play-btn').innerText = "⏸ Pause";
-                document.getElementById('play-btn').classList.replace('bg-blue-600', 'bg-yellow-500');
-            } else {
-                window.bgmAudio.pause();
-                document.getElementById('play-btn').innerText = "▶ Play";
-                document.getElementById('play-btn').classList.replace('bg-yellow-500', 'bg-blue-600');
-            }
-        }
+  // ✅ Receive chat messages
+  socket.on('chatMessage', (data) => {
+      const isMe = data.user === 'HOST';
+      const isSystem = data.type === 'system';
+      const color = isSystem ? '#fbbf24' : (isMe ? '#ef4444' : data.color || '#3b82f6');
+      
+      addChatBubble(data.user, data.msg, isMe, isSystem, color);
+      
+      // Highlight host mentions
+      if (!isMe && !isSystem && data.msg.toLowerCase().includes('host')) {
+          showToast(`💬 ${data.user} mentioned you!`);
+      }
+  });
 
-        function setGain(target, val) {
-            if(target === 'mic' && micGain) micGain.gain.value = val / 100;
-            if(target === 'bgm' && bgmGain) bgmGain.gain.value = val / 100;
-        }
+  // ✅ Receive online users
+  socket.on('online-users', (users) => {
+      onlineUsers = users;
+      updateOnlineUsersDisplay();
+  });
 
-        // 4. VISUALIZER
-        function startVisualizer() {
-            const canvas = document.getElementById('visualizer');
-            const ctx = canvas.getContext('2d');
-            const bufferLength = analyser.frequencyBinCount;
-            const dataArray = new Uint8Array(bufferLength);
+  // ✅ Typing indicator
+  socket.on('user-typing', (data) => {
+      if (data.isTyping) {
+          typingUsers.add(data.user);
+      } else {
+          typingUsers.delete(data.user);
+      }
+      updateTypingIndicator();
+  });
 
-            function draw() {
-                requestAnimationFrame(draw);
-                analyser.getByteFrequencyData(dataArray);
+  // ✅ Update online users display
+  function updateOnlineUsersDisplay() {
+      const hostCount = onlineUsers.filter(u => u.isHost).length;
+      const listenerCount = onlineUsers.filter(u => !u.isHost).length;
+      
+      document.getElementById('listener-count').innerText = onlineUsers.length;
+      
+      // You could add a user list panel here
+      console.log(`Online: ${onlineUsers.length} (${hostCount} host, ${listenerCount} listeners)`);
+  }
 
-                ctx.fillStyle = '#000';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
+  // ✅ Update typing indicator
+  function updateTypingIndicator() {
+      const typingIndicator = document.getElementById('typing-indicator');
+      if (!typingIndicator) return;
+      
+      if (typingUsers.size > 0) {
+          const names = Array.from(typingUsers).slice(0, 3);
+          let text = names.join(', ');
+          if (typingUsers.size > 3) text += ` and ${typingUsers.size - 3} more`;
+          typingIndicator.innerHTML = `${text} ${typingUsers.size === 1 ? 'is' : 'are'} typing...`;
+          typingIndicator.classList.remove('hidden');
+      } else {
+          typingIndicator.classList.add('hidden');
+      }
+  }
 
-                const barWidth = (canvas.width / bufferLength) * 2.5;
-                let barHeight;
-                let x = 0;
+  socket.on('giftReceived', (data) => {
+    giftScore += 10;
+    document.getElementById('gift-count').innerText = giftScore;
+    showGiftPopup(data.user, data.gift);
+    
+    // Add to chat
+    addChatBubble("SYSTEM", `${data.user} sent ${data.gift}`, false, false, '#fbbf24');
+  });
 
-                for(let i = 0; i < bufferLength; i++) {
-                    barHeight = dataArray[i] / 2;
-                    ctx.fillStyle = `rgb(${barHeight + 100}, 50, 255)`;
-                    ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
-                    x += barWidth + 1;
-                }
-            }
-            draw();
-        }
+  function sendHostMessage(e) {
+      e.preventDefault();
+      const inp = document.getElementById('host-msg');
+      const txt = inp.value.trim();
+      if(!txt) return;
 
-        // SOCKET STATUS
-        socket.on('connect', () => {
-            log("✅ Connected to Server");
-            document.getElementById('conn-dot').classList.replace('bg-gray-500', 'bg-success');
-        });
-        
-        socket.on('disconnect', () => {
-            log("⚠️ Disconnected!", 'warn');
-            document.getElementById('conn-dot').classList.replace('bg-success', 'bg-danger');
-        });
+      // show instantly
+      addChatBubble('HOST', txt, true, false, '#ef4444');
 
-    </script>
+      // ✅ send to global chat
+      socket.emit('chatMessage', { 
+          user: 'HOST', 
+          msg: txt,
+          type: 'host',
+          color: '#ef4444'
+      });
+
+      inp.value = '';
+  }
+
+  function addChatBubble(user, msg, isMe, isSystem = false, color = '#3b82f6') {
+      const div = document.createElement('div');
+      div.className = `flex flex-col ${isMe ? 'items-end' : 'items-start'} mb-2 animate-fadeIn`;
+      
+      let bg, nameColor;
+      if (isSystem) {
+          bg = 'bg-yellow-900/20 border border-yellow-500/20 text-yellow-200';
+          nameColor = 'text-yellow-400';
+      } else if (isMe) {
+          bg = 'bg-red-900/30 border border-red-500/30 text-white';
+          nameColor = 'text-red-300';
+      } else {
+          bg = 'bg-gray-800/50 border border-gray-700/50 text-gray-200';
+          nameColor = 'text-gray-400';
+      }
+      
+      div.innerHTML = `
+          <div class="flex items-center gap-2 mb-0.5">
+              <span class="text-[9px] ${nameColor} font-bold ml-1">${escapeHtml(user)}</span>
+              ${isMe ? '<span class="text-[8px] bg-red-500 px-1 py-0.5 rounded uppercase">HOST</span>' : ''}
+              ${user === "SYSTEM" ? '<span class="text-[8px] bg-yellow-600 px-1 py-0.5 rounded uppercase">SYSTEM</span>' : ''}
+          </div>
+          <div class="${bg} px-3 py-2 rounded-lg text-xs max-w-[90%] break-words">${escapeHtml(msg)}</div>
+          <span class="text-[8px] text-gray-500 mt-0.5 ml-1">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+      `;
+      
+      const feed = document.getElementById('chat-feed');
+      feed.appendChild(div);
+      feed.scrollTop = feed.scrollHeight;
+  }
+
+  function showGiftPopup(user, icon) {
+      const div = document.createElement('div');
+      div.className = 'gift-pop bg-yellow-900/80 border border-yellow-500 p-3 rounded-xl flex items-center gap-3 shadow-xl backdrop-blur';
+      div.innerHTML = `<div class="text-2xl">${icon}</div><div><div class="text-[10px] text-yellow-200 font-bold uppercase">New Gift!</div><div class="text-xs text-white font-bold">${escapeHtml(user)} sent ${escapeHtml(icon)}</div></div>`;
+      document.getElementById('gift-container').appendChild(div);
+      setTimeout(() => div.remove(), 4000);
+  }
+
+  function showToast(msg) {
+      // Create toast if it doesn't exist
+      let toast = document.getElementById('host-toast');
+      if (!toast) {
+          toast = document.createElement('div');
+          toast.id = 'host-toast';
+          toast.className = 'fixed top-4 right-4 bg-white text-black px-4 py-2 rounded-lg text-xs font-bold shadow-xl z-[200] hidden';
+          document.body.appendChild(toast);
+      }
+      
+      toast.innerText = msg;
+      toast.classList.remove('hidden');
+      setTimeout(() => toast.classList.add('hidden'), 3000);
+  }
+
+  // Add typing indicator to chat feed
+  const chatFeed = document.getElementById('chat-feed');
+  const typingDiv = document.createElement('div');
+  typingDiv.id = 'typing-indicator';
+  typingDiv.className = 'hidden text-[10px] text-gray-500 italic px-3 py-1';
+  chatFeed.appendChild(typingDiv);
+
+  // Request online users on load
+  socket.on('connect', () => {
+      socket.emit('request-online-users');
+  });
+
+  // Rest of your existing studio functions...
+  const talkBtn = document.getElementById('talkoverBtn');
+  talkBtn.onmousedown = talkBtn.ontouchstart = () => {
+      if(musicGain) {
+        musicGain.gain.setTargetAtTime(0.1, audioCtx.currentTime, 0.1);
+        talkBtn.classList.add('bg-white', 'text-black');
+      }
+  };
+  talkBtn.onmouseup = talkBtn.ontouchend = () => {
+      if(musicGain) {
+        const currentVol = document.getElementById('musicVol').value / 100;
+        musicGain.gain.setTargetAtTime(currentVol, audioCtx.currentTime, 0.2);
+        talkBtn.classList.remove('bg-white', 'text-black');
+      }
+  };
+
+  document.getElementById('musicFile').onchange = (e) => {
+      const file = e.target.files[0];
+      if(!file) return;
+
+      const url = URL.createObjectURL(file);
+      musicEl = new Audio(url);
+      musicEl.crossOrigin = 'anonymous';
+
+      document.getElementById('track-name').innerText = file.name;
+      document.getElementById('playBtn').disabled = false;
+
+      if(!musicNode && audioCtx) {
+        musicNode = audioCtx.createMediaElementSource(musicEl);
+        musicNode.connect(musicGain);
+      }
+
+      musicEl.ontimeupdate = () => {
+          const m = Math.floor(musicEl.currentTime / 60);
+          const s = Math.floor(musicEl.currentTime % 60).toString().padStart(2,'0');
+          document.getElementById('track-time').innerText = `${m}:${s}`;
+      };
+  };
+
+  document.getElementById('playBtn').onclick = async () => {
+      if(audioCtx.state === 'suspended') await audioCtx.resume();
+
+      if(musicEl.paused) {
+        musicEl.play();
+        document.getElementById('playBtn').innerHTML = '⏸';
+        document.getElementById('deck-art').classList.add('animate-spin');
+        document.getElementById('deck-art').style.animationDuration = '3s';
+      } else {
+        musicEl.pause();
+        document.getElementById('playBtn').innerHTML = '▶';
+        document.getElementById('deck-art').classList.remove('animate-spin');
+      }
+  };
+
+  document.getElementById('micVol').oninput = (e) => { if(micGain) micGain.gain.value = e.target.value / 100; };
+  document.getElementById('musicVol').oninput = (e) => { if(musicGain) musicGain.gain.value = e.target.value / 100; };
+
+  document.getElementById('micToggle').onclick = () => {
+      if(micGain.gain.value > 0) {
+        micGain.gain.value = 0;
+        document.getElementById('micToggle').innerText = "MUTED";
+        document.getElementById('micToggle').className = "text-[10px] bg-red-900/50 text-red-500 border border-red-900 px-2 py-0.5 rounded";
+      } else {
+        micGain.gain.value = document.getElementById('micVol').value / 100;
+        document.getElementById('micToggle').innerText = "LIVE";
+        document.getElementById('micToggle').className = "text-[10px] bg-green-500/20 text-green-400 border border-green-500/50 px-2 py-0.5 rounded";
+      }
+  };
+
+  function drawScope() {
+      const canvas = document.getElementById('scope');
+      const ctx = canvas.getContext('2d');
+      canvas.width = canvas.clientWidth * devicePixelRatio;
+      canvas.height = canvas.clientHeight * devicePixelRatio;
+
+      const bufferLength = analyser.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+
+      function loop() {
+          requestAnimationFrame(loop);
+          analyser.getByteTimeDomainData(dataArray);
+          ctx.fillStyle = '#000';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.lineWidth = 2;
+          ctx.strokeStyle = '#22c55e';
+          ctx.beginPath();
+          const sliceWidth = canvas.width / bufferLength;
+          let x = 0;
+          for(let i = 0; i < bufferLength; i++) {
+              const v = dataArray[i] / 128.0;
+              const y = v * canvas.height/2;
+              if(i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+              x += sliceWidth;
+          }
+          ctx.stroke();
+      }
+      loop();
+  }
+
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, (m) => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+    }[m]));
+  }
+</script>
 </body>
 </html>
