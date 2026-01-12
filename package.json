@@ -4,7 +4,8 @@
   "description": "Next Gen Audio Broadcast Platform",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "start:prod": "node server.js"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
@@ -19,6 +20,7 @@
     "helmet": "^8.1.0",
     "peer": "^1.0.2",
     "peerjs": "^1.5.5",
+    "morgan": "^1.10.0",
     "socket.io": "^4.8.3",
     "sqlite3": "^5.1.7",
     "uuid": "^13.0.0"

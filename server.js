@@ -3,9 +3,11 @@ const http = require("http");
 const path = require("path");
 const { Server } = require("socket.io");
 const { ExpressPeerServer } = require("peer");
+const helmet = require('helmet');
+const morgan = require('morgan');
 
 const PORT = process.env.PORT || 3000;
-
+const ALLOWED_ORIGIN = process.env.CORS_ORIGIN || '*';
 const app = express();
 const server = http.createServer(app);
 
@@ -32,483 +34,90 @@ app.get("/dashboard", (req, res) => sendIfExists(res, "dashboard.html"));
 const peerServer = ExpressPeerServer(server, { path: "/peerjs", debug: true });
 app.use("/peerjs", peerServer);
 
-// ========== STREAMING SYSTEM ==========
-const streams = new Map(); // Store all active streams
-const users = new Map(); // Store all connected users
-
-// Generate unique IDs
-function generateStreamId() {
-  return 'stream_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-}
-
-function generateMessageId() {
-  return 'msg_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-}
-
-// Function to send stream list to all or specific client
-function broadcastStreamList() {
-  const activeStreams = Array.from(streams.values())
-    .filter(stream => stream.isLive)
-    .map(stream => ({
-      id: stream.id,
-      title: stream.title,
-      description: stream.description,
-      host: stream.host,
-      category: stream.category,
-      thumbnail: stream.thumbnail,
-      listeners: stream.listeners,
-      maxListeners: stream.maxListeners,
-      isLive: stream.isLive,
-      isPrivate: stream.isPrivate,
-      tags: stream.tags,
-      createdAt: stream.createdAt,
-      startedAt: stream.startedAt,
-      uptime: Math.floor((Date.now() - stream.startedAt) / 1000)
-    }));
-  
-  console.log(`📡 Broadcasting ${activeStreams.length} streams to all clients`);
-  io.emit("stream-list", activeStreams);
-}
+// ========== REAL-TIME STREAMING ENGINE ==========
+const activeStreams = new Map(); // Only stores REAL streams
 
 io.on("connection", (socket) => {
   console.log(`🔌 New connection: ${socket.id}`);
-  
-  // Initialize user data
-  users.set(socket.id, {
-    id: socket.id,
-    name: `Guest${Math.floor(Math.random() * 10000)}`,
-    type: 'listener',
-    joinedAt: Date.now(),
-    currentRoom: null,
-    peerId: null
-  });
 
-  // Send initial stream list IMMEDIATELY
-  const activeStreams = Array.from(streams.values())
-    .filter(stream => stream.isLive)
-    .map(stream => ({
-      id: stream.id,
-      title: stream.title,
-      description: stream.description,
-      host: stream.host,
-      category: stream.category,
-      thumbnail: stream.thumbnail,
-      listeners: stream.listeners,
-      maxListeners: stream.maxListeners,
-      isLive: stream.isLive,
-      isPrivate: stream.isPrivate,
-      tags: stream.tags,
-      createdAt: stream.createdAt,
-      startedAt: stream.startedAt,
-      uptime: Math.floor((Date.now() - stream.startedAt) / 1000)
-    }));
-  
-  socket.emit("stream-list", activeStreams);
-  console.log(`📡 Sent ${activeStreams.length} streams to ${socket.id}`);
+  // Send current list immediately to new user
+  socket.emit("stream-list", Array.from(activeStreams.values()));
 
-  // ========== STREAM CREATION (HOST) ==========
-  socket.on("create-stream", (data) => {
-    console.log("📡 Create stream request received:", data);
-    
-    const streamId = generateStreamId();
-    const hostInfo = users.get(socket.id);
-    
-    const streamData = {
-      id: streamId,
-      title: data.title || "Untitled Stream",
-      description: data.description || "Join my live broadcast!",
-      host: {
-        id: socket.id,
-        name: data.hostName || hostInfo.name,
-        peerId: data.peerId
-      },
-      category: data.category || "general",
-      thumbnail: data.thumbnail || `https://api.dicebear.com/7.x/shapes/svg?seed=${streamId}`,
-      listeners: 0,
-      maxListeners: data.maxListeners || 1000,
-      isLive: true,
-      isPrivate: false,
-      password: null,
-      tags: [data.category || "general"],
-      createdAt: Date.now(),
-      startedAt: Date.now(),
-      listenersList: []
-    };
+  // allow explicit refresh from clients
+  socket.on('request-stream-list', () => socket.emit('stream-list', Array.from(activeStreams.values())));
 
-    streams.set(streamId, streamData);
-    socket.join(streamId);
+  // 1. HOST STARTS STREAM
+  socket.on("host-ready", (data) => {
+    console.log(`🎙️ New Host Live: ${data.title}`);
     
-    // Update host info
-    hostInfo.currentRoom = streamId;
-    hostInfo.type = 'host';
-    hostInfo.streamId = streamId;
-    hostInfo.name = data.hostName || hostInfo.name;
-
-    console.log(`🎙️ New stream created: ${streamId} by ${hostInfo.name}`);
-    console.log(`📡 Total active streams: ${streams.size}`);
-
-    // Notify everyone about new stream
-    broadcastStreamList();
-    
-    socket.emit("stream-created-success", streamData);
-  });
-
-  // ========== STREAM JOINING (LISTENER) ==========
-  socket.on("join-stream", (data) => {
-    console.log("📡 Join stream request:", data);
-    
-    const { streamId, peerId, userData } = data;
-    const stream = streams.get(streamId);
-    
-    if (!stream) {
-      socket.emit("stream-error", { message: "Stream not found" });
-      console.log(`❌ Stream not found: ${streamId}`);
-      return;
-    }
-
-    // Join the stream room
-    socket.join(streamId);
-    
-    // Update user info
-    const userInfo = users.get(socket.id);
-    userInfo.currentRoom = streamId;
-    userInfo.name = userData?.name || userInfo.name;
-    userInfo.peerId = peerId;
-    
-    // Update listener count
-    stream.listeners++;
-    stream.listenersList.push({
+    const stream = {
       id: socket.id,
-      name: userInfo.name,
-      peerId: peerId,
-      joinedAt: Date.now()
-    });
-
-    console.log(`👂 ${userInfo.name} joined stream: ${stream.title} (${stream.listeners} listeners)`);
-
-    // Send stream info to the new listener
-    socket.emit("stream-joined", {
-      ...stream,
-      hostPeerId: stream.host.peerId
-    });
-
-    // Notify host about new listener
-    socket.to(stream.host.id).emit("new-listener", {
-      listenerId: socket.id,
-      peerId: peerId,
-      name: userInfo.name
-    });
-
-    // Notify everyone in the stream about new listener
-    io.to(streamId).emit("listener-joined", {
-      streamId: streamId,
-      listener: userInfo.name,
-      totalListeners: stream.listeners
-    });
-
-    // Update stream list for everyone
-    broadcastStreamList();
-  });
-
-  // ========== STREAM LEAVING ==========
-  socket.on("leave-stream", (data) => {
-    const { streamId } = data;
-    const stream = streams.get(streamId);
-    const userInfo = users.get(socket.id);
-    
-    if (!stream) return;
-    
-    socket.leave(streamId);
-    
-    // Update listeners count
-    stream.listeners = Math.max(0, stream.listeners - 1);
-    stream.listenersList = stream.listenersList.filter(listener => listener.id !== socket.id);
-    
-    console.log(`👋 ${userInfo.name} left stream: ${stream.title} (${stream.listeners} listeners)`);
-
-    // Notify everyone in the stream
-    io.to(streamId).emit("listener-left", {
-      streamId: streamId,
-      listener: userInfo.name,
-      totalListeners: stream.listeners
-    });
-
-    // Update stream list
-    broadcastStreamList();
-    
-    userInfo.currentRoom = null;
-  });
-
-  // ========== STREAM ENDING (HOST) ==========
-  socket.on("end-stream", (data) => {
-    const { streamId } = data;
-    const stream = streams.get(streamId);
-    
-    if (!stream) return;
-    
-    console.log(`🛑 Stream ending: ${stream.title}`);
-    
-    // Notify all listeners
-    io.to(streamId).emit("stream-ended", {
-      streamId: streamId,
-      reason: data.reason || "Host ended the stream"
-    });
-
-    // Remove stream from active streams
-    streams.delete(streamId);
-    
-    // Update host info
-    const hostInfo = users.get(socket.id);
-    hostInfo.currentRoom = null;
-    hostInfo.type = 'listener';
-    delete hostInfo.streamId;
-    
-    // Update stream list for everyone
-    broadcastStreamList();
-  });
-
-  // ========== CHAT MESSAGES ==========
-  socket.on("chat-message", (data) => {
-    const { streamId, message, user } = data;
-    const stream = streams.get(streamId);
-    
-    if (!stream) return;
-    
-    const messageData = {
-      id: generateMessageId(),
-      streamId: streamId,
-      user: user || users.get(socket.id)?.name,
-      message: message,
-      timestamp: Date.now(),
-      type: 'user'
+      peerId: data.peerId,
+      title: data.title || "Untitled Stream",
+      hostName: data.hostName || "Anonymous",
+      listeners: 0,
+      startedAt: Date.now(),
+      thumbnail: `https://api.dicebear.com/7.x/shapes/svg?seed=${data.title}` // Auto-generated art
     };
 
-    // Send to everyone in the stream room
-    io.to(streamId).emit("chat-message", messageData);
-    
-    console.log(`💬 [${stream.title}] ${messageData.user}: ${message}`);
+    activeStreams.set(socket.id, stream);
+    socket.join(data.peerId); // Create a room for this stream
+
+    // Broadcast update to ALL dashboards
+    io.emit("stream-list", Array.from(activeStreams.values()));
   });
 
-  // ========== GIFT SENDING ==========
-  socket.on("send-gift", (data) => {
-    const { streamId, gift, user } = data;
-    const stream = streams.get(streamId);
-    
-    if (!stream) return;
-    
-    const giftData = {
-      id: generateMessageId(),
-      streamId: streamId,
-      user: user || users.get(socket.id)?.name,
-      gift: gift,
-      timestamp: Date.now()
-    };
+  // 2. LISTENER JOINS
+  socket.on("join-stream", (peerId) => {
+    socket.join(peerId); // Join the chat room
+    socket.joinedStream = peerId; // store the host peerId this socket joined
 
-    // Notify everyone in the stream
-    io.to(streamId).emit("gift-received", giftData);
-    
-    // Also send as system message in chat
-    const systemMessage = {
-      id: generateMessageId(),
-      streamId: streamId,
-      user: 'SYSTEM',
-      message: `${giftData.user} sent a ${gift} gift! 🎁`,
-      timestamp: Date.now(),
-      type: 'system'
-    };
-    
-    io.to(streamId).emit("chat-message", systemMessage);
-    
-    console.log(`🎁 [${stream.title}] ${giftData.user} sent ${gift}`);
+    // Optimistically increment listener count
+    for (let [id, stream] of activeStreams) {
+      if (stream.peerId === peerId) {
+        stream.listeners = (stream.listeners || 0) + 1;
+        break;
+      }
+    }
+
+    // Broadcast updated listener count to everyone
+    io.emit("stream-list", Array.from(activeStreams.values()));
   });
 
-  // ========== REACTIONS ==========
-  socket.on("send-reaction", (data) => {
-    const { streamId, reaction, user } = data;
-    const stream = streams.get(streamId);
-    
-    if (!stream) return;
-    
-    const reactionData = {
-      id: generateMessageId(),
-      streamId: streamId,
-      user: user || users.get(socket.id)?.name,
-      reaction: reaction,
-      timestamp: Date.now()
-    };
-
-    io.to(streamId).emit("reaction-received", reactionData);
+  // When the listener has initialized PeerJS, they should send their peer id
+  socket.on('listener-ready', (listenerPeerId) => {
+    const hostPeerId = socket.joinedStream;
+    if (!hostPeerId) return;
+    for (let [hostSocketId, stream] of activeStreams) {
+      if (stream.peerId === hostPeerId) {
+        // notify host with the listener's PeerJS id so host can call them
+        io.to(hostSocketId).emit('new-listener', listenerPeerId);
+        break;
+      }
+    }
   });
 
-  // ========== PEER SIGNALING ==========
-  socket.on("signal", (data) => {
-    const { to, signal } = data;
-    socket.to(to).emit("signal", {
-      from: socket.id,
-      signal: signal
-    });
+  // 3. CHAT & GIFTS
+  socket.on('chatMessage', (data) => {
+    if (data.room) socket.to(data.room).emit('chatMessage', data);
+  });
+  
+  socket.on('sendGift', (data) => {
+    if (data.room) io.to(data.room).emit('giftReceived', data);
   });
 
-  // Request stream list
-  socket.on("request-stream-list", () => {
-    console.log(`📡 Stream list requested by ${socket.id}`);
-    const activeStreams = Array.from(streams.values())
-      .filter(stream => stream.isLive)
-      .map(stream => ({
-        id: stream.id,
-        title: stream.title,
-        description: stream.description,
-        host: stream.host,
-        category: stream.category,
-        thumbnail: stream.thumbnail,
-        listeners: stream.listeners,
-        maxListeners: stream.maxListeners,
-        isLive: stream.isLive,
-        isPrivate: stream.isPrivate,
-        tags: stream.tags,
-        createdAt: stream.createdAt,
-        startedAt: stream.startedAt,
-        uptime: Math.floor((Date.now() - stream.startedAt) / 1000)
-      }));
-    
-    socket.emit("stream-list", activeStreams);
-  });
-
-  // ========== DISCONNECTION ==========
+  // 4. DISCONNECT
   socket.on("disconnect", () => {
-    const userInfo = users.get(socket.id);
-    
-    if (!userInfo) return;
-    
-    console.log(`❌ Disconnected: ${socket.id} (${userInfo.name})`);
-    
-    // If user was hosting a stream, end it
-    if (userInfo.type === 'host' && userInfo.streamId) {
-      const stream = streams.get(userInfo.streamId);
-      if (stream) {
-        console.log(`🛑 Host disconnected, ending stream: ${stream.title}`);
-        
-        // Notify all listeners
-        io.to(userInfo.streamId).emit("stream-ended", {
-          streamId: userInfo.streamId,
-          reason: "Host disconnected"
-        });
-        
-        // Remove stream
-        streams.delete(userInfo.streamId);
-        broadcastStreamList();
-      }
+    // Check if a HOST disconnected
+    if (activeStreams.has(socket.id)) {
+      console.log(`🛑 Stream Ended: ${activeStreams.get(socket.id).title}`);
+      activeStreams.delete(socket.id);
+      io.emit("stream-list", Array.from(activeStreams.values())); // Remove from dashboard
     }
-    
-    // If user was in a stream as listener, remove them
-    if (userInfo.currentRoom) {
-      const stream = streams.get(userInfo.currentRoom);
-      if (stream) {
-        stream.listeners = Math.max(0, stream.listeners - 1);
-        stream.listenersList = stream.listenersList.filter(listener => listener.id !== socket.id);
-        
-        console.log(`👋 ${userInfo.name} auto-left stream: ${stream.title} (${stream.listeners} listeners)`);
-        
-        io.to(userInfo.currentRoom).emit("listener-left", {
-          streamId: userInfo.currentRoom,
-          listener: userInfo.name,
-          totalListeners: stream.listeners
-        });
-        
-        broadcastStreamList();
-      }
-    }
-    
-    // Remove user
-    users.delete(socket.id);
+    // Note: If a listener disconnects, we ideally decrement count, but for simplicity we rely on refresh for now
   });
-
-  // Periodic stream updates
-  setInterval(() => {
-    broadcastStreamList();
-  }, 5000); // Update every 5 seconds
-
-  // Cleanup empty streams
-  setInterval(() => {
-    let cleaned = 0;
-    for (const [streamId, stream] of streams.entries()) {
-      if (stream.listeners === 0 && Date.now() - stream.startedAt > 300000) { // 5 minutes
-        streams.delete(streamId);
-        cleaned++;
-        console.log(`🧹 Cleaned up empty stream: ${stream.title}`);
-      }
-    }
-    if (cleaned > 0) {
-      broadcastStreamList();
-    }
-  }, 60000); // Every minute
 });
-
-// Mock data for testing
-const mockStreams = [
-  {
-    id: 'stream_1',
-    title: 'Chill LoFi Beats',
-    description: 'Relaxing music for studying and working',
-    host: { id: 'host_1', name: 'DJ Chill', peerId: 'peer123' },
-    category: 'music',
-    thumbnail: 'https://api.dicebear.com/7.x/shapes/svg?seed=lofi',
-    listeners: 42,
-    maxListeners: 1000,
-    isLive: true,
-    isPrivate: false,
-    tags: ['music', 'lofi', 'chill'],
-    createdAt: Date.now() - 3600000,
-    startedAt: Date.now() - 3600000,
-    listenersList: []
-  },
-  {
-    id: 'stream_2',
-    title: 'Tech Talk Live',
-    description: 'Discussing latest tech news and innovations',
-    host: { id: 'host_2', name: 'Tech Guru', peerId: 'peer456' },
-    category: 'tech',
-    thumbnail: 'https://api.dicebear.com/7.x/shapes/svg?seed=tech',
-    listeners: 28,
-    maxListeners: 500,
-    isLive: true,
-    isPrivate: false,
-    tags: ['tech', 'discussion', 'news'],
-    createdAt: Date.now() - 1800000,
-    startedAt: Date.now() - 1800000,
-    listenersList: []
-  },
-  {
-    id: 'stream_3',
-    title: 'Morning Meditation',
-    description: 'Start your day with peace and mindfulness',
-    host: { id: 'host_3', name: 'Zen Master', peerId: 'peer789' },
-    category: 'wellness',
-    thumbnail: 'https://api.dicebear.com/7.x/shapes/svg?seed=meditation',
-    listeners: 15,
-    maxListeners: 200,
-    isLive: true,
-    isPrivate: false,
-    tags: ['wellness', 'meditation', 'peace'],
-    createdAt: Date.now() - 900000,
-    startedAt: Date.now() - 900000,
-    listenersList: []
-  }
-];
-
-// Add mock streams for testing
-mockStreams.forEach(stream => {
-  streams.set(stream.id, stream);
-});
-
-console.log(`📡 Added ${mockStreams.length} mock streams for testing`);
 
 server.listen(PORT, () => {
-  console.log(`🚀 Airvibe Server Running on Port ${PORT}`);
-  console.log(`➡️ Dashboard: http://localhost:${PORT}/dashboard`);
-  console.log(`➡️ Studio: http://localhost:${PORT}/studio`);
-  console.log(`🎧 WebRTC Peer Server: /peerjs`);
-  console.log(`📡 Socket.io: /socket.io`);
-  console.log(`💬 Active Streams: ${mockStreams.length}`);
-  console.log(`👂 Total Listeners: ${mockStreams.reduce((sum, s) => sum + s.listeners, 0)}`);
+  console.log(`🚀 Airvibe Real-Time Server running on port ${PORT}`);
 });

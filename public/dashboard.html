@@ -3,1685 +3,394 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Airvibe | Live Streams</title>
+    <title>Airvibe | Live</title>
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        'airvibe-dark': '#0A0A0F',
-                        'airvibe-surface': '#111118',
-                        'airvibe-card': '#161622',
-                        'airvibe-border': '#222233',
-                        'airvibe-primary': '#8B5CF6',
-                        'airvibe-secondary': '#06B6D4',
-                        'airvibe-accent': '#F59E0B',
-                        'airvibe-success': '#10B981',
-                        'airvibe-danger': '#EF4444',
-                        'airvibe-text': '#F8FAFC',
-                        'airvibe-text-light': '#94A3B8',
-                    },
-                    fontFamily: {
-                        'sans': ['Inter', 'system-ui', 'sans-serif'],
-                        'heading': ['Poppins', 'Inter', 'system-ui', 'sans-serif'],
-                        'mono': ['JetBrains Mono', 'monospace'],
-                    },
-                    animation: {
-                        'float': 'float 6s ease-in-out infinite',
-                        'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
-                        'shimmer': 'shimmer 2s linear infinite',
-                        'fade-in': 'fade-in 0.6s ease-out',
-                        'slide-up': 'slide-up 0.5s ease-out',
-                        'slide-in': 'slide-in 0.7s cubic-bezier(0.16, 1, 0.3, 1)',
-                        'blob': 'blob 10s infinite',
-                        'gradient': 'gradient 8s ease infinite',
-                        'wave': 'wave 1.5s ease-in-out infinite',
-                        'spin-slow': 'spin 3s linear infinite',
-                        'bounce-smooth': 'bounce-smooth 2s ease-in-out infinite',
-                        'heartbeat': 'heartbeat 1.5s ease-in-out infinite',
-                        'typing': 'typing 1.5s steps(5, end) infinite',
-                        'pulse-ring': 'pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                    },
-                    keyframes: {
-                        float: {
-                            '0%, 100%': { transform: 'translateY(0)' },
-                            '50%': { transform: 'translateY(-10px)' },
-                        },
-                        'pulse-glow': {
-                            '0%, 100%': { opacity: 1 },
-                            '50%': { opacity: 0.6 },
-                        },
-                        shimmer: {
-                            '0%': { backgroundPosition: '-200px 0' },
-                            '100%': { backgroundPosition: 'calc(200px + 100%) 0' },
-                        },
-                        'fade-in': {
-                            '0%': { opacity: 0 },
-                            '100%': { opacity: 1 },
-                        },
-                        'slide-up': {
-                            '0%': { transform: 'translateY(20px)', opacity: 0 },
-                            '100%': { transform: 'translateY(0)', opacity: 1 },
-                        },
-                        'slide-in': {
-                            '0%': { transform: 'translateX(-20px)', opacity: 0 },
-                            '100%': { transform: 'translateX(0)', opacity: 1 },
-                        },
-                        blob: {
-                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
-                            '33%': { transform: 'translate(20px, -30px) scale(1.1)' },
-                            '66%': { transform: 'translate(-10px, 10px) scale(0.9)' },
-                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
-                        },
-                        gradient: {
-                            '0%, 100%': { backgroundPosition: '0% 50%' },
-                            '50%': { backgroundPosition: '100% 50%' },
-                        },
-                        wave: {
-                            '0%, 100%': { transform: 'translateY(0)' },
-                            '50%': { transform: 'translateY(-5px)' },
-                        },
-                        heartbeat: {
-                            '0%, 100%': { transform: 'scale(1)' },
-                            '50%': { transform: 'scale(1.1)' },
-                        },
-                        typing: {
-                            '0%, 100%': { width: '0' },
-                            '50%': { width: '100%' },
-                        },
-                        'pulse-ring': {
-                            '0%': { transform: 'scale(0.8)', opacity: 0.8 },
-                            '100%': { transform: 'scale(1.2)', opacity: 0 },
-                        }
-                    },
-                    backdropBlur: {
-                        'xs': '2px',
-                    }
-                }
-            }
-        }
-    </script>
-    
-    <!-- Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- External Libraries -->
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <style>
-        * {
-            -webkit-tap-highlight-color: transparent;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
+        body { background: #050505; color: white; font-family: 'Outfit', sans-serif; overflow: auto; min-height: 100vh; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
         
-        body {
-            background-color: #0A0A0F;
-            color: #F8FAFC;
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            overflow-x: hidden;
-            position: relative;
-        }
+        /* Smooth Loading */
+        .fade-enter { opacity: 0; transform: translateY(10px); }
+        .fade-enter-active { opacity: 1; transform: translateY(0); transition: opacity 0.3s, transform 0.3s; }
         
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                radial-gradient(circle at 20% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(6, 182, 212, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 40% 40%, rgba(245, 158, 11, 0.05) 0%, transparent 50%);
-            pointer-events: none;
-            z-index: -2;
-        }
+        /* Cards */
+        .glass-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(12px); transition: all 0.2s ease; }
+        .glass-card:active { transform: scale(0.98); background: rgba(255,255,255,0.08); }
+        .safe-pb { padding-bottom: env(safe-area-inset-bottom, 20px); }
         
-        .glass-card {
-            background: rgba(22, 22, 34, 0.7);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 
-                0 8px 32px rgba(0, 0, 0, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.05);
-        }
-        
-        .glass-nav {
-            background: rgba(10, 10, 15, 0.85);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-        
-        .gradient-text {
-            background: linear-gradient(135deg, #8B5CF6 0%, #06B6D4 50%, #F59E0B 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            background-size: 200% auto;
-        }
-        
-        .gradient-border {
-            position: relative;
-            background: linear-gradient(45deg, #8B5CF6, #06B6D4, #F59E0B);
-            padding: 1px;
-            border-radius: 16px;
-        }
-        
-        .gradient-border > div {
-            background: #161622;
-            border-radius: 15px;
-        }
-        
-        .live-indicator {
-            background: linear-gradient(90deg, #EF4444, #F59E0B);
-            animation: pulse-glow 2s ease-in-out infinite;
-        }
-        
-        .card-hover {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        .card-hover:hover {
-            transform: translateY(-4px);
-            border-color: rgba(139, 92, 246, 0.3);
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
-        }
-        
-        .feature-icon {
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(6, 182, 212, 0.1));
-            border: 1px solid rgba(139, 92, 246, 0.2);
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
-            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.3);
-            transition: all 0.3s ease;
-        }
-        
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
-        }
-        
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
-        }
-        
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(255, 255, 255, 0.2);
-            transform: translateY(-2px);
-        }
-        
-        .scrollbar-hide::-webkit-scrollbar {
-            display: none;
-        }
-        
-        .scrollbar-hide {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-        
-        .scrollbar-custom::-webkit-scrollbar {
-            width: 4px;
-        }
-        
-        .scrollbar-custom::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-        }
-        
-        .scrollbar-custom::-webkit-scrollbar-thumb {
-            background: rgba(139, 92, 246, 0.5);
-            border-radius: 10px;
-        }
-        
-        .scrollbar-custom::-webkit-scrollbar-thumb:hover {
-            background: rgba(139, 92, 246, 0.7);
-        }
-        
-        .waveform-bar {
-            animation: wave 1.5s ease-in-out infinite;
-            animation-delay: calc(var(--i) * 0.1s);
-        }
-        
-        @supports (-webkit-touch-callout: none) {
-            .safe-area-inset-bottom {
-                padding-bottom: env(safe-area-inset-bottom);
-            }
-        }
-        
-        @media (max-width: 640px) {
-            .mobile-padding {
-                padding-left: 1rem;
-                padding-right: 1rem;
-            }
-            
-            .mobile-touch {
-                min-height: 44px;
-                min-width: 44px;
-            }
-        }
+        /* Mini Player Transition */
+        #mini-player { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
     </style>
 </head>
-<body class="antialiased overflow-x-hidden">
-    <!-- Audio Element -->
+<body class="flex flex-col bg-black">
+
     <audio id="remoteAudio" autoplay playsinline></audio>
 
-    <!-- Navigation -->
-    <nav class="glass-nav fixed top-0 left-0 right-0 z-50 py-3 px-4 md:px-6 transition-all duration-300">
-        <div class="max-w-7xl mx-auto flex items-center justify-between">
-            <!-- Logo -->
+    <div id="view-lobby" class="flex-1 flex flex-col p-4 md:p-6 overflow-y-auto transition-all duration-500 pb-32">
+        <header class="flex justify-between items-center mb-6">
+            <h1 class="text-xl md:text-2xl font-black tracking-tight">AIRVIBE <span class="text-indigo-500">LIVE</span></h1>
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-airvibe-primary to-airvibe-secondary flex items-center justify-center font-bold text-white shadow-lg">
-                    <i class="fas fa-headphones text-lg"></i>
+                <div class="flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-full border border-white/10">
+                    <div id="conn-dot" class="w-2 h-2 rounded-full bg-red-500"></div>
+                    <span id="conn-text" class="text-[10px] font-mono text-gray-400">OFFLINE</span>
                 </div>
-                <div class="flex flex-col">
-                    <span class="text-lg font-bold font-heading tracking-tight">AIRVIBE</span>
-                    <span class="text-[10px] text-airvibe-text-light font-mono tracking-widest">LIVE</span>
+                <div class="w-8 h-8 rounded-full bg-gray-800 overflow-hidden border border-white/20">
+                    <img id="user-avatar" src="" class="w-full h-full object-cover">
                 </div>
             </div>
-            
-            <!-- Connection Status -->
-            <div class="flex items-center gap-2">
-                <div id="connectionStatus" class="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-green-500/20 border border-green-500/30">
-                    <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    <span class="text-xs font-medium text-green-400">CONNECTED</span>
-                </div>
-                <button id="createStreamBtn" class="w-10 h-10 rounded-xl bg-airvibe-primary flex items-center justify-center text-white hover:bg-airvibe-primary/80 transition mobile-touch">
-                    <i class="fas fa-plus"></i>
-                </button>
-            </div>
-        </div>
-    </nav>
+        </header>
 
-    <!-- Main Content -->
-    <main class="pt-16 pb-24 px-4 md:px-6 max-w-7xl mx-auto">
-        <!-- Welcome Section -->
-        <div class="mb-8 animate-slide-in">
-            <h1 class="text-2xl md:text-3xl font-bold font-heading mb-2">
-                <span id="greetingText">Good Evening</span>, 
-                <span id="userName" class="gradient-text">Listener</span>
-            </h1>
-            <p class="text-airvibe-text-light">Join live audio streams from creators worldwide in real-time</p>
+        <div class="relative mb-6 md:mb-8">
+            <i class="fas fa-search absolute left-4 top-3.5 text-gray-500"></i>
+            <input id="search-input" type="text" placeholder="Search stations..." 
+                class="w-full bg-[#111] border border-white/10 rounded-xl pl-10 pr-4 py-3 text-white focus:border-indigo-500 outline-none transition text-sm"
+                onkeyup="filterStreams()">
         </div>
 
-        <!-- Connection Setup -->
-        <div id="connectionSetup" class="glass-card rounded-2xl p-6 mb-8 text-center animate-fade-in">
-            <div class="w-16 h-16 rounded-full border-2 border-dashed border-airvibe-border flex items-center justify-center mx-auto mb-4 animate-spin-slow">
-                <i class="fas fa-satellite-dish text-airvibe-text-light text-xl"></i>
-            </div>
-            <h3 class="text-lg font-bold mb-2">Connecting to Airvibe...</h3>
-            <p class="text-airvibe-text-light text-sm mb-4">Setting up peer connection and loading streams</p>
-            <div class="flex items-center justify-center gap-2">
-                <div class="w-2 h-2 bg-airvibe-primary rounded-full animate-pulse"></div>
-                <div class="w-2 h-2 bg-airvibe-secondary rounded-full animate-pulse delay-75"></div>
-                <div class="w-2 h-2 bg-airvibe-accent rounded-full animate-pulse delay-150"></div>
-            </div>
-        </div>
-
-        <!-- Active Streams -->
-        <section id="streamsSection" class="hidden">
-            <!-- Stats -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                <div class="glass-card rounded-2xl p-4">
-                    <div class="text-xs text-airvibe-text-light mb-1">ACTIVE NOW</div>
-                    <div class="text-2xl font-bold flex items-center gap-2">
-                        <span id="activeCount">0</span>
-                        <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    </div>
-                </div>
-                <div class="glass-card rounded-2xl p-4">
-                    <div class="text-xs text-airvibe-text-light mb-1">TOTAL LISTENERS</div>
-                    <div class="text-2xl font-bold" id="totalListeners">0</div>
-                </div>
-                <div class="glass-card rounded-2xl p-4">
-                    <div class="text-xs text-airvibe-text-light mb-1">YOUR ID</div>
-                    <div class="text-lg font-bold font-mono truncate" id="peerIdDisplay">---</div>
-                </div>
-                <div class="glass-card rounded-2xl p-4">
-                    <div class="text-xs text-airvibe-text-light mb-1">LATENCY</div>
-                    <div class="text-2xl font-bold" id="latencyDisplay">--ms</div>
-                </div>
-            </div>
-
-            <!-- Search & Filter -->
-            <div class="glass-card rounded-2xl p-4 mb-8">
-                <div class="flex items-center gap-3">
-                    <i class="fas fa-search text-airvibe-text-light"></i>
-                    <input type="text" 
-                        id="searchInput"
-                        class="flex-1 bg-transparent border-none outline-none text-white placeholder-airvibe-text-light"
-                        placeholder="Search streams, creators, or categories..."
-                        autocomplete="off">
-                    <button id="filterBtn" class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition mobile-touch">
-                        <i class="fas fa-sliders-h"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Live Streams Grid -->
-            <div class="mb-10">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-xl font-bold font-heading flex items-center gap-2">
-                        <span class="relative flex h-3 w-3">
-                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                            <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-                        </span>
-                        Live Streams 🔥
-                    </h2>
-                    <button id="refreshBtn" class="text-sm text-airvibe-primary font-medium hover:underline flex items-center gap-2">
-                        <i class="fas fa-sync-alt"></i> Refresh
-                    </button>
-                </div>
-                
-                <div id="streamsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <!-- Stream cards will be loaded here -->
-                </div>
-                
-                <div id="noStreamsMessage" class="hidden text-center py-12">
-                    <div class="w-16 h-16 rounded-full border-2 border-dashed border-airvibe-border flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-broadcast-tower text-airvibe-text-light text-xl"></i>
-                    </div>
-                    <h3 class="text-lg font-bold mb-2">No Live Streams</h3>
-                    <p class="text-airvibe-text-light mb-4">Be the first to start streaming!</p>
-                    <button onclick="goToStudio()" class="btn-primary px-6 py-3 rounded-full font-medium">
-                        <i class="fas fa-broadcast-tower mr-2"></i> Go Live Now
-                    </button>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <!-- Mini Player -->
-    <div id="miniPlayer" class="fixed bottom-20 left-4 right-4 glass-card rounded-2xl p-4 z-40 hidden animate-slide-up shadow-2xl">
-        <div class="flex items-center gap-4">
-            <div class="relative">
-                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-airvibe-primary to-airvibe-secondary overflow-hidden">
-                    <img id="miniArt" src="" class="w-full h-full object-cover">
-                </div>
-                <div class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-airvibe-card animate-pulse"></div>
-            </div>
-            
-            <div class="flex-1 min-w-0">
-                <h3 id="miniTitle" class="font-bold text-sm truncate">Stream Title</h3>
-                <p id="miniHost" class="text-xs text-airvibe-text-light truncate">@Creator</p>
-                <div class="flex items-center gap-2 mt-1">
-                    <div class="text-xs px-2 py-0.5 rounded-full bg-red-500/20 text-red-400">
-                        <i class="fas fa-circle text-[6px]"></i> LIVE
-                    </div>
-                    <div class="text-xs text-airvibe-text-light">
-                        <i class="fas fa-headphones"></i> <span id="miniListeners">0</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="flex items-center gap-2">
-                <button id="miniPlayBtn" class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition mobile-touch">
-                    <i class="fas fa-pause text-sm"></i>
-                </button>
-                <button id="miniExpandBtn" class="w-10 h-10 rounded-xl bg-airvibe-primary/20 border border-airvibe-primary/30 flex items-center justify-center hover:bg-airvibe-primary/30 transition mobile-touch">
-                    <i class="fas fa-expand-alt text-sm"></i>
-                </button>
-            </div>
-        </div>
+        <h2 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span> On Air
+        </h2>
         
-        <!-- Progress Bar -->
-        <div class="mt-3">
-            <div class="h-1 bg-white/5 rounded-full overflow-hidden">
-                <div id="miniProgress" class="h-full bg-gradient-to-r from-airvibe-primary to-airvibe-secondary rounded-full" style="width: 30%"></div>
+        <div id="stream-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="col-span-full text-center py-20 text-gray-600">
+                <i class="fas fa-circle-notch fa-spin text-2xl mb-2"></i>
+                <p class="text-xs">Scanning frequencies...</p>
             </div>
         </div>
     </div>
 
-    <!-- Full Player -->
-    <div id="fullPlayer" class="fixed inset-0 bg-airvibe-dark z-[100] flex flex-col hidden">
-        <!-- Player Header -->
-        <div class="glass-nav p-4 flex items-center justify-between">
-            <button id="closePlayerBtn" class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition mobile-touch">
+    <div id="mini-player" class="fixed bottom-0 left-0 right-0 bg-[#111] border-t border-white/10 p-3 pb-6 md:pb-3 flex items-center justify-between z-40 translate-y-full cursor-pointer" onclick="openFullPlayer()">
+        <div class="flex items-center gap-3">
+            <img id="mini-art" src="" class="w-10 h-10 rounded bg-gray-800 object-cover">
+            <div>
+                <h4 id="mini-title" class="text-xs font-bold text-white leading-tight">Station Name</h4>
+                <p id="mini-host" class="text-[10px] text-gray-400">Host Name</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-4 pr-2">
+            <button id="mini-play-btn" class="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center hover:bg-white/10 text-white" onclick="event.stopPropagation(); togglePlay()">
+                <i class="fas fa-pause text-xs"></i>
+            </button>
+        </div>
+    </div>
+
+    <div id="view-player" class="fixed inset-0 bg-[#050505] z-50 flex flex-col translate-y-full transition-transform duration-500 ease-out">
+        
+        <div class="flex justify-between items-center p-6 z-20 bg-gradient-to-b from-black/80 to-transparent">
+            <button onclick="closeFullPlayer()" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 backdrop-blur">
                 <i class="fas fa-chevron-down"></i>
             </button>
             <div class="text-center">
-                <h3 id="fullTitle" class="font-bold text-lg truncate max-w-xs mx-auto">Stream Title</h3>
-                <p id="fullHost" class="text-sm text-airvibe-text-light truncate max-w-xs mx-auto">@Creator</p>
+                <h3 id="player-title" class="font-bold text-lg leading-none tracking-tight">Loading...</h3>
+                <p id="player-host" class="text-xs text-indigo-400 font-mono uppercase mt-1">CONNECTING</p>
             </div>
-            <button id="playerMenuBtn" class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition mobile-touch">
-                <i class="fas fa-ellipsis-h"></i>
+            <button class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 backdrop-blur">
+                <i class="fas fa-ellipsis-v"></i>
             </button>
         </div>
 
-        <!-- Visualizer & Stream Info -->
-        <div class="flex-1 relative flex items-center justify-center p-4">
-            <canvas id="visualizerCanvas" class="absolute inset-0 w-full h-full opacity-20"></canvas>
+        <div class="flex-1 relative flex flex-col items-center justify-center">
+            <canvas id="vis-canvas" class="absolute inset-0 w-full h-full opacity-40 mix-blend-screen"></canvas>
             
-            <div class="relative z-10 text-center w-full max-w-md">
-                <!-- Stream Art -->
-                <div class="relative mx-auto mb-8">
-                    <div class="w-64 h-64 rounded-3xl bg-gradient-to-br from-airvibe-primary/20 to-airvibe-secondary/20 border border-white/10 overflow-hidden mx-auto">
-                        <img id="fullArt" src="" class="w-full h-full object-cover">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-                        
-                        <!-- Live Badge -->
-                        <div class="absolute top-4 right-4">
-                            <div class="live-indicator px-3 py-1 rounded-full text-white font-bold text-xs flex items-center gap-1">
-                                <div class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
-                                LIVE
-                            </div>
-                        </div>
-                        
-                        <!-- Listener Count -->
-                        <div class="absolute bottom-4 left-4">
-                            <div class="flex items-center gap-2 text-white">
-                                <i class="fas fa-headphones"></i>
-                                <span class="text-sm font-bold" id="fullListeners">0</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Pulsing Ring Effect -->
-                    <div class="absolute inset-0 -z-10">
-                        <div class="w-64 h-64 rounded-3xl border-4 border-airvibe-primary/30 mx-auto animate-pulse-ring"></div>
-                    </div>
-                </div>
-                
-                <!-- Stream Info -->
-                <div class="space-y-2 mb-8">
-                    <h2 id="fullSongTitle" class="text-2xl font-bold">Live Audio Stream</h2>
-                    <p id="fullArtist" class="text-airvibe-text-light">Broadcasting in real-time</p>
-                    <div class="flex items-center justify-center gap-4 text-sm text-airvibe-text-light">
-                        <span>
-                            <i class="fas fa-microphone mr-1"></i>
-                            <span id="fullHostName">Host</span>
-                        </span>
-                        <span>•</span>
-                        <span>
-                            <i class="far fa-clock mr-1"></i>
-                            <span id="fullUptime">00:00</span>
-                        </span>
-                    </div>
-                </div>
-                
-                <!-- Waveform Visualizer -->
-                <div class="flex items-center justify-center gap-1 h-8 mb-8" id="waveform">
-                    <!-- Waveform bars will be generated here -->
-                </div>
-            </div>
-        </div>
-
-        <!-- Controls -->
-        <div class="p-6 border-t border-airvibe-border safe-area-inset-bottom">
-            <!-- Player Controls -->
-            <div class="flex items-center justify-center gap-6 mb-8">
-                <button id="volumeBtn" class="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition mobile-touch">
-                    <i class="fas fa-volume-up text-lg"></i>
-                </button>
-                
-                <button id="playPauseBtn" class="w-16 h-16 rounded-full bg-gradient-to-br from-airvibe-primary to-airvibe-secondary flex items-center justify-center hover:shadow-lg hover:shadow-airvibe-primary/30 transition mobile-touch">
-                    <i class="fas fa-pause text-xl"></i>
-                </button>
-                
-                <button id="giftBtn" class="w-12 h-12 rounded-xl bg-airvibe-accent/20 border border-airvibe-accent/30 flex items-center justify-center hover:bg-airvibe-accent/30 transition mobile-touch">
-                    <i class="fas fa-gift text-lg"></i>
-                </button>
+            <div class="w-64 h-64 md:w-80 md:h-80 rounded-full bg-[#1a1a2e] border border-white/10 shadow-[0_0_60px_rgba(79,70,229,0.2)] flex items-center justify-center relative z-10 overflow-hidden">
+                <img id="player-art" src="" class="w-full h-full object-cover opacity-80">
+                <div class="absolute inset-0 bg-black/20"></div>
+                <i class="fas fa-music text-6xl text-white/50 absolute z-20"></i>
             </div>
             
-            <!-- Quick Actions -->
-            <div class="flex items-center justify-between">
-                <button onclick="sendReaction('❤️')" class="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition mobile-touch">
-                    <span class="text-xl">❤️</span>
-                </button>
-                <button onclick="sendReaction('🔥')" class="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition mobile-touch">
-                    <span class="text-xl">🔥</span>
-                </button>
-                <button onclick="sendReaction('🎉')" class="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition mobile-touch">
-                    <span class="text-xl">🎉</span>
-                </button>
-                <button onclick="sendReaction('🚀')" class="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition mobile-touch">
-                    <span class="text-xl">🚀</span>
-                </button>
-                <button onclick="sendReaction('👏')" class="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition mobile-touch">
-                    <span class="text-xl">👏</span>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Chat Modal -->
-    <div id="chatModal" class="fixed inset-0 bg-airvibe-dark z-[100] flex flex-col hidden">
-        <div class="glass-nav p-4 flex items-center justify-between">
-            <button id="closeChatBtn" class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition mobile-touch">
-                <i class="fas fa-chevron-left"></i>
-            </button>
-            <div class="text-center">
-                <h3 class="font-bold text-lg">Live Chat</h3>
-                <p id="chatRoomName" class="text-sm text-airvibe-text-light">Stream Name</p>
-            </div>
-            <button id="chatSettingsBtn" class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition mobile-touch">
-                <i class="fas fa-cog"></i>
+            <button id="big-play-btn" onclick="togglePlay()" class="absolute z-30 w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-xl hidden">
+                <i class="fas fa-play text-black text-3xl ml-1"></i>
             </button>
         </div>
 
-        <div id="chatMessages" class="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-custom">
-            <!-- Chat messages will appear here -->
-        </div>
-
-        <div class="border-t border-airvibe-border p-4 safe-area-inset-bottom">
-            <div class="flex items-center gap-3">
-                <input type="text" 
-                    id="chatInput"
-                    class="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none placeholder-airvibe-text-light"
-                    placeholder="Type a message..."
-                    autocomplete="off">
-                <button id="sendChatBtn" class="w-12 h-12 rounded-xl bg-airvibe-primary flex items-center justify-center hover:bg-airvibe-primary/80 transition mobile-touch">
-                    <i class="fas fa-paper-plane text-white"></i>
+        <div class="h-[40vh] bg-[#0a0a0a] border-t border-white/10 flex flex-col rounded-t-[2.5rem] relative z-20 shadow-2xl">
+            <div id="chat-feed" class="flex-1 overflow-y-auto p-6 space-y-3 no-scrollbar text-sm"></div>
+            
+            <div class="p-4 safe-pb border-t border-white/5 flex gap-2 items-center bg-[#0a0a0a]">
+                <button onclick="sendGift('🔥')" class="text-xl hover:scale-110 transition p-2">🔥</button>
+                <button onclick="sendGift('❤️')" class="text-xl hover:scale-110 transition p-2">❤️</button>
+                <input id="chat-inp" type="text" class="flex-1 bg-[#151515] border border-white/10 rounded-full px-4 h-10 text-white focus:outline-none focus:border-indigo-500 transition placeholder-gray-600 text-sm" placeholder="Say something..." autocomplete="off">
+                <button onclick="sendChat()" class="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white hover:bg-indigo-500 transition shadow-lg">
+                    <i class="fas fa-paper-plane text-xs"></i>
                 </button>
             </div>
-        </div>
-    </div>
-
-    <!-- Create Stream Modal -->
-    <div id="createStreamModal" class="fixed inset-0 bg-airvibe-dark z-[100] flex flex-col hidden">
-        <div class="glass-nav p-4 flex items-center justify-between">
-            <button id="closeCreateModalBtn" class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition mobile-touch">
-                <i class="fas fa-times"></i>
-            </button>
-            <h3 class="font-bold text-lg">Start Streaming</h3>
-            <div class="w-10"></div>
-        </div>
-
-        <div class="flex-1 overflow-y-auto p-6 scrollbar-custom">
-            <div class="max-w-md mx-auto">
-                <div class="text-center mb-8">
-                    <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-airvibe-primary to-airvibe-secondary flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-broadcast-tower text-2xl text-white"></i>
-                    </div>
-                    <h3 class="text-xl font-bold mb-2">Go Live</h3>
-                    <p class="text-airvibe-text-light">Start broadcasting to listeners worldwide</p>
-                </div>
-
-                <div class="space-y-6">
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Stream Title</label>
-                        <input type="text" 
-                            id="streamTitle"
-                            class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none placeholder-airvibe-text-light"
-                            placeholder="Enter stream title..."
-                            value="My Live Stream">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Description (Optional)</label>
-                        <textarea 
-                            id="streamDescription"
-                            class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none placeholder-airvibe-text-light h-24"
-                            placeholder="Describe your stream..."></textarea>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Category</label>
-                        <select id="streamCategory" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none">
-                            <option value="music">Music</option>
-                            <option value="talk">Talk</option>
-                            <option value="gaming">Gaming</option>
-                            <option value="education">Education</option>
-                            <option value="wellness">Wellness</option>
-                            <option value="tech">Tech</option>
-                            <option value="general">General</option>
-                        </select>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Max Listeners</label>
-                        <input type="range" 
-                            id="maxListeners"
-                            min="10"
-                            max="10000"
-                            value="1000"
-                            class="w-full">
-                        <div class="text-right text-sm text-airvibe-text-light">
-                            <span id="maxListenersValue">1000</span> listeners
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="p-6 border-t border-airvibe-border">
-            <button id="startStreamBtn" class="w-full btn-primary py-4 rounded-xl font-bold text-lg">
-                <i class="fas fa-broadcast-tower mr-2"></i> Start Broadcasting
-            </button>
-        </div>
-    </div>
-
-    <!-- Toast Notification -->
-    <div id="toast" class="fixed top-6 left-1/2 -translate-x-1/2 bg-gradient-to-r from-airvibe-primary to-airvibe-secondary text-white px-6 py-3 rounded-full text-sm font-medium shadow-2xl z-[200] hidden animate-slide-up">
-        <i class="fas fa-check-circle mr-2"></i>
-        <span id="toastMessage">Notification message</span>
-    </div>
-
-    <!-- Connection Error Modal -->
-    <div id="errorModal" class="fixed inset-0 bg-black/90 z-[1000] flex items-center justify-center p-4 hidden">
-        <div class="glass-card rounded-2xl p-6 max-w-md w-full text-center">
-            <div class="w-16 h-16 rounded-full bg-red-500/20 border border-red-500/30 flex items-center justify-center mx-auto mb-4">
-                <i class="fas fa-exclamation-triangle text-2xl text-red-500"></i>
-            </div>
-            <h3 class="text-xl font-bold mb-2" id="errorTitle">Connection Error</h3>
-            <p class="text-airvibe-text-light mb-6" id="errorMessage">Unable to connect to the server. Please check your internet connection.</p>
-            <button onclick="window.location.reload()" class="btn-primary w-full py-3 rounded-xl font-medium">
-                <i class="fas fa-redo mr-2"></i> Retry Connection
-            </button>
         </div>
     </div>
 
     <script>
-        // ========== GLOBAL VARIABLES ==========
-        let socket = null;
-        let peer = null;
-        let myPeerId = null;
-        let currentStream = null;
-        let audioCtx = null;
-        let analyser = null;
-        let isPlaying = false;
-        let audioElement = null;
-        let userData = {};
+        // --- GLOBAL STATE ---
+        const socket = io();
+        let peer, myId, currentRoomId;
         let activeStreams = [];
-        let pingInterval = null;
+        let audioCtx, analyser, gainNode;
+        let isConnected = false;
 
-        // ========== INITIALIZATION ==========
-        document.addEventListener('DOMContentLoaded', () => {
-            initializeUser();
-            initializeConnection();
-            setupEventListeners();
-            updateGreeting();
+        // --- 1. PROFILE INIT ---
+        const myName = localStorage.getItem('av_name') || `Guest${Math.floor(Math.random()*900)}`;
+        const myAvatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${myName}`;
+        document.getElementById('user-avatar').src = myAvatar;
+
+        // --- 2. NETWORK ---
+        socket.on('connect', () => {
+            isConnected = true;
+            document.getElementById('conn-text').innerText = "ONLINE";
+            document.getElementById('conn-dot').classList.replace('bg-red-500', 'bg-green-500');
+            document.getElementById('conn-text').classList.add('text-green-500');
+            socket.emit('request-stream-list');
         });
 
-        function initializeUser() {
-            // Load or create user data
-            const savedName = localStorage.getItem('airvibe_username');
-            const userId = localStorage.getItem('airvibe_userid') || generateUserId();
-            
-            userData = {
-                id: userId,
-                name: savedName || `Listener${Math.floor(Math.random() * 10000)}`,
-                avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${userId}`,
-                points: parseInt(localStorage.getItem('airvibe_points')) || 0,
-                listeningTime: parseInt(localStorage.getItem('airvibe_time')) || 0,
-                joinedAt: Date.now()
-            };
-            
-            // Save user data
-            localStorage.setItem('airvibe_userid', userId);
-            if (!savedName) {
-                localStorage.setItem('airvibe_username', userData.name);
-            }
-            
-            document.getElementById('userName').textContent = userData.name;
-        }
+        socket.on('disconnect', () => {
+            isConnected = false;
+            document.getElementById('conn-text').innerText = "OFFLINE";
+            document.getElementById('conn-dot').classList.replace('bg-green-500', 'bg-red-500');
+            document.getElementById('conn-text').classList.remove('text-green-500');
+        });
 
-        function generateUserId() {
-            return 'user_' + Math.random().toString(36).substr(2, 9);
-        }
+        // Initialize PeerJS
+        peer = new Peer(undefined, { 
+            host: location.hostname, 
+            port: location.port || 443, 
+            path: "/peerjs", 
+            secure: location.protocol === "https:" 
+        });
+        
+        peer.on('open', id => { myId = id; console.log("My Peer ID:", id); });
 
-        function updateGreeting() {
-            const hour = new Date().getHours();
-            let greeting = "Good Evening";
-            if (hour < 12) greeting = "Good Morning";
-            else if (hour < 18) greeting = "Good Afternoon";
-            document.getElementById('greetingText').textContent = greeting;
-        }
-
-        // ========== SOCKET.IO CONNECTION ==========
-        function initializeConnection() {
-            try {
-                socket = io({
-                    reconnection: true,
-                    reconnectionAttempts: 5,
-                    reconnectionDelay: 1000,
-                    timeout: 20000
-                });
-
-                setupSocketListeners();
-                initializePeerConnection();
-            } catch (error) {
-                console.error('Connection error:', error);
-                showError('Connection Error', 'Failed to connect to server. Please try again.');
-            }
-        }
-
-        function setupSocketListeners() {
-            socket.on('connect', () => {
-                console.log('✅ Connected to server:', socket.id);
-                showToast('Connected to Airvibe');
-                updateConnectionStatus(true);
-                
-                // Request stream list
-                socket.emit('request-stream-list');
-                
-                // Start ping for latency
-                startPing();
-            });
-
-            socket.on('connect_error', (error) => {
-                console.error('❌ Connection error:', error);
-                updateConnectionStatus(false);
-                showError('Connection Error', 'Failed to connect to server.');
-            });
-
-            socket.on('disconnect', (reason) => {
-                console.log('🔌 Disconnected:', reason);
-                updateConnectionStatus(false);
-                
-                if (reason === 'io server disconnect') {
-                    // Server initiated disconnect, try to reconnect
-                    socket.connect();
-                }
-            });
-
-            // ========== STREAM EVENTS ==========
-            socket.on('stream-list', (streams) => {
-                console.log('📡 Received streams:', streams.length);
+        // --- 3. STREAM DISCOVERY ---
+        socket.on('stream-list', (streams) => {
+            if (activeStreams.length !== streams.length) {
                 activeStreams = streams;
                 renderStreams(streams);
-                updateStats(streams);
-                showStreamsSection();
-            });
-
-            socket.on('stream-created', (stream) => {
-                console.log('🎙️ New stream created:', stream.title);
-                // Add to active streams if not already there
-                if (!activeStreams.find(s => s.id === stream.id)) {
-                    activeStreams.push(stream);
-                    renderStreams(activeStreams);
-                    updateStats(activeStreams);
-                    showToast(`New stream: ${stream.title}`);
-                }
-            });
-
-            socket.on('stream-ended', (data) => {
-                console.log('🛑 Stream ended:', data.streamId);
-                // Remove from active streams
-                activeStreams = activeStreams.filter(s => s.id !== data.streamId);
-                renderStreams(activeStreams);
-                updateStats(activeStreams);
-                
-                // If we were in that stream, leave it
-                if (currentStream && currentStream.id === data.streamId) {
-                    leaveStream();
-                    showToast('Stream ended by host');
-                }
-            });
-
-            socket.on('stream-updated', (data) => {
-                // Update stream in active streams
-                const index = activeStreams.findIndex(s => s.id === data.streamId);
-                if (index !== -1) {
-                    Object.assign(activeStreams[index], data.updates);
-                    renderStreams(activeStreams);
-                }
-            });
-
-            // ========== STREAM JOIN EVENTS ==========
-            socket.on('stream-joined', (streamData) => {
-                console.log('✅ Joined stream:', streamData.title);
-                currentStream = streamData;
-                showToast(`Joined ${streamData.title}`);
-                
-                // Connect to host via PeerJS
-                if (streamData.hostPeerId && myPeerId) {
-                    connectToHost(streamData.hostPeerId);
-                }
-                
-                // Update UI
-                updatePlayerUI(streamData);
-                showMiniPlayer();
-            });
-
-            socket.on('stream-error', (error) => {
-                console.error('Stream error:', error);
-                showToast(error.message || 'Stream error occurred');
-            });
-
-            socket.on('listener-joined', (data) => {
-                // Update listener count for all streams
-                const stream = activeStreams.find(s => s.id === data.streamId);
-                if (stream) {
-                    stream.listeners = data.totalListeners;
-                    renderStreams(activeStreams);
-                    
-                    // Update player UI if we're in that stream
-                    if (currentStream && currentStream.id === data.streamId) {
-                        document.getElementById('fullListeners').textContent = data.totalListeners;
-                        document.getElementById('miniListeners').textContent = data.totalListeners;
-                    }
-                }
-            });
-
-            socket.on('listener-left', (data) => {
-                // Update listener count
-                const stream = activeStreams.find(s => s.id === data.streamId);
-                if (stream) {
-                    stream.listeners = data.totalListeners;
-                    renderStreams(activeStreams);
-                    
-                    // Update player UI if we're in that stream
-                    if (currentStream && currentStream.id === data.streamId) {
-                        document.getElementById('fullListeners').textContent = data.totalListeners;
-                        document.getElementById('miniListeners').textContent = data.totalListeners;
-                    }
-                }
-            });
-
-            // ========== CHAT EVENTS ==========
-            socket.on('chat-message', (message) => {
-                if (currentStream && message.streamId === currentStream.id) {
-                    addChatMessage(message.user, message.message, message.type === 'system');
-                }
-            });
-
-            socket.on('gift-received', (gift) => {
-                if (currentStream && gift.streamId === currentStream.id) {
-                    showGiftAnimation(gift.user, gift.gift);
-                }
-            });
-
-            socket.on('reaction-received', (reaction) => {
-                if (currentStream && reaction.streamId === currentStream.id) {
-                    showReactionAnimation(reaction.user, reaction.reaction);
-                }
-            });
-        }
-
-        // ========== PEERJS CONNECTION ==========
-        function initializePeerConnection() {
-            peer = new Peer(undefined, {
-                host: window.location.hostname,
-                port: window.location.port || (window.location.protocol === 'https:' ? 443 : 80),
-                path: '/peerjs/peerjs',
-                secure: window.location.protocol === 'https:',
-                config: {
-                    iceServers: [
-                        { urls: 'stun:stun.l.google.com:19302' },
-                        { urls: 'stun:global.stun.twilio.com:3478' }
-                    ]
-                },
-                debug: 2
-            });
-
-            peer.on('open', (id) => {
-                console.log('🎧 PeerJS connected:', id);
-                myPeerId = id;
-                document.getElementById('peerIdDisplay').textContent = id.substring(0, 8) + '...';
-                document.getElementById('connectionSetup').classList.add('hidden');
-            });
-
-            peer.on('error', (err) => {
-                console.error('PeerJS error:', err);
-                showToast('Audio connection error');
-            });
-
-            peer.on('call', (call) => {
-                // This is for P2P connections between listeners (not needed for basic streaming)
-                call.answer();
-            });
-        }
-
-        function connectToHost(hostPeerId) {
-            if (!peer || !hostPeerId) return;
-            
-            console.log('🔗 Connecting to host:', hostPeerId);
-            
-            // Get user media (for future features like talkback)
-            navigator.mediaDevices.getUserMedia({ audio: true, video: false })
-                .then((stream) => {
-                    // Call the host
-                    const call = peer.call(hostPeerId, stream);
-                    
-                    call.on('stream', (remoteStream) => {
-                        console.log('🎵 Received audio stream from host');
-                        setupAudioPlayback(remoteStream);
-                    });
-                    
-                    call.on('close', () => {
-                        console.log('🔇 Call closed');
-                        if (audioElement) {
-                            audioElement.pause();
-                            audioElement.srcObject = null;
-                        }
-                    });
-                    
-                    call.on('error', (err) => {
-                        console.error('Call error:', err);
-                        showToast('Audio connection lost');
-                    });
-                })
-                .catch((err) => {
-                    console.error('Microphone error:', err);
-                    // Still try to connect without sending audio
-                    const call = peer.call(hostPeerId, null);
-                    
-                    call.on('stream', (remoteStream) => {
-                        console.log('🎵 Received audio stream (listen only)');
-                        setupAudioPlayback(remoteStream);
-                    });
-                });
-        }
-
-        // ========== AUDIO HANDLING ==========
-        function setupAudioPlayback(stream) {
-            audioElement = document.getElementById('remoteAudio');
-            
-            // Set the stream
-            audioElement.srcObject = stream;
-            
-            // Play the audio
-            audioElement.play().then(() => {
-                console.log('▶️ Audio playback started');
-                isPlaying = true;
-                updatePlayButton();
-                setupAudioVisualizer(stream);
-                startUptimeCounter();
-            }).catch((err) => {
-                console.error('Audio play failed:', err);
-                showToast('Click to unmute audio');
-            });
-            
-            // Handle audio events
-            audioElement.onended = () => {
-                console.log('⏹️ Audio ended');
-                isPlaying = false;
-                updatePlayButton();
-            };
-            
-            audioElement.onerror = (err) => {
-                console.error('Audio error:', err);
-                showToast('Audio playback error');
-            };
-        }
-
-        function setupAudioVisualizer(stream) {
-            if (audioCtx) {
-                audioCtx.close();
+            } else {
+                activeStreams = streams;
             }
-            
-            try {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const source = audioCtx.createMediaStreamSource(stream);
-                analyser = audioCtx.createAnalyser();
-                
-                analyser.fftSize = 256;
-                analyser.smoothingTimeConstant = 0.8;
-                
-                source.connect(analyser);
-                
-                startVisualizer();
-                createWaveform();
-            } catch (err) {
-                console.error('AudioContext error:', err);
-            }
-        }
+        });
 
-        function startVisualizer() {
-            if (!analyser) return;
-            
-            const canvas = document.getElementById('visualizerCanvas');
-            const ctx = canvas.getContext('2d');
-            
-            // Set canvas size
-            canvas.width = canvas.offsetWidth * window.devicePixelRatio;
-            canvas.height = canvas.offsetHeight * window.devicePixelRatio;
-            
-            const bufferLength = analyser.frequencyBinCount;
-            const dataArray = new Uint8Array(bufferLength);
-            
-            function draw() {
-                if (!analyser) return;
-                
-                requestAnimationFrame(draw);
-                analyser.getByteFrequencyData(dataArray);
-                
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                
-                const barWidth = (canvas.width / bufferLength) * 2.5;
-                let barHeight;
-                let x = 0;
-                
-                for (let i = 0; i < bufferLength; i++) {
-                    barHeight = (dataArray[i] / 255) * canvas.height * 0.8;
-                    
-                    // Create gradient
-                    const gradient = ctx.createLinearGradient(0, canvas.height - barHeight, 0, canvas.height);
-                    gradient.addColorStop(0, '#8B5CF6');
-                    gradient.addColorStop(0.5, '#06B6D4');
-                    gradient.addColorStop(1, '#F59E0B');
-                    
-                    ctx.fillStyle = gradient;
-                    ctx.fillRect(x, canvas.height - barHeight, barWidth - 1, barHeight);
-                    
-                    x += barWidth + 1;
-                }
-            }
-            
-            draw();
-        }
-
-        function createWaveform() {
-            const container = document.getElementById('waveform');
-            if (!container) return;
-            
-            container.innerHTML = '';
-            
-            for (let i = 0; i < 20; i++) {
-                const bar = document.createElement('div');
-                bar.className = 'waveform-bar';
-                bar.style.setProperty('--i', i);
-                bar.style.width = '3px';
-                bar.style.height = `${Math.random() * 24 + 8}px`;
-                bar.style.backgroundColor = i % 2 === 0 ? '#8B5CF6' : '#06B6D4';
-                bar.style.borderRadius = '3px';
-                container.appendChild(bar);
-            }
-        }
-
-        // ========== STREAM MANAGEMENT ==========
-        function joinStream(stream) {
-            if (!socket || !socket.connected) {
-                showToast('Not connected to server');
-                return;
-            }
-            
-            if (currentStream && currentStream.id === stream.id) {
-                // Already in this stream, just show player
-                showFullPlayer();
-                return;
-            }
-            
-            // Leave current stream if any
-            if (currentStream) {
-                leaveStream();
-            }
-            
-            console.log('🎧 Joining stream:', stream.title);
-            
-            // Send join request to server
-            socket.emit('join-stream', {
-                streamId: stream.id,
-                peerId: myPeerId,
-                userData: {
-                    name: userData.name,
-                    avatar: userData.avatar
-                }
-            });
-            
-            // Show loading state
-            showToast(`Joining ${stream.title}...`);
-        }
-
-        function leaveStream() {
-            if (!currentStream || !socket) return;
-            
-            console.log('👋 Leaving stream:', currentStream.title);
-            
-            // Notify server
-            socket.emit('leave-stream', {
-                streamId: currentStream.id
-            });
-            
-            // Stop audio
-            if (audioElement) {
-                audioElement.pause();
-                audioElement.srcObject = null;
-            }
-            
-            // Close audio context
-            if (audioCtx) {
-                audioCtx.close();
-                audioCtx = null;
-                analyser = null;
-            }
-            
-            // Update UI
-            currentStream = null;
-            isPlaying = false;
-            hideMiniPlayer();
-            hideFullPlayer();
-            
-            showToast('Left stream');
-        }
-
-        function createStream() {
-            const title = document.getElementById('streamTitle').value.trim();
-            const description = document.getElementById('streamDescription').value.trim();
-            const category = document.getElementById('streamCategory').value;
-            const maxListeners = parseInt(document.getElementById('maxListeners').value);
-            
-            if (!title) {
-                showToast('Please enter a stream title');
-                return;
-            }
-            
-            if (!socket || !socket.connected) {
-                showToast('Not connected to server');
-                return;
-            }
-            
-            socket.emit('create-stream', {
-                title: title,
-                description: description,
-                category: category,
-                maxListeners: maxListeners,
-                hostName: userData.name,
-                peerId: myPeerId,
-                thumbnail: `https://api.dicebear.com/7.x/shapes/svg?seed=${title}`
-            });
-            
-            hideCreateStreamModal();
-            showToast('Creating stream...');
-        }
-
-        // ========== UI UPDATES ==========
         function renderStreams(streams) {
-            const grid = document.getElementById('streamsGrid');
-            const noStreamsMsg = document.getElementById('noStreamsMessage');
+            const grid = document.getElementById('stream-grid');
+            grid.innerHTML = '';
+            // only show truly live streams (defensive)
+            const live = (streams || []).filter(s => s && s.startedAt);
             
-            if (streams.length === 0) {
-                grid.innerHTML = '';
-                noStreamsMsg.classList.remove('hidden');
+            if(live.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full text-center py-20 opacity-50">
+                        <i class="fas fa-satellite-dish text-4xl text-gray-700 mb-2"></i>
+                        <p class="text-sm text-gray-500">No signals detected.</p>
+                    </div>`;
                 return;
             }
-            
-            noStreamsMsg.classList.add('hidden');
-            grid.innerHTML = '';
-            
-            streams.forEach(stream => {
-                const card = createStreamCard(stream);
+
+            // sort by newest first
+            live.sort((a,b) => (b.startedAt||0) - (a.startedAt||0));
+
+            live.forEach(stream => {
+                const card = document.createElement('div');
+                card.className = "glass-card p-4 rounded-2xl flex items-center gap-4 cursor-pointer hover:bg-white/5 active:scale-95 fade-enter";
+                card.onclick = () => joinStream(stream);
+                
+                requestAnimationFrame(() => card.classList.add('fade-enter-active'));
+                
+                const artSeed = stream.title.replace(/\s/g, '');
+                
+                card.innerHTML = `
+                    <div class="w-14 h-14 rounded-xl bg-gray-900 overflow-hidden relative shrink-0">
+                        <img src="https://api.dicebear.com/7.x/shapes/svg?seed=${artSeed}" class="w-full h-full object-cover opacity-80">
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <i class="fas fa-play text-white drop-shadow-md text-xs"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h3 class="font-bold text-base text-white truncate">${stream.title}</h3>
+                        <p class="text-xs text-gray-400 truncate">${stream.hostName}</p>
+                    </div>
+                    <div class="flex flex-col items-end gap-1">
+                        <span class="text-[9px] font-bold text-red-500 bg-red-900/20 px-2 py-0.5 rounded border border-red-900/30">LIVE</span>
+                        <span class="text-[9px] text-gray-500"><i class="fas fa-users"></i> ${stream.listeners || 0}</span>
+                    </div>
+                `;
                 grid.appendChild(card);
             });
         }
 
-        function createStreamCard(stream) {
+        function filterStreams() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const filtered = activeStreams.filter(s => 
+                s.title.toLowerCase().includes(query) || 
+                s.hostName.toLowerCase().includes(query)
+            );
+            renderStreams(filtered);
+        }
+
+        // --- 4. PLAYER LOGIC ---
+        function joinStream(stream) {
+            currentRoomId = stream.peerId;
+            
+            // UI Updates
+            document.getElementById('player-title').innerText = stream.title;
+            document.getElementById('player-host').innerText = stream.hostName;
+            document.getElementById('mini-title').innerText = stream.title;
+            document.getElementById('mini-host').innerText = stream.hostName;
+            
+            const artUrl = `https://api.dicebear.com/7.x/shapes/svg?seed=${stream.title.replace(/\s/g, '')}`;
+            document.getElementById('player-art').src = artUrl;
+            document.getElementById('mini-art').src = artUrl;
+            document.getElementById('chat-feed').innerHTML = `<div class="text-center text-[10px] text-gray-600 mt-4">Connected to ${stream.title}</div>`;
+            
+            // Show Full Player
+            document.getElementById('view-player').classList.remove('translate-y-full');
+            document.getElementById('mini-player').classList.remove('translate-y-full'); // Show mini bar
+            
+            // Connect Sockets
+            if(isConnected) {
+                socket.emit('join-stream', currentRoomId);
+                socket.emit('listener-ready', myId);
+                socket.emit('chatMessage', { room: currentRoomId, user: 'SYSTEM', msg: `${myName} joined`, type: 'system' });
+            }
+            
+            // Init Audio (Requires interaction)
+            initAudioContext();
+        }
+
+        function openFullPlayer() {
+            document.getElementById('view-player').classList.remove('translate-y-full');
+        }
+
+        function closeFullPlayer() {
+            document.getElementById('view-player').classList.add('translate-y-full');
+        }
+
+        function leaveStream() {
+            closeFullPlayer();
+            document.getElementById('mini-player').classList.add('translate-y-full');
+            const audio = document.getElementById('remoteAudio');
+            audio.pause();
+            audio.srcObject = null;
+            setTimeout(() => { if(audioCtx) audioCtx.suspend(); }, 500);
+        }
+
+        // Audio Controls
+        function togglePlay() {
+            const audio = document.getElementById('remoteAudio');
+            const miniBtn = document.getElementById('mini-play-btn');
+            const bigBtn = document.getElementById('big-play-btn');
+            
+            if (audio.paused) {
+                audio.play();
+                miniBtn.innerHTML = '<i class="fas fa-pause text-xs"></i>';
+                bigBtn.classList.add('hidden');
+            } else {
+                audio.pause();
+                miniBtn.innerHTML = '<i class="fas fa-play text-xs"></i>';
+                bigBtn.classList.remove('hidden');
+            }
+        }
+
+        // Receive Audio Stream
+        peer.on('call', (call) => {
+            call.answer();
+            call.on('stream', (stream) => {
+                const audio = document.getElementById('remoteAudio');
+                audio.srcObject = stream;
+                audio.play().catch(e => {
+                    console.log("Autoplay blocked");
+                    document.getElementById('big-play-btn').classList.remove('hidden');
+                });
+                setupVisualizer(stream);
+            });
+        });
+
+        // --- 5. CHAT SYSTEM ---
+        socket.on('chatMessage', (data) => {
             const div = document.createElement('div');
-            div.className = 'glass-card rounded-2xl overflow-hidden card-hover cursor-pointer animate-fade-in';
-            div.onclick = () => joinStream(stream);
+            const isMe = data.user === myName;
+            div.className = isMe ? "text-right mb-2" : "text-left mb-2";
             
-            // Format uptime
-            const uptime = formatUptime(stream.startedAt);
-            
+            const bgClass = isMe ? 'bg-indigo-600 text-white' : 'bg-[#1a1a1a] border border-white/10 text-gray-300';
+            const userColor = data.user === 'HOST' ? 'text-red-400' : 'text-indigo-400';
+
             div.innerHTML = `
-                <div class="relative h-48 overflow-hidden">
-                    <img src="${stream.thumbnail}" class="w-full h-full object-cover">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-                    
-                    <!-- Live Badge -->
-                    <div class="absolute top-3 right-3">
-                        <div class="live-indicator px-3 py-1 rounded-full text-white font-bold text-xs flex items-center gap-1">
-                            <div class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
-                            LIVE
-                        </div>
-                    </div>
-                    
-                    <!-- Listener Count -->
-                    <div class="absolute bottom-3 left-3">
-                        <div class="flex items-center gap-2 text-white">
-                            <i class="fas fa-headphones"></i>
-                            <span class="text-sm font-bold">${formatNumber(stream.listeners)}</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="p-4">
-                    <h3 class="font-bold text-lg mb-1 truncate">${stream.title}</h3>
-                    <p class="text-sm text-airvibe-text-light mb-3 truncate">${stream.description || 'Live audio stream'}</p>
-                    
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-airvibe-primary/20 to-airvibe-secondary/20 flex items-center justify-center">
-                                <i class="fas fa-microphone text-xs"></i>
-                            </div>
-                            <div>
-                                <span class="text-sm font-medium">${stream.host.name}</span>
-                                <div class="text-xs text-airvibe-text-light">${uptime}</div>
-                            </div>
-                        </div>
-                        
-                        <span class="text-xs px-2 py-1 rounded-full bg-white/10 capitalize">${stream.category}</span>
-                    </div>
+                <div class="inline-block max-w-[85%]">
+                    <span class="text-[9px] ${userColor} font-bold block mb-0.5 ml-1">${data.user}</span>
+                    <span class="${bgClass} px-3 py-1.5 rounded-2xl ${isMe ? 'rounded-tr-sm' : 'rounded-tl-sm'} text-xs inline-block">
+                        ${data.msg}
+                    </span>
                 </div>
             `;
-            
-            return div;
-        }
-
-        function updatePlayerUI(stream) {
-            document.getElementById('miniTitle').textContent = stream.title;
-            document.getElementById('miniHost').textContent = stream.host.name;
-            document.getElementById('miniListeners').textContent = formatNumber(stream.listeners);
-            document.getElementById('miniArt').src = stream.thumbnail;
-            
-            document.getElementById('fullTitle').textContent = stream.title;
-            document.getElementById('fullHost').textContent = stream.host.name;
-            document.getElementById('fullHostName').textContent = stream.host.name;
-            document.getElementById('fullListeners').textContent = formatNumber(stream.listeners);
-            document.getElementById('fullArt').src = stream.thumbnail;
-            document.getElementById('chatRoomName').textContent = stream.title;
-        }
-
-        function updateStats(streams) {
-            const totalListeners = streams.reduce((sum, stream) => sum + stream.listeners, 0);
-            
-            document.getElementById('activeCount').textContent = streams.length;
-            document.getElementById('totalListeners').textContent = formatNumber(totalListeners);
-        }
-
-        function updateConnectionStatus(connected) {
-            const statusEl = document.getElementById('connectionStatus');
-            if (connected) {
-                statusEl.classList.remove('hidden');
-                statusEl.innerHTML = `
-                    <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    <span class="text-xs font-medium text-green-400">CONNECTED</span>
-                `;
-            } else {
-                statusEl.classList.remove('hidden');
-                statusEl.innerHTML = `
-                    <div class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                    <span class="text-xs font-medium text-red-400">DISCONNECTED</span>
-                `;
-            }
-        }
-
-        function showStreamsSection() {
-            document.getElementById('connectionSetup').classList.add('hidden');
-            document.getElementById('streamsSection').classList.remove('hidden');
-        }
-
-        // ========== PLAYER CONTROLS ==========
-        function togglePlayPause() {
-            if (!audioElement) return;
-            
-            if (isPlaying) {
-                audioElement.pause();
-            } else {
-                audioElement.play().catch(err => {
-                    console.error('Play failed:', err);
-                    showToast('Click to unmute audio');
-                });
-            }
-            
-            isPlaying = !isPlaying;
-            updatePlayButton();
-        }
-
-        function updatePlayButton() {
-            const miniBtn = document.getElementById('miniPlayBtn');
-            const fullBtn = document.getElementById('playPauseBtn');
-            
-            if (miniBtn) {
-                miniBtn.innerHTML = isPlaying ? 
-                    '<i class="fas fa-pause text-sm"></i>' :
-                    '<i class="fas fa-play text-sm"></i>';
-            }
-            
-            if (fullBtn) {
-                fullBtn.innerHTML = isPlaying ? 
-                    '<i class="fas fa-pause text-xl"></i>' :
-                    '<i class="fas fa-play text-xl"></i>';
-            }
-        }
-
-        // ========== CHAT FUNCTIONS ==========
-        function sendChatMessage() {
-            if (!currentStream || !socket) return;
-            
-            const input = document.getElementById('chatInput');
-            const message = input.value.trim();
-            
-            if (!message) return;
-            
-            socket.emit('chat-message', {
-                streamId: currentStream.id,
-                message: message,
-                user: userData.name
-            });
-            
-            input.value = '';
-        }
-
-        function addChatMessage(user, message, isSystem) {
-            const container = document.getElementById('chatMessages');
-            const div = document.createElement('div');
-            div.className = 'animate-slide-up';
-            
-            if (isSystem) {
-                div.innerHTML = `
-                    <div class="text-center">
-                        <span class="text-xs px-3 py-1 rounded-full bg-yellow-500/20 text-yellow-400 inline-block">
-                            ${message}
-                        </span>
-                    </div>
-                `;
-            } else {
-                div.innerHTML = `
-                    <div class="flex items-start gap-3">
-                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-airvibe-primary/20 to-airvibe-secondary/20 flex items-center justify-center">
-                            <i class="fas fa-user text-xs"></i>
-                        </div>
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-1">
-                                <span class="font-bold text-sm">${user}</span>
-                                <span class="text-xs text-airvibe-text-light">just now</span>
-                            </div>
-                            <p class="text-sm">${message}</p>
-                        </div>
-                    </div>
-                `;
-            }
-            
-            container.appendChild(div);
-            container.scrollTop = container.scrollHeight;
-        }
-
-        // ========== INTERACTIONS ==========
-        function sendReaction(reaction) {
-            if (!currentStream || !socket) return;
-            
-            socket.emit('send-reaction', {
-                streamId: currentStream.id,
-                reaction: reaction,
-                user: userData.name
-            });
-            
-            showReactionAnimation(userData.name, reaction);
-        }
-
-        function sendGift() {
-            if (!currentStream || !socket) return;
-            
-            const gifts = ['🎁', '🎵', '🌟', '💎', '🏆', '👑'];
-            const gift = gifts[Math.floor(Math.random() * gifts.length)];
-            
-            socket.emit('send-gift', {
-                streamId: currentStream.id,
-                gift: gift,
-                user: userData.name
-            });
-            
-            showGiftAnimation(userData.name, gift);
-        }
-
-        function showReactionAnimation(user, reaction) {
-            // Create floating reaction
-            const reactionEl = document.createElement('div');
-            reactionEl.className = 'fixed text-3xl z-[1000] animate-float pointer-events-none';
-            reactionEl.textContent = reaction;
-            reactionEl.style.left = `${Math.random() * 70 + 15}%`;
-            reactionEl.style.bottom = '100px';
-            
-            document.body.appendChild(reactionEl);
-            
-            // Remove after animation
-            setTimeout(() => {
-                reactionEl.remove();
-            }, 3000);
-            
-            // Confetti for certain reactions
-            if (reaction === '🎉' || reaction === '🚀') {
-                confetti({
-                    particleCount: 30,
-                    spread: 60,
-                    origin: { y: 0.6 }
-                });
-            }
-        }
-
-        function showGiftAnimation(user, gift) {
-            // Show gift animation
-            confetti({
-                particleCount: 100,
-                spread: 70,
-                origin: { y: 0.6 }
-            });
-            
-            // Add chat message
-            if (currentStream) {
-                addChatMessage('SYSTEM', `${user} sent a ${gift} gift!`, true);
-            }
-            
-            showToast(`You sent a ${gift} gift!`);
-        }
-
-        // ========== UI CONTROLS ==========
-        function showMiniPlayer() {
-            document.getElementById('miniPlayer').classList.remove('hidden');
-        }
-
-        function hideMiniPlayer() {
-            document.getElementById('miniPlayer').classList.add('hidden');
-        }
-
-        function showFullPlayer() {
-            document.getElementById('fullPlayer').classList.remove('hidden');
-        }
-
-        function hideFullPlayer() {
-            document.getElementById('fullPlayer').classList.add('hidden');
-        }
-
-        function showChatModal() {
-            if (!currentStream) {
-                showToast('Join a stream first');
-                return;
-            }
-            document.getElementById('chatModal').classList.remove('hidden');
-        }
-
-        function hideChatModal() {
-            document.getElementById('chatModal').classList.add('hidden');
-        }
-
-        function showCreateStreamModal() {
-            document.getElementById('createStreamModal').classList.remove('hidden');
-        }
-
-        function hideCreateStreamModal() {
-            document.getElementById('createStreamModal').classList.add('hidden');
-        }
-
-        function showError(title, message) {
-            document.getElementById('errorTitle').textContent = title;
-            document.getElementById('errorMessage').textContent = message;
-            document.getElementById('errorModal').classList.remove('hidden');
-        }
-
-        // ========== UTILITY FUNCTIONS ==========
-        function formatNumber(num) {
-            if (num >= 1000000) {
-                return (num / 1000000).toFixed(1) + 'M';
-            }
-            if (num >= 1000) {
-                return (num / 1000).toFixed(1) + 'K';
-            }
-            return num.toString();
-        }
-
-        function formatUptime(startedAt) {
-            const seconds = Math.floor((Date.now() - startedAt) / 1000);
-            const hours = Math.floor(seconds / 3600);
-            const minutes = Math.floor((seconds % 3600) / 60);
-            
-            if (hours > 0) {
-                return `${hours}h ${minutes}m`;
-            }
-            return `${minutes}m`;
-        }
-
-        function startUptimeCounter() {
-            if (!currentStream) return;
-            
-            const uptimeEl = document.getElementById('fullUptime');
-            const startTime = currentStream.startedAt;
-            
-            function updateUptime() {
-                if (!currentStream) return;
-                
-                const seconds = Math.floor((Date.now() - startTime) / 1000);
-                const hours = Math.floor(seconds / 3600);
-                const minutes = Math.floor((seconds % 3600) / 60);
-                const secs = seconds % 60;
-                
-                if (hours > 0) {
-                    uptimeEl.textContent = `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-                } else {
-                    uptimeEl.textContent = `${minutes}:${secs.toString().padStart(2, '0')}`;
-                }
-            }
-            
-            // Update immediately
-            updateUptime();
-            
-            // Update every second
-            const interval = setInterval(updateUptime, 1000);
-            
-            // Clean up when leaving stream
-            window.currentUptimeInterval = interval;
-        }
-
-        function startPing() {
-            if (pingInterval) clearInterval(pingInterval);
-            
-            pingInterval = setInterval(() => {
-                const startTime = Date.now();
-                socket.emit('ping');
-                
-                socket.once('pong', () => {
-                    const latency = Date.now() - startTime;
-                    document.getElementById('latencyDisplay').textContent = `${latency}ms`;
-                });
-            }, 5000);
-        }
-
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            const toastMessage = document.getElementById('toastMessage');
-            
-            toastMessage.textContent = message;
-            toast.classList.remove('hidden');
-            
-            setTimeout(() => {
-                toast.classList.add('hidden');
-            }, 3000);
-        }
-
-        function goToStudio() {
-            window.location.href = '/studio';
-        }
-
-        // ========== EVENT LISTENERS ==========
-        function setupEventListeners() {
-            // Player controls
-            document.getElementById('miniPlayBtn').addEventListener('click', togglePlayPause);
-            document.getElementById('playPauseBtn').addEventListener('click', togglePlayPause);
-            document.getElementById('miniExpandBtn').addEventListener('click', showFullPlayer);
-            document.getElementById('closePlayerBtn').addEventListener('click', hideFullPlayer);
-            
-            // Chat
-            document.getElementById('sendChatBtn').addEventListener('click', sendChatMessage);
-            document.getElementById('chatInput').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') sendChatMessage();
-            });
-            document.getElementById('closeChatBtn').addEventListener('click', hideChatModal);
-            
-            // Gift button
-            document.getElementById('giftBtn').addEventListener('click', sendGift);
-            
-            // Create stream
-            document.getElementById('createStreamBtn').addEventListener('click', showCreateStreamModal);
-            document.getElementById('closeCreateModalBtn').addEventListener('click', hideCreateStreamModal);
-            document.getElementById('startStreamBtn').addEventListener('click', createStream);
-            
-            // Max listeners slider
-            const maxListenersSlider = document.getElementById('maxListeners');
-            const maxListenersValue = document.getElementById('maxListenersValue');
-            
-            maxListenersSlider.addEventListener('input', (e) => {
-                maxListenersValue.textContent = e.target.value;
-            });
-            
-            // Refresh button
-            document.getElementById('refreshBtn').addEventListener('click', () => {
-                if (socket && socket.connected) {
-                    socket.emit('request-stream-list');
-                    showToast('Refreshing streams...');
-                }
-            });
-            
-            // Search
-            document.getElementById('searchInput').addEventListener('input', (e) => {
-                const query = e.target.value.toLowerCase();
-                const filtered = activeStreams.filter(stream => 
-                    stream.title.toLowerCase().includes(query) ||
-                    stream.host.name.toLowerCase().includes(query) ||
-                    stream.description.toLowerCase().includes(query) ||
-                    stream.category.toLowerCase().includes(query)
-                );
-                renderStreams(filtered);
-            });
-            
-            // Chat button in mini player
-            document.getElementById('playerMenuBtn')?.addEventListener('click', showChatModal);
-            
-            // Handle window resize for canvas
-            window.addEventListener('resize', () => {
-                if (analyser) {
-                    startVisualizer();
-                }
-            });
-            
-            // Keyboard shortcuts
-            document.addEventListener('keydown', (e) => {
-                if (e.key === ' ' && document.activeElement.tagName !== 'INPUT') {
-                    e.preventDefault();
-                    togglePlayPause();
-                }
-                if (e.key === 'Escape') {
-                    hideFullPlayer();
-                    hideChatModal();
-                    hideCreateStreamModal();
-                }
-            });
-        }
-
-        // Clean up on page unload
-        window.addEventListener('beforeunload', () => {
-            if (currentStream && socket) {
-                socket.emit('leave-stream', { streamId: currentStream.id });
-            }
-            
-            if (pingInterval) {
-                clearInterval(pingInterval);
-            }
-            
-            if (window.currentUptimeInterval) {
-                clearInterval(window.currentUptimeInterval);
-            }
+            const feed = document.getElementById('chat-feed');
+            feed.appendChild(div);
+            feed.scrollTop = feed.scrollHeight;
         });
- 
-        console.log('🎧 Airvibe Live Dashboard initialized!');
+
+        function sendChat() {
+            const inp = document.getElementById('chat-inp');
+            const txt = inp.value.trim();
+            if(!txt || !currentRoomId) return;
+            
+            const div = document.createElement('div');
+            div.className = "text-right mb-2";
+            div.innerHTML = `
+                <div class="inline-block max-w-[85%]">
+                    <span class="text-[9px] text-gray-500 font-bold block mb-0.5 ml-1">Me</span>
+                    <span class="bg-indigo-600 text-white px-3 py-1.5 rounded-2xl rounded-tr-sm text-xs inline-block">${txt}</span>
+                </div>`;
+            document.getElementById('chat-feed').appendChild(div);
+            document.getElementById('chat-feed').scrollTop = document.getElementById('chat-feed').scrollHeight;
+
+            socket.emit('chatMessage', { room: currentRoomId, user: myName, msg: txt });
+            inp.value = '';
+        }
+
+        function sendGift(icon) {
+            if(!currentRoomId) return;
+            socket.emit('sendGift', { room: currentRoomId, user: myName, gift: icon });
+            confetti({ particleCount: 30, spread: 50, origin: { y: 0.8 } });
+        }
+
+        // --- 6. VISUALIZER ---
+        function initAudioContext() {
+            if(audioCtx && audioCtx.state === 'running') return;
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            audioCtx = new AudioContext();
+            gainNode = audioCtx.createGain();
+            analyser = audioCtx.createAnalyser();
+            analyser.fftSize = 64;
+        }
+
+        function setupVisualizer(stream) {
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            
+            const src = audioCtx.createMediaStreamSource(stream);
+            src.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            src.connect(analyser);
+            
+            const canvas = document.getElementById('vis-canvas');
+            const ctx = canvas.getContext('2d');
+            const data = new Uint8Array(analyser.frequencyBinCount);
+            
+            function draw() {
+                requestAnimationFrame(draw);
+                analyser.getByteFrequencyData(data);
+                ctx.clearRect(0,0,canvas.width,canvas.height);
+                
+                const w = canvas.width / data.length;
+                data.forEach((val, i) => {
+                    const h = (val/255) * canvas.height;
+                    ctx.fillStyle = `rgba(99, 102, 241, ${val/300})`;
+                    ctx.fillRect(i*w, (canvas.height-h)/2, w-1, h);
+                });
+            }
+            draw();
+        }
     </script>
 </body>
 </html>

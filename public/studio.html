@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Airvibe Studio 4000 | Professional Broadcasting Suite</title>
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -31,2303 +30,621 @@
                         'mono': ['JetBrains Mono', 'monospace'],
                     },
                     animation: {
-                        'float': 'float 6s ease-in-out infinite',
                         'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
-                        'shimmer': 'shimmer 2s linear infinite',
-                        'fade-in': 'fade-in 0.6s ease-out',
-                        'slide-up': 'slide-up 0.5s ease-out',
-                        'slide-in': 'slide-in 0.7s cubic-bezier(0.16, 1, 0.3, 1)',
-                        'blob': 'blob 10s infinite',
-                        'gradient': 'gradient 8s ease infinite',
-                        'wave': 'wave 1.5s ease-in-out infinite',
-                        'spin-slow': 'spin 3s linear infinite',
-                        'bounce-smooth': 'bounce-smooth 2s ease-in-out infinite',
-                        'heartbeat': 'heartbeat 1.5s ease-in-out infinite',
-                        'typing': 'typing 1.5s steps(5, end) infinite',
-                        'pulse-ring': 'pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                        'meter-bounce': 'meter-bounce 0.5s ease-in-out infinite',
-                        'vibrate': 'vibrate 0.3s ease-in-out infinite',
-                        'record-pulse': 'record-pulse 1.5s ease-in-out infinite',
-                        'level-up': 'level-up 0.3s ease-out',
-                        'slide-fx': 'slide-fx 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
                     },
                     keyframes: {
-                        float: {
-                            '0%, 100%': { transform: 'translateY(0)' },
-                            '50%': { transform: 'translateY(-10px)' },
-                        },
                         'pulse-glow': {
                             '0%, 100%': { opacity: 1 },
                             '50%': { opacity: 0.6 },
-                        },
-                        shimmer: {
-                            '0%': { backgroundPosition: '-200px 0' },
-                            '100%': { backgroundPosition: 'calc(200px + 100%) 0' },
-                        },
-                        'fade-in': {
-                            '0%': { opacity: 0 },
-                            '100%': { opacity: 1 },
-                        },
-                        'slide-up': {
-                            '0%': { transform: 'translateY(20px)', opacity: 0 },
-                            '100%': { transform: 'translateY(0)', opacity: 1 },
-                        },
-                        'slide-in': {
-                            '0%': { transform: 'translateX(-20px)', opacity: 0 },
-                            '100%': { transform: 'translateX(0)', opacity: 1 },
-                        },
-                        blob: {
-                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
-                            '33%': { transform: 'translate(20px, -30px) scale(1.1)' },
-                            '66%': { transform: 'translate(-10px, 10px) scale(0.9)' },
-                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
-                        },
-                        gradient: {
-                            '0%, 100%': { backgroundPosition: '0% 50%' },
-                            '50%': { backgroundPosition: '100% 50%' },
-                        },
-                        wave: {
-                            '0%, 100%': { transform: 'translateY(0)' },
-                            '50%': { transform: 'translateY(-5px)' },
-                        },
-                        heartbeat: {
-                            '0%, 100%': { transform: 'scale(1)' },
-                            '50%': { transform: 'scale(1.1)' },
-                        },
-                        typing: {
-                            '0%, 100%': { width: '0' },
-                            '50%': { width: '100%' },
-                        },
-                        'pulse-ring': {
-                            '0%': { transform: 'scale(0.8)', opacity: 0.8 },
-                            '100%': { transform: 'scale(1.2)', opacity: 0 },
-                        },
-                        'meter-bounce': {
-                            '0%, 100%': { transform: 'translateY(0)' },
-                            '50%': { transform: 'translateY(-2px)' },
-                        },
-                        vibrate: {
-                            '0%, 100%': { transform: 'translateX(0)' },
-                            '25%': { transform: 'translateX(-1px)' },
-                            '75%': { transform: 'translateX(1px)' },
-                        },
-                        'record-pulse': {
-                            '0%, 100%': { opacity: 0.6 },
-                            '50%': { opacity: 1 },
-                        },
-                        'level-up': {
-                            '0%': { transform: 'scale(1)', opacity: 1 },
-                            '100%': { transform: 'scale(1.5)', opacity: 0 },
-                        },
-                        'slide-fx': {
-                            '0%': { transform: 'translateX(-100%)' },
-                            '100%': { transform: 'translateX(100%)' },
                         }
-                    },
-                    backdropBlur: {
-                        'xs': '2px',
                     }
                 }
             }
         }
     </script>
     
-    <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- External Libraries -->
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/howler@2.2.4/dist/howler.min.js"></script>
     
     <style>
-        * {
-            -webkit-tap-highlight-color: transparent;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
+        * { -webkit-tap-highlight-color: transparent; }
+        body { background-color: #0A0A0F; color: #F8FAFC; font-family: 'Inter', system-ui, -apple-system, sans-serif; overflow: auto; min-height: 100vh; width: 100vw; }
         
-        body {
-            background-color: #0A0A0F;
-            color: #F8FAFC;
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            overflow-x: hidden;
-            position: relative;
-            height: 100vh;
-            width: 100vw;
-            overflow: hidden;
-        }
+        /* Glassmorphism */
+        .glass-nav { background: rgba(10, 10, 15, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+        .glass-card { background: rgba(22, 22, 34, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); transition: transform 0.2s, border-color 0.2s; }
         
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                radial-gradient(circle at 20% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(6, 182, 212, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 40% 40%, rgba(245, 158, 11, 0.05) 0%, transparent 50%);
-            pointer-events: none;
-            z-index: -2;
-        }
+        /* Utilities */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .safe-pb { padding-bottom: env(safe-area-inset-bottom, 20px); }
+        .safe-pt { padding-top: env(safe-area-inset-top, 20px); }
         
-        .glass-card {
-            background: rgba(22, 22, 34, 0.7);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 
-                0 8px 32px rgba(0, 0, 0, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.05);
-        }
-        
-        .glass-nav {
-            background: rgba(10, 10, 15, 0.85);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-        
-        .gradient-text {
-            background: linear-gradient(135deg, #8B5CF6 0%, #06B6D4 50%, #F59E0B 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            background-size: 200% auto;
-        }
-        
+        /* Channel Strip */
         .channel-strip {
             background: linear-gradient(180deg, #1a1a22 0%, #141419 100%);
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 12px;
-            box-shadow: 
-                inset 0 0 20px rgba(0, 0, 0, 0.3),
-                0 4px 12px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.2);
         }
         
-        .channel-strip:hover {
-            border-color: rgba(139, 92, 246, 0.3);
-            box-shadow: 
-                inset 0 0 30px rgba(139, 92, 246, 0.1),
-                0 8px 24px rgba(0, 0, 0, 0.3);
+        /* Fader */
+        input[type=range][orient=vertical] {
+            writing-mode: bt-lr; -webkit-appearance: slider-vertical;
+            width: 40px; height: 180px; padding: 0; background: transparent;
         }
-        
-        .meter-bar {
-            background: linear-gradient(to top, #10B981, #F59E0B, #EF4444);
-            transition: height 0.1s ease-out;
-        }
-        
-        .meter-container {
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .meter-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(transparent 70%, rgba(255,255,255,0.1) 71%, rgba(255,255,255,0.1) 74%, transparent 75%),
-                      linear-gradient(transparent 85%, rgba(255,255,255,0.1) 86%, rgba(255,255,255,0.1) 89%, transparent 90%),
-                      linear-gradient(transparent 95%, rgba(255,255,255,0.2) 96%, rgba(255,255,255,0.2) 99%, transparent 100%);
-            pointer-events: none;
-        }
-        
-        .record-btn {
-            background: radial-gradient(circle, #EF4444, #DC2626);
-            box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
-            animation: record-pulse 1.5s ease-in-out infinite;
-        }
-        
-        .record-btn.recording {
-            animation: record-pulse 0.5s ease-in-out infinite;
-        }
-        
-        .soundboard-btn {
-            background: linear-gradient(135deg, #222233, #1a1a22);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 8px;
-            transition: all 0.2s ease;
-        }
-        
-        .soundboard-btn:hover {
-            background: linear-gradient(135deg, #2a2a3a, #222233);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        }
-        
-        .soundboard-btn:active {
-            transform: translateY(0);
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
-            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.3);
-            transition: all 0.3s ease;
-        }
-        
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
-        }
-        
-        .scrollbar-custom::-webkit-scrollbar {
-            width: 4px;
-        }
-        
-        .scrollbar-custom::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-        }
-        
-        .scrollbar-custom::-webkit-scrollbar-thumb {
-            background: rgba(139, 92, 246, 0.5);
-            border-radius: 10px;
-        }
-        
-        .scrollbar-custom::-webkit-scrollbar-thumb:hover {
-            background: rgba(139, 92, 246, 0.7);
-        }
-        
-        .analyser-grid {
-            background: 
-                linear-gradient(to right, rgba(255,255,255,0.02) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(255,255,255,0.02) 1px, transparent 1px);
-            background-size: 20px 20px;
-        }
-        
-        .frequency-band {
-            background: linear-gradient(to top, #8B5CF6, #06B6D4);
-            transition: height 0.05s ease-out;
-        }
-        
-        .waveform-canvas {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 4px;
-        }
-        
-        .upload-zone {
-            border: 2px dashed rgba(139, 92, 246, 0.3);
-            border-radius: 12px;
-            transition: all 0.3s ease;
-        }
-        
-        .upload-zone:hover {
-            border-color: rgba(139, 92, 246, 0.6);
-            background: rgba(139, 92, 246, 0.05);
-        }
-        
-        .upload-zone.dragover {
-            border-color: rgba(139, 92, 246, 0.8);
-            background: rgba(139, 92, 246, 0.1);
-        }
-        
-        .audio-file-item {
-            transition: all 0.3s ease;
-        }
-        
-        .audio-file-item:hover {
-            background: rgba(255, 255, 255, 0.05);
-            transform: translateX(4px);
-        }
-        
-        .audio-file-item.playing {
-            background: rgba(139, 92, 246, 0.15);
-            border-left: 3px solid #8B5CF6;
-        }
-        
-        .level-meter {
-            background: linear-gradient(to right, 
-                #10B981 0%, 
-                #10B981 30%, 
-                #F59E0B 31%, 
-                #F59E0B 80%, 
-                #EF4444 81%, 
-                #EF4444 100%);
-            transition: width 0.1s ease;
-        }
-        
-        .peaks-visualizer {
-            background: linear-gradient(180deg, 
-                rgba(139, 92, 246, 0.1) 0%, 
-                rgba(6, 182, 212, 0.1) 50%, 
-                rgba(245, 158, 11, 0.1) 100%);
-        }
-        
-        .progress-wave {
-            fill: rgba(139, 92, 246, 0.3);
-            stroke: #8B5CF6;
-            stroke-width: 1;
-        }
-        
-        /* Mobile-specific styles */
+        /* Mobile Fader */
         @media (max-width: 768px) {
-            .mobile-stack {
-                flex-direction: column !important;
+            input[type=range][orient=vertical] {
+                writing-mode: horizontal-tb; -webkit-appearance: none;
+                width: 100%; height: 8px; border-radius: 4px; background: #333;
             }
-            
-            .mobile-full {
-                width: 100% !important;
-            }
-            
-            .mobile-h-auto {
-                height: auto !important;
-            }
-            
-            .mobile-h-48 {
-                height: 12rem !important;
-            }
-            
-            .mobile-h-64 {
-                height: 16rem !important;
-            }
-            
-            .mobile-h-96 {
-                height: 24rem !important;
-            }
-            
-            .mobile-text-sm {
-                font-size: 0.875rem !important;
-            }
-            
-            .mobile-text-xs {
-                font-size: 0.75rem !important;
-            }
-            
-            .mobile-p-3 {
-                padding: 0.75rem !important;
-            }
-            
-            .mobile-p-2 {
-                padding: 0.5rem !important;
-            }
-            
-            .mobile-gap-2 {
-                gap: 0.5rem !important;
-            }
-            
-            .mobile-grid-cols-2 {
-                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-            }
-            
-            .mobile-overflow-x-auto {
-                overflow-x: auto !important;
-            }
-            
-            .mobile-min-w-32 {
-                min-width: 8rem !important;
-            }
-            
-            .mobile-scale-95 {
-                transform: scale(0.95) !important;
-            }
-            
-            .mobile-touch-target {
-                min-height: 44px !important;
-                min-width: 44px !important;
-            }
-            
-            .mobile-hidden {
-                display: none !important;
-            }
-            
-            .mobile-flex-col {
-                flex-direction: column !important;
-            }
-            
-            .mobile-justify-start {
-                justify-content: flex-start !important;
-            }
-            
-            .mobile-items-start {
-                align-items: flex-start !important;
-            }
-            
-            .mobile-space-y-2 > * + * {
-                margin-top: 0.5rem !important;
-            }
-            
-            .mobile-truncate {
-                overflow: hidden !important;
-                text-overflow: ellipsis !important;
-                white-space: nowrap !important;
-            }
-            
-            .mobile-border-none {
-                border: none !important;
-            }
-            
-            .mobile-rounded-lg {
-                border-radius: 0.5rem !important;
+            input[type=range][orient=vertical]::-webkit-slider-thumb {
+                -webkit-appearance: none; width: 24px; height: 24px; border-radius: 50%; background: #fff; cursor: pointer; margin-top: -8px;
             }
         }
+
+        /* Meter */
+        .meter-bar { background: linear-gradient(to top, #10B981, #F59E0B, #EF4444); transition: height 0.05s ease-out; }
         
-        /* Tablet-specific styles */
-        @media (min-width: 769px) and (max-width: 1024px) {
-            .tablet-w-64 {
-                width: 16rem !important;
-            }
-            
-            .tablet-w-80 {
-                width: 20rem !important;
-            }
-            
-            .tablet-grid-cols-2 {
-                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-            }
-        }
-        
-        /* Safe area insets for mobile */
-        @supports (-webkit-touch-callout: none) {
-            .safe-area-inset-top {
-                padding-top: env(safe-area-inset-top);
-            }
-            
-            .safe-area-inset-bottom {
-                padding-bottom: env(safe-area-inset-bottom);
-            }
-            
-            .safe-area-inset-left {
-                padding-left: env(safe-area-inset-left);
-            }
-            
-            .safe-area-inset-right {
-                padding-right: env(safe-area-inset-right);
-            }
-        }
+        /* Mobile Menu Transitions */
+        .slide-up-enter { transform: translateY(100%); }
+        .slide-up-enter-active { transform: translateY(0); transition: transform 0.3s ease-out; }
+        .slide-up-exit { transform: translateY(100%); transition: transform 0.3s ease-in; }
     </style>
 </head>
-<body class="antialiased overflow-hidden h-screen">
-    <!-- Setup Modal -->
-    <div id="setupModal" class="fixed inset-0 bg-black/90 z-[1000] flex items-center justify-center p-4 safe-area-inset-top safe-area-inset-bottom">
-        <div class="glass-card rounded-2xl p-6 md:p-8 max-w-2xl w-full mx-4 mobile-p-3">
-            <div class="text-center mb-6 md:mb-8">
-                <div class="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-gradient-to-br from-airvibe-primary to-airvibe-secondary flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-broadcast-tower text-xl md:text-2xl text-white"></i>
+<body class="flex flex-col h-screen">
+
+    <div id="setupModal" class="fixed inset-0 bg-black/95 z-[1000] flex items-center justify-center p-4">
+        <div class="glass-card rounded-2xl p-6 md:p-8 max-w-md w-full mx-4 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-airvibe-primary to-airvibe-secondary"></div>
+            
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-4 shadow-lg">
+                    <i class="fas fa-sliders-h text-3xl text-airvibe-primary"></i>
                 </div>
-                <h1 class="text-2xl md:text-3xl font-bold font-heading mb-2">Airvibe Studio 4000</h1>
-                <p class="text-sm md:text-base text-airvibe-text-light">Professional Broadcasting Suite</p>
+                <h1 class="text-2xl font-bold font-heading">Studio Setup</h1>
+                <p class="text-sm text-gray-400">Configure your broadcast environment</p>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
+            <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium mb-2 mobile-text-xs">Studio Name</label>
-                    <input type="text" 
-                        id="studioName"
-                        class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none placeholder-airvibe-text-light mobile-text-sm mobile-p-2"
-                        placeholder="e.g. Midnight Sessions"
-                        value="My Studio">
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Station Name</label>
+                    <input type="text" id="studioName" class="w-full bg-[#0A0A0F] border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-airvibe-primary transition" placeholder="e.g. Midnight FM" value="My Radio">
                 </div>
-                
                 <div>
-                    <label class="block text-sm font-medium mb-2 mobile-text-xs">Host Name</label>
-                    <input type="text" 
-                        id="hostName"
-                        class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none placeholder-airvibe-text-light mobile-text-sm mobile-p-2"
-                        placeholder="e.g. DJ Vibe"
-                        value="Host">
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Host Name</label>
+                    <input type="text" id="hostName" class="w-full bg-[#0A0A0F] border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-airvibe-primary transition" placeholder="e.g. DJ Cool" value="Host">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Audio Input</label>
+                    <select id="audioInput" class="w-full bg-[#0A0A0F] border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-airvibe-primary transition">
+                        </select>
                 </div>
                 
-                <div class="md:col-span-2">
-                    <label class="block text-sm font-medium mb-2 mobile-text-xs">Audio Input</label>
-                    <select id="audioInput" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none mobile-text-sm mobile-p-2">
-                        <!-- Populated by JavaScript -->
-                    </select>
-                </div>
-                
-                <div class="md:col-span-2">
-                    <label class="block text-sm font-medium mb-2 mobile-text-xs">Description (Optional)</label>
-                    <textarea 
-                        id="streamDescription"
-                        class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none placeholder-airvibe-text-light h-20 mobile-text-sm mobile-p-2"
-                        placeholder="Describe your broadcast..."></textarea>
-                </div>
-            </div>
-            
-            <div class="flex gap-4">
-                <button onclick="initializeStudio()" class="flex-1 btn-primary py-4 rounded-xl font-bold text-lg mobile-text-base mobile-p-2 mobile-touch-target">
-                    <i class="fas fa-play-circle mr-2"></i> Initialize Studio
+                <button onclick="initializeStudio()" class="w-full bg-airvibe-primary hover:bg-indigo-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-indigo-900/20 transition transform active:scale-95 mt-4">
+                    <i class="fas fa-power-off mr-2"></i> INITIALIZE SYSTEM
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Main Studio Interface -->
-    <div id="studioInterface" class="h-screen flex flex-col hidden safe-area-inset-top">
-        <!-- Top Bar - Mobile Optimized -->
-        <div class="glass-nav p-3 md:p-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 md:gap-4 mobile-stack">
-            <!-- Logo and Status -->
-            <div class="flex items-center justify-between md:justify-start gap-3">
-                <div class="flex items-center gap-2 md:gap-3">
-                    <div class="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-gradient-to-br from-airvibe-primary to-airvibe-secondary flex items-center justify-center font-bold text-white">
-                        <i class="fas fa-wave-square text-sm md:text-base"></i>
-                    </div>
-                    <div>
-                        <div class="text-base md:text-lg font-bold font-heading mobile-text-sm">AIRVIBE STUDIO</div>
-                        <div class="text-[10px] md:text-xs text-airvibe-text-light font-mono mobile-text-xs" id="studioVersion">v4.0.0</div>
-                    </div>
-                </div>
-                
-                <div id="connectionStatus" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-500/20 border border-green-500/30 md:hidden">
-                    <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    <span class="text-xs font-medium text-green-400">LIVE</span>
-                </div>
-            </div>
-            
-            <!-- Time and Controls -->
-            <div class="flex items-center justify-between md:justify-end gap-3 md:gap-4">
-                <div class="text-right">
-                    <div class="text-sm md:text-sm font-medium mobile-text-xs" id="currentTime">--:--:--</div>
-                    <div class="text-xs text-airvibe-text-light mobile-text-xs" id="broadcastTimer">00:00:00</div>
-                </div>
-                
-                <div id="onAirIndicator" class="hidden md:flex items-center gap-2 px-4 py-2 rounded-full bg-red-500/20 border border-red-500/30">
-                    <div class="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-                    <span class="text-sm font-bold text-red-400">ON AIR</span>
-                </div>
-                
-                <button id="endStreamBtn" class="px-3 md:px-4 py-2 rounded-xl bg-airvibe-danger/20 border border-airvibe-danger/30 text-airvibe-danger font-medium hover:bg-airvibe-danger/30 transition mobile-text-sm mobile-touch-target">
-                    <i class="fas fa-power-off mr-1 md:mr-2"></i> End
-                </button>
-            </div>
-        </div>
+    <div id="studioInterface" class="h-full flex flex-col hidden opacity-0 transition-opacity duration-500">
         
-        <!-- Main Content Area - Mobile Responsive -->
-        <div class="flex-1 flex flex-col md:flex-row overflow-hidden mobile-stack">
-            <!-- Left Sidebar - Input Sources & Recording (Hidden on mobile, accessible via menu) -->
-            <div id="leftSidebar" class="hidden md:flex md:w-96 border-r border-airvibe-border flex-col mobile-full mobile-h-96 mobile-overflow-y-auto">
-                <!-- Recording Section -->
-                <div class="p-4 border-b border-airvibe-border mobile-p-3">
-                    <h3 class="font-bold text-lg flex items-center gap-2 mb-4 mobile-text-base">
-                        <i class="fas fa-record-vinyl text-airvibe-danger"></i>
-                        Recording Studio
-                    </h3>
-                    
-                    <div class="space-y-4 mobile-space-y-2">
-                        <!-- Recording Controls -->
-                        <div class="flex items-center justify-center gap-2 md:gap-4 mb-4">
-                            <button id="recordStartBtn" class="flex-1 py-3 rounded-xl bg-airvibe-danger/20 border border-airvibe-danger/30 text-airvibe-danger font-medium hover:bg-airvibe-danger/30 transition mobile-text-sm mobile-p-2 mobile-touch-target">
-                                <i class="fas fa-circle mr-2"></i> Record
-                            </button>
-                            <button id="recordStopBtn" class="flex-1 py-3 rounded-xl bg-gray-600/20 border border-gray-600/30 text-gray-400 font-medium hover:bg-gray-600/30 transition mobile-text-sm mobile-p-2 mobile-touch-target" disabled>
-                                <i class="fas fa-stop mr-2"></i> Stop
-                            </button>
-                        </div>
-                        
-                        <!-- Recording Timer & Status -->
-                        <div class="glass-card rounded-xl p-4 mobile-p-3">
-                            <div class="flex justify-between items-center mb-3">
-                                <div class="text-sm font-medium mobile-text-xs">Recording Status</div>
-                                <div id="recordingTimer" class="text-lg font-mono font-bold text-airvibe-danger mobile-text-base">00:00:00</div>
-                            </div>
-                            
-                            <div class="flex items-center gap-2 mb-3">
-                                <div class="flex-1 h-2 bg-white/5 rounded-full overflow-hidden">
-                                    <div id="recordingLevel" class="level-meter h-full" style="width: 0%"></div>
-                                </div>
-                                <div id="recordingLevelDb" class="text-xs text-airvibe-text-light w-12 text-right mobile-text-xs">-∞ dB</div>
-                            </div>
-                            
-                            <div class="text-xs text-airvibe-text-light flex justify-between mobile-text-xs">
-                                <span id="recordingStatus">Ready to record</span>
-                                <span id="recordingSize">0 MB</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- File Upload Section -->
-                <div class="p-4 border-b border-airvibe-border mobile-p-3">
-                    <h3 class="font-bold text-lg flex items-center gap-2 mb-4 mobile-text-base">
-                        <i class="fas fa-cloud-upload-alt text-airvibe-secondary"></i>
-                        Audio Library
-                    </h3>
-                    
-                    <div class="space-y-4 mobile-space-y-2">
-                        <!-- Upload Zone -->
-                        <div id="uploadZone" class="upload-zone p-4 md:p-6 text-center cursor-pointer mobile-p-3">
-                            <div class="mb-3">
-                                <i class="fas fa-file-audio text-2xl md:text-3xl text-airvibe-primary/50 mb-2"></i>
-                                <div class="text-sm font-medium mobile-text-xs">Drop audio files here</div>
-                                <div class="text-xs text-airvibe-text-light mt-1 mobile-text-xs">or click to browse</div>
-                            </div>
-                            <input type="file" id="audioUpload" hidden accept="audio/*" multiple>
-                            <button onclick="document.getElementById('audioUpload').click()" class="btn-primary px-3 md:px-4 py-2 rounded-lg text-sm mobile-text-xs mobile-touch-target">
-                                <i class="fas fa-folder-open mr-1 md:mr-2"></i> Browse Files
-                            </button>
-                        </div>
-                        
-                        <!-- Audio Files List -->
-                        <div>
-                            <div class="flex justify-between items-center mb-2">
-                                <div class="text-sm font-medium mobile-text-xs">Audio Files</div>
-                                <div class="text-xs text-airvibe-text-light mobile-text-xs" id="audioFileCount">0 files</div>
-                            </div>
-                            <div id="audioFilesList" class="max-h-40 md:max-h-60 overflow-y-auto scrollbar-custom space-y-2">
-                                <!-- Audio files will appear here -->
-                                <div class="text-xs text-airvibe-text-light text-center py-4 mobile-text-xs">
-                                    Upload audio files to get started
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Background Sounds Manager -->
-                <div class="p-4 flex-1 mobile-p-3">
-                    <h3 class="font-bold text-lg flex items-center gap-2 mb-4 mobile-text-base">
-                        <i class="fas fa-layer-group text-airvibe-accent"></i>
-                        Background Sounds
-                    </h3>
-                    
-                    <div class="space-y-4 mobile-space-y-2">
-                        <!-- Background Sounds Controls -->
-                        <div class="grid grid-cols-3 md:grid-cols-3 gap-2 mb-4">
-                            <button onclick="playBackgroundSound('rain')" class="soundboard-btn py-2 flex flex-col items-center justify-center mobile-p-2 mobile-touch-target">
-                                <span class="text-xl mb-1">🌧️</span>
-                                <span class="text-[10px] md:text-[10px]">Rain</span>
-                            </button>
-                            <button onclick="playBackgroundSound('cafe')" class="soundboard-btn py-2 flex flex-col items-center justify-center mobile-p-2 mobile-touch-target">
-                                <span class="text-xl mb-1">☕</span>
-                                <span class="text-[10px] md:text-[10px]">Cafe</span>
-                            </button>
-                            <button onclick="playBackgroundSound('fire')" class="soundboard-btn py-2 flex flex-col items-center justify-center mobile-p-2 mobile-touch-target">
-                                <span class="text-xl mb-1">🔥</span>
-                                <span class="text-[10px] md:text-[10px]">Fireplace</span>
-                            </button>
-                            <button onclick="playBackgroundSound('waves')" class="soundboard-btn py-2 flex flex-col items-center justify-center mobile-p-2 mobile-touch-target">
-                                <span class="text-xl mb-1">🌊</span>
-                                <span class="text-[10px] md:text-[10px]">Waves</span>
-                            </button>
-                            <button onclick="playBackgroundSound('forest')" class="soundboard-btn py-2 flex flex-col items-center justify-center mobile-p-2 mobile-touch-target">
-                                <span class="text-xl mb-1">🌲</span>
-                                <span class="text-[10px] md:text-[10px]">Forest</span>
-                            </button>
-                            <button onclick="playBackgroundSound('white')" class="soundboard-btn py-2 flex flex-col items-center justify-center mobile-p-2 mobile-touch-target">
-                                <span class="text-xl mb-1">📻</span>
-                                <span class="text-[10px] md:text-[10px]">White Noise</span>
-                            </button>
-                        </div>
-                        
-                        <!-- Background Sound Mixer -->
-                        <div class="space-y-3 mobile-space-y-2">
-                            <div>
-                                <div class="flex justify-between text-xs mb-1 mobile-text-xs">
-                                    <span>Background Volume</span>
-                                    <span id="bgVolumeValue">50%</span>
-                                </div>
-                                <input type="range" id="bgVolume" min="0" max="100" value="50" class="w-full mobile-touch-target">
-                            </div>
-                            
-                            <div class="flex gap-2">
-                                <button id="stopAllBgBtn" class="flex-1 py-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition text-sm mobile-text-xs mobile-touch-target">
-                                    <i class="fas fa-stop mr-1"></i> Stop All
-                                </button>
-                                <button id="fadeOutBtn" class="flex-1 py-2 rounded-lg bg-airvibe-primary/20 border border-airvibe-primary/30 hover:bg-airvibe-primary/30 transition text-sm mobile-text-xs mobile-touch-target">
-                                    <i class="fas fa-volume-down mr-1"></i> Fade Out
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+        <header class="glass-nav h-16 flex items-center justify-between px-4 z-50 shrink-0">
+            <div class="flex items-center gap-3">
+                <div id="onAirLight" class="bg-gray-800 text-gray-500 px-3 py-1 rounded border border-gray-700 text-[10px] font-black tracking-widest transition-all duration-300">OFF AIR</div>
+                <div>
+                    <h1 class="font-bold text-sm md:text-base leading-tight tracking-tight">AIRVIBE <span class="text-airvibe-primary">STUDIO</span></h1>
+                    <div id="peer-display" class="text-[9px] text-gray-500 font-mono">STANDBY</div>
                 </div>
             </div>
-            
-            <!-- Center - Mixer & Visualizers -->
-            <div class="flex-1 flex flex-col mobile-full">
-                <!-- Audio Analyzers -->
-                <div class="h-32 md:h-48 border-b border-airvibe-border p-3 md:p-4 mobile-p-2">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 h-full">
-                        <!-- Spectrum Analyzer -->
-                        <div class="glass-card rounded-xl p-3 md:p-4 mobile-p-2">
-                            <div class="flex items-center justify-between mb-2">
-                                <h4 class="font-medium text-sm md:text-base mobile-text-sm">Spectrum Analyzer</h4>
-                                <div class="text-xs text-airvibe-text-light mobile-text-xs">Live</div>
-                            </div>
-                            <div class="analyser-grid h-16 md:h-24 rounded-lg overflow-hidden relative">
-                                <div id="spectrumBars" class="absolute inset-0 flex items-end gap-px px-1 md:px-2 pb-1">
-                                    <!-- Spectrum bars will be generated here -->
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Peak Meters -->
-                        <div class="glass-card rounded-xl p-3 md:p-4 mobile-p-2">
-                            <div class="flex items-center justify-between mb-2">
-                                <h4 class="font-medium text-sm md:text-base mobile-text-sm">Peak Meters</h4>
-                                <div class="text-xs text-airvibe-text-light mobile-text-xs" id="peakLevel">-∞ dB</div>
-                            </div>
-                            <div class="space-y-2 md:space-y-3">
-                                <div>
-                                    <div class="flex justify-between text-xs mb-1 mobile-text-xs">
-                                        <span>Microphone</span>
-                                        <span id="micLevelDb">-∞ dB</span>
-                                    </div>
-                                    <div class="h-2 bg-white/5 rounded-full overflow-hidden">
-                                        <div id="micLevelMeter" class="level-meter h-full" style="width: 0%"></div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <div class="flex justify-between text-xs mb-1 mobile-text-xs">
-                                        <span>Master</span>
-                                        <span id="masterLevelDb">-∞ dB</span>
-                                    </div>
-                                    <div class="h-2 bg-white/5 rounded-full overflow-hidden">
-                                        <div id="masterLevelMeter" class="level-meter h-full" style="width: 0%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <div class="flex items-center gap-3">
+                <div class="text-right hidden sm:block">
+                    <div id="currentTime" class="text-xs font-bold">00:00:00</div>
+                    <div id="broadcastTimer" class="text-[10px] text-airvibe-success font-mono">00:00:00</div>
                 </div>
-                
-                <!-- Main Mixer - Mobile Optimized -->
-                <div class="flex-1 p-3 md:p-4 mobile-p-2">
-                    <div class="flex md:grid md:grid-cols-4 gap-3 md:gap-4 h-full overflow-x-auto md:overflow-visible mobile-overflow-x-auto">
-                        <!-- Channel 1: Mic -->
-                        <div class="channel-strip p-3 md:p-4 flex flex-col mobile-min-w-32 mobile-p-2">
-                            <div class="text-center mb-3 md:mb-4">
-                                <div class="text-sm font-bold mobile-text-xs">MIC</div>
-                                <div class="text-xs text-airvibe-text-light mobile-text-xs">Input</div>
-                            </div>
-                            
-                            <div class="flex-1 flex flex-col items-center">
-                                <!-- VU Meter -->
-                                <div class="meter-container w-4 md:w-6 h-32 md:h-48 bg-black/30 rounded-lg mb-3 md:mb-4 overflow-hidden relative">
-                                    <div class="absolute inset-0 flex flex-col-reverse">
-                                        <div id="channel1Meter" class="meter-bar w-full" style="height: 0%"></div>
-                                    </div>
-                                </div>
-                                
-                                <!-- Channel Fader -->
-                                <div class="relative h-40 md:h-56 w-8 md:w-12">
-                                    <div class="absolute inset-x-0 top-0 bottom-0 bg-gradient-to-b from-gray-900 to-black rounded-lg"></div>
-                                    <div id="micFader" class="absolute w-6 md:w-10 h-4 md:h-6 -ml-2 md:-ml-5 bg-gradient-to-b from-airvibe-primary to-airvibe-secondary rounded-lg cursor-ns-resize shadow-lg" style="top: 50%"></div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Channel 2: Music -->
-                        <div class="channel-strip p-3 md:p-4 flex flex-col mobile-min-w-32 mobile-p-2">
-                            <div class="text-center mb-3 md:mb-4">
-                                <div class="text-sm font-bold mobile-text-xs">MUSIC</div>
-                                <div class="text-xs text-airvibe-text-light mobile-text-xs">Player</div>
-                            </div>
-                            
-                            <div class="flex-1 flex flex-col items-center">
-                                <!-- VU Meter -->
-                                <div class="meter-container w-4 md:w-6 h-32 md:h-48 bg-black/30 rounded-lg mb-3 md:mb-4 overflow-hidden relative">
-                                    <div class="absolute inset-0 flex flex-col-reverse">
-                                        <div id="channel2Meter" class="meter-bar w-full" style="height: 0%"></div>
-                                    </div>
-                                </div>
-                                
-                                <!-- Channel Fader -->
-                                <div class="relative h-40 md:h-56 w-8 md:w-12">
-                                    <div class="absolute inset-x-0 top-0 bottom-0 bg-gradient-to-b from-gray-900 to-black rounded-lg"></div>
-                                    <div id="musicFader" class="absolute w-6 md:w-10 h-4 md:h-6 -ml-2 md:-ml-5 bg-gradient-to-b from-airvibe-secondary to-airvibe-accent rounded-lg cursor-ns-resize shadow-lg" style="top: 50%"></div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Channel 3: Soundboard -->
-                        <div class="channel-strip p-3 md:p-4 flex flex-col mobile-min-w-32 mobile-p-2">
-                            <div class="text-center mb-3 md:mb-4">
-                                <div class="text-sm font-bold mobile-text-xs">SFX</div>
-                                <div class="text-xs text-airvibe-text-light mobile-text-xs">Board</div>
-                            </div>
-                            
-                            <div class="flex-1 flex flex-col items-center">
-                                <!-- VU Meter -->
-                                <div class="meter-container w-4 md:w-6 h-32 md:h-48 bg-black/30 rounded-lg mb-3 md:mb-4 overflow-hidden relative">
-                                    <div class="absolute inset-0 flex flex-col-reverse">
-                                        <div id="channel3Meter" class="meter-bar w-full" style="height: 0%"></div>
-                                    </div>
-                                </div>
-                                
-                                <!-- Channel Fader -->
-                                <div class="relative h-40 md:h-56 w-8 md:w-12">
-                                    <div class="absolute inset-x-0 top-0 bottom-0 bg-gradient-to-b from-gray-900 to-black rounded-lg"></div>
-                                    <div id="sfxFader" class="absolute w-6 md:w-10 h-4 md:h-6 -ml-2 md:-ml-5 bg-gradient-to-b from-airvibe-accent to-airvibe-danger rounded-lg cursor-ns-resize shadow-lg" style="top: 50%"></div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Master Channel -->
-                        <div class="channel-strip p-3 md:p-4 flex flex-col border-2 border-airvibe-primary/30 mobile-min-w-32 mobile-p-2">
-                            <div class="text-center mb-3 md:mb-4">
-                                <div class="text-sm font-bold mobile-text-xs">MASTER</div>
-                                <div class="text-xs text-airvibe-primary mobile-text-xs">Output</div>
-                            </div>
-                            
-                            <div class="flex-1 flex flex-col items-center">
-                                <!-- Master VU Meter -->
-                                <div class="meter-container w-6 md:w-8 h-40 md:h-64 bg-black/30 rounded-lg mb-3 md:mb-4 overflow-hidden relative">
-                                    <div class="absolute inset-0 flex flex-col-reverse">
-                                        <div id="masterMeter" class="meter-bar w-full" style="height: 0%"></div>
-                                    </div>
-                                </div>
-                                
-                                <!-- Master Fader -->
-                                <div class="relative h-48 md:h-64 w-8 md:w-12">
-                                    <div class="absolute inset-x-0 top-0 bottom-0 bg-gradient-to-b from-gray-900 to-black rounded-lg"></div>
-                                    <div id="masterFader" class="absolute w-6 md:w-10 h-5 md:h-8 -ml-2 md:-ml-5 bg-gradient-to-b from-airvibe-primary via-airvibe-secondary to-airvibe-accent rounded-lg cursor-ns-resize shadow-xl" style="top: 50%"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Transport Controls - Mobile Optimized -->
-                <div class="h-20 md:h-20 border-t border-airvibe-border p-3 md:p-4 mobile-p-2">
-                    <div class="flex items-center justify-center gap-3 md:gap-6 h-full overflow-x-auto mobile-overflow-x-auto">
-                        <!-- Mobile Menu Button -->
-                        <button id="mobileMenuBtn" class="md:hidden w-12 h-12 rounded-xl bg-airvibe-primary/20 border border-airvibe-primary/30 flex items-center justify-center mobile-touch-target">
-                            <i class="fas fa-bars text-airvibe-primary"></i>
-                        </button>
-                        
-                        <button id="talkoverBtn" class="px-4 md:px-6 py-2 md:py-3 rounded-xl bg-airvibe-accent/20 border border-airvibe-accent/30 text-airvibe-accent font-medium hover:bg-airvibe-accent/30 transition mobile-text-sm mobile-touch-target">
-                            <i class="fas fa-microphone-alt mr-1 md:mr-2"></i> Talkover
-                        </button>
-                        
-                        <button onclick="showEffectsModal()" class="px-4 md:px-6 py-2 md:py-3 rounded-xl bg-airvibe-primary/20 border border-airvibe-primary/30 text-airvibe-primary font-medium hover:bg-airvibe-primary/30 transition mobile-text-sm mobile-touch-target">
-                            <i class="fas fa-magic mr-1 md:mr-2"></i> Effects
-                        </button>
-                        
-                        <!-- Start Broadcast Button -->
-                        <button id="startBroadcastBtn" class="px-4 md:px-6 py-2 md:py-3 rounded-xl bg-airvibe-success/20 border border-airvibe-success/30 text-airvibe-success font-medium hover:bg-airvibe-success/30 transition mobile-text-sm mobile-touch-target">
-                            <i class="fas fa-broadcast-tower mr-1 md:mr-2"></i> Go Live
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Right Sidebar - Stats & Chat (Hidden on mobile) -->
-            <div id="rightSidebar" class="hidden md:flex md:w-96 border-l border-airvibe-border flex-col mobile-full mobile-h-96">
-                <!-- Stream Stats -->
-                <div class="p-4 border-b border-airvibe-border mobile-p-3">
-                    <h3 class="font-bold text-lg mb-4 mobile-text-base">Stream Analytics</h3>
-                    
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="glass-card rounded-xl p-3 text-center">
-                            <div class="text-xl md:text-2xl font-bold" id="listenerCount">0</div>
-                            <div class="text-xs text-airvibe-text-light mobile-text-xs">Listeners</div>
-                        </div>
-                        
-                        <div class="glass-card rounded-xl p-3 text-center">
-                            <div class="text-xl md:text-2xl font-bold" id="bitrateDisplay">--</div>
-                            <div class="text-xs text-airvibe-text-light mobile-text-xs">kbps</div>
-                        </div>
-                        
-                        <div class="glass-card rounded-xl p-3 text-center">
-                            <div class="text-xl md:text-2xl font-bold" id="latencyDisplay">--</div>
-                            <div class="text-xs text-airvibe-text-light mobile-text-xs">ms</div>
-                        </div>
-                        
-                        <div class="glass-card rounded-xl p-3 text-center">
-                            <div class="text-xl md:text-2xl font-bold" id="cpuUsage">--%</div>
-                            <div class="text-xs text-airvibe-text-light mobile-text-xs">CPU</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Live Chat -->
-                <div class="flex-1 flex flex-col">
-                    <div class="p-4 border-b border-airvibe-border mobile-p-3">
-                        <h3 class="font-bold text-lg mobile-text-base">Live Chat</h3>
-                        <div class="text-xs text-airvibe-text-light mt-1 mobile-text-xs" id="chatRoomName">Studio Chat</div>
-                    </div>
-                    
-                    <div id="chatMessages" class="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-custom">
-                        <!-- Chat messages will appear here -->
-                    </div>
-                    
-                    <div class="border-t border-airvibe-border p-4">
-                        <div class="flex items-center gap-2">
-                            <input type="text" 
-                                id="chatInput"
-                                class="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none placeholder-airvibe-text-light mobile-text-sm mobile-p-2"
-                                placeholder="Type a message...">
-                            <button id="sendChatBtn" class="w-12 h-12 rounded-xl bg-airvibe-primary flex items-center justify-center hover:bg-airvibe-primary/80 transition mobile-touch-target">
-                                <i class="fas fa-paper-plane text-white"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Effects Modal -->
-    <div id="effectsModal" class="fixed inset-0 bg-black/90 z-[1000] flex items-center justify-center p-4 hidden safe-area-inset-top safe-area-inset-bottom">
-        <div class="glass-card rounded-2xl p-6 max-w-4xl w-full mx-4">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-2xl font-bold mobile-text-xl">Audio Effects Rack</h2>
-                <button onclick="hideEffectsModal()" class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition mobile-touch-target">
-                    <i class="fas fa-times"></i>
+                <button id="mobileMenuBtn" class="md:hidden w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center text-white" onclick="toggleMobileMenu()">
+                    <i class="fas fa-bars"></i>
                 </button>
+                <button onclick="endStream()" class="hidden md:flex bg-red-900/20 border border-red-500/50 text-red-500 hover:bg-red-500 hover:text-white px-4 py-2 rounded-lg text-xs font-bold transition">END STREAM</button>
             </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium mb-2 mobile-text-xs">Compressor</label>
-                        <input type="range" id="compressorAmount" min="0" max="100" value="0" class="w-full mobile-touch-target">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-2 mobile-text-xs">Reverb</label>
-                        <input type="range" id="reverbAmount" min="0" max="100" value="0" class="w-full mobile-touch-target">
-                    </div>
-                </div>
-                
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium mb-2 mobile-text-xs">Delay</label>
-                        <input type="range" id="delayAmount" min="0" max="100" value="0" class="w-full mobile-touch-target">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-2 mobile-text-xs">Chorus</label>
-                        <input type="range" id="chorusAmount" min="0" max="100" value="0" class="w-full mobile-touch-target">
-                    </div>
-                </div>
-                
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium mb-2 mobile-text-xs">Pitch Shift</label>
-                        <input type="range" id="pitchAmount" min="-12" max="12" value="0" class="w-full mobile-touch-target">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-2 mobile-text-xs">Distortion</label>
-                        <input type="range" id="distortionAmount" min="0" max="100" value="0" class="w-full mobile-touch-target">
-                    </div>
-                </div>
-            </div>
-            
-            <div class="mt-6">
-                <button onclick="hideEffectsModal()" class="w-full btn-primary py-3 rounded-xl font-medium mobile-touch-target">
-                    Apply Effects
-                </button>
-            </div>
-        </div>
-    </div>
+        </header>
 
-    <!-- Mobile Menu Modal -->
-    <div id="mobileMenuModal" class="fixed inset-0 bg-black/90 z-[1000] flex flex-col hidden safe-area-inset-top safe-area-inset-bottom">
-        <div class="glass-nav p-4 flex items-center justify-between">
-            <h2 class="text-xl font-bold">Studio Menu</h2>
-            <button onclick="hideMobileMenu()" class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition mobile-touch-target">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        
-        <div class="flex-1 overflow-y-auto p-4 space-y-4">
-            <!-- Recording Section -->
-            <div class="glass-card rounded-xl p-4">
-                <h3 class="font-bold text-lg flex items-center gap-2 mb-4">
-                    <i class="fas fa-record-vinyl text-airvibe-danger"></i>
-                    Recording
-                </h3>
-                
-                <div class="space-y-4">
-                    <div class="flex items-center justify-center gap-2 mb-4">
-                        <button onclick="startRecording()" class="flex-1 py-3 rounded-xl bg-airvibe-danger/20 border border-airvibe-danger/30 text-airvibe-danger font-medium hover:bg-airvibe-danger/30 transition mobile-touch-target">
-                            <i class="fas fa-circle mr-2"></i> Record
+        <div class="flex-1 flex overflow-hidden relative">
+            
+            <div id="leftSidebar" class="w-64 bg-[#0A0A0F] border-r border-white/5 hidden md:flex flex-col z-40">
+                <div class="p-4 border-b border-white/5">
+                    <h3 class="text-xs font-bold text-gray-500 uppercase mb-3">Soundboard</h3>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="playSfx('horn')" class="p-3 bg-white/5 hover:bg-white/10 rounded-lg border border-white/5 text-center transition active:scale-95">
+                            <div class="text-xl mb-1">📢</div>
+                            <div class="text-[9px]">Horn</div>
                         </button>
-                        <button onclick="stopRecording()" class="flex-1 py-3 rounded-xl bg-gray-600/20 border border-gray-600/30 text-gray-400 font-medium hover:bg-gray-600/30 transition mobile-touch-target">
-                            <i class="fas fa-stop mr-2"></i> Stop
+                        <button onclick="playSfx('laugh')" class="p-3 bg-white/5 hover:bg-white/10 rounded-lg border border-white/5 text-center transition active:scale-95">
+                            <div class="text-xl mb-1">😂</div>
+                            <div class="text-[9px]">Laugh</div>
+                        </button>
+                        <button onclick="playSfx('clap')" class="p-3 bg-white/5 hover:bg-white/10 rounded-lg border border-white/5 text-center transition active:scale-95">
+                            <div class="text-xl mb-1">👏</div>
+                            <div class="text-[9px]">Clap</div>
+                        </button>
+                        <button onclick="playSfx('cricket')" class="p-3 bg-white/5 hover:bg-white/10 rounded-lg border border-white/5 text-center transition active:scale-95">
+                            <div class="text-xl mb-1">🦗</div>
+                            <div class="text-[9px]">Cricket</div>
                         </button>
                     </div>
+                </div>
+                
+                <div class="p-4 flex-1">
+                    <h3 class="text-xs font-bold text-gray-500 uppercase mb-3">Playlist</h3>
+                    <button onclick="document.getElementById('musicFile').click()" class="w-full py-2 border border-dashed border-gray-600 rounded-lg text-xs text-gray-400 hover:text-white hover:border-gray-400 transition mb-2">
+                        + Add Track
+                    </button>
+                    <input type="file" id="musicFile" hidden accept="audio/*">
+                    <div id="playlistContainer" class="space-y-2 max-h-60 overflow-y-auto no-scrollbar text-xs text-gray-500 text-center pt-4">
+                        No tracks loaded
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex-1 bg-[#121214] flex flex-col overflow-y-auto pb-20 md:pb-0 scroll-smooth">
+                
+                <div class="h-24 bg-black border-b border-white/5 relative shrink-0">
+                    <canvas id="scope" class="w-full h-full opacity-60"></canvas>
+                    <div class="absolute bottom-2 left-4 text-[10px] text-gray-500 font-mono">MASTER OUTPUT</div>
+                </div>
+
+                <div class="p-4 md:p-8 grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 max-w-5xl mx-auto w-full">
                     
-                    <div class="text-center">
-                        <div id="mobileRecordingTimer" class="text-lg font-mono font-bold text-airvibe-danger mb-2">00:00:00</div>
-                        <div id="mobileRecordingStatus" class="text-sm text-airvibe-text-light">Ready to record</div>
+                    <div class="channel-strip p-4 flex flex-col md:flex-row md:items-stretch gap-4 relative">
+                        <div class="absolute top-2 left-3 text-[10px] font-bold text-gray-500 tracking-widest">MIC 1</div>
+                        
+                        <div class="flex-1 flex flex-col justify-end mt-6">
+                            <div class="flex items-center gap-4 md:hidden mb-4">
+                                <span class="text-xs text-gray-400 w-8 font-mono">VOL</span>
+                                <input id="micVolMobile" type="range" class="flex-1 h-2 bg-gray-700 rounded-lg appearance-none" min="0" max="150" value="100">
+                            </div>
+
+                            <div class="hidden md:flex justify-center h-48 relative w-full bg-black/20 rounded-lg py-2 border border-white/5">
+                                <input id="micVol" type="range" orient="vertical" min="0" max="150" value="100" class="cursor-pointer">
+                            </div>
+                            
+                            <button id="micToggle" class="mt-4 w-full py-3 bg-green-900/20 border border-green-600/50 text-green-500 rounded-lg text-xs font-bold hover:bg-green-600 hover:text-white transition uppercase shadow-lg shadow-green-900/10">
+                                ON AIR
+                            </button>
+                        </div>
                     </div>
+
+                    <div class="channel-strip p-4 flex flex-col relative">
+                        <div class="absolute top-2 left-3 text-[10px] font-bold text-blue-500 tracking-widest">DECK A</div>
+                        
+                        <div class="mt-6 mb-4 bg-black/50 rounded-lg p-3 border border-white/5 flex items-center gap-3">
+                            <div class="w-10 h-10 bg-gray-800 rounded flex items-center justify-center text-gray-500">
+                                <i class="fas fa-compact-disc"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div id="trackName" class="text-xs text-white truncate font-medium">No Track Loaded</div>
+                                <div id="trackTime" class="text-[10px] text-gray-500 font-mono">00:00 / 00:00</div>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-2 mb-4">
+                            <button id="playBtn" class="flex-1 py-2.5 bg-gray-800 hover:bg-gray-700 border border-white/5 rounded text-xs font-bold transition text-gray-300" disabled>PLAY</button>
+                            <button onclick="document.getElementById('musicFile').click()" class="px-3 bg-gray-800 hover:bg-gray-700 border border-white/5 rounded text-xs text-gray-300"><i class="fas fa-folder-open"></i></button>
+                        </div>
+
+                        <div class="flex items-center gap-4 md:hidden mb-4">
+                            <span class="text-xs text-gray-400 w-8 font-mono">VOL</span>
+                            <input id="musicVolMobile" type="range" class="flex-1 h-2 bg-gray-700 rounded-lg appearance-none" min="0" max="100" value="50">
+                        </div>
+                        
+                        <div class="hidden md:flex justify-center h-48 relative w-full bg-black/20 rounded-lg py-2 border border-white/5">
+                            <input id="musicVol" type="range" orient="vertical" min="0" max="100" value="50" class="cursor-pointer">
+                        </div>
+
+                        <button id="talkoverBtn" class="mt-4 w-full py-3 bg-white/5 border border-white/10 text-gray-400 rounded-lg text-xs font-bold active:bg-white active:text-black transition uppercase">
+                            TALKOVER
+                        </button>
+                    </div>
+
+                    <div class="channel-strip p-4 flex flex-col relative border border-airvibe-primary/30 shadow-[0_0_30px_-10px_rgba(139,92,246,0.15)]">
+                        <div class="absolute top-2 left-3 text-[10px] font-bold text-airvibe-primary tracking-widest">MASTER</div>
+                        
+                        <div class="mt-6 flex-1 flex flex-col justify-end">
+                            <button id="startBtn" class="w-full py-8 rounded-xl bg-gray-800/50 border border-white/10 flex flex-col items-center justify-center gap-2 group hover:bg-gray-800 transition mb-auto relative overflow-hidden">
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                                <i class="fas fa-power-off text-2xl text-gray-500 group-hover:text-red-500 transition relative z-10"></i>
+                                <span class="text-[10px] font-bold text-gray-400 relative z-10">START ENGINE</span>
+                            </button>
+
+                            <div class="space-y-4 mt-8 px-2">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-[10px] font-bold text-gray-500">COMPRESSOR</span>
+                                    <div class="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_5px_#10B981]"></div>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-[10px] font-bold text-gray-500">LIMITER</span>
+                                    <div class="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_5px_#10B981]"></div>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-[10px] font-bold text-gray-500">48KHZ</span>
+                                    <div class="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_5px_#3B82F6]"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
-            
-            <!-- File Upload -->
-            <div class="glass-card rounded-xl p-4">
-                <h3 class="font-bold text-lg flex items-center gap-2 mb-4">
-                    <i class="fas fa-cloud-upload-alt text-airvibe-secondary"></i>
-                    Audio Files
-                </h3>
-                
-                <div class="space-y-3">
-                    <input type="file" id="mobileAudioUpload" hidden accept="audio/*" multiple>
-                    <button onclick="document.getElementById('mobileAudioUpload').click()" class="w-full btn-primary py-3 rounded-xl font-medium mobile-touch-target">
-                        <i class="fas fa-upload mr-2"></i> Upload Audio
-                    </button>
-                    
-                    <div class="text-center text-sm text-airvibe-text-light" id="mobileFileCount">
-                        0 files uploaded
-                    </div>
+
+            <div id="rightSidebar" class="w-80 bg-[#0C0C0E] border-l border-white/5 hidden lg:flex flex-col z-40">
+                <div class="p-3 border-b border-white/5 flex justify-between items-center">
+                    <span class="text-xs font-bold uppercase tracking-widest text-gray-500">COMMS</span>
+                    <span class="bg-white/10 text-white text-[10px] px-2 py-0.5 rounded font-mono" id="listenerCount">0 LIS</span>
+                </div>
+                <div id="chatFeed" class="flex-1 overflow-y-auto p-4 space-y-3 text-xs font-mono no-scrollbar"></div>
+                <div class="p-3 border-t border-white/5 bg-[#111]">
+                    <form onsubmit="sendHostMessage(event)" class="flex gap-2">
+                        <input id="hostMsg" class="flex-1 bg-black border border-white/10 rounded px-3 py-2 text-xs text-white outline-none focus:border-airvibe-primary" placeholder="CMD...">
+                        <button class="bg-white/10 hover:bg-white/20 text-white px-3 rounded text-xs font-bold">TX</button>
+                    </form>
                 </div>
             </div>
-            
-            <!-- Background Sounds -->
-            <div class="glass-card rounded-xl p-4">
-                <h3 class="font-bold text-lg flex items-center gap-2 mb-4">
-                    <i class="fas fa-layer-group text-airvibe-accent"></i>
-                    Background Sounds
-                </h3>
-                
-                <div class="grid grid-cols-3 gap-2">
-                    <button onclick="playBackgroundSound('rain')" class="soundboard-btn py-3 flex flex-col items-center justify-center mobile-touch-target">
-                        <span class="text-xl mb-1">🌧️</span>
-                        <span class="text-xs">Rain</span>
-                    </button>
-                    <button onclick="playBackgroundSound('cafe')" class="soundboard-btn py-3 flex flex-col items-center justify-center mobile-touch-target">
-                        <span class="text-xl mb-1">☕</span>
-                        <span class="text-xs">Cafe</span>
-                    </button>
-                    <button onclick="playBackgroundSound('fire')" class="soundboard-btn py-3 flex flex-col items-center justify-center mobile-touch-target">
-                        <span class="text-xl mb-1">🔥</span>
-                        <span class="text-xs">Fire</span>
-                    </button>
-                </div>
-                
-                <div class="mt-4">
-                    <button onclick="stopAllBackgroundSounds()" class="w-full py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition mobile-touch-target">
-                        <i class="fas fa-stop mr-2"></i> Stop All Sounds
-                    </button>
-                </div>
+
+        </div>
+
+        <div id="mobileDrawer" class="fixed inset-0 bg-black/95 z-[60] transform translate-y-full transition-transform duration-300 flex flex-col md:hidden">
+            <div class="flex justify-between items-center p-4 border-b border-white/10">
+                <h2 class="font-bold text-white">Studio Controls</h2>
+                <button onclick="toggleMobileMenu()" class="text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
             </div>
             
-            <!-- Stream Stats -->
-            <div class="glass-card rounded-xl p-4">
-                <h3 class="font-bold text-lg mb-4">Stream Stats</h3>
-                
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="text-center">
-                        <div class="text-2xl font-bold" id="mobileListenerCount">0</div>
-                        <div class="text-xs text-airvibe-text-light">Listeners</div>
-                    </div>
-                    <div class="text-center">
-                        <div class="text-2xl font-bold" id="mobileLatency">--</div>
-                        <div class="text-xs text-airvibe-text-light">ms</div>
+            <div class="flex-1 overflow-y-auto p-4">
+                <div class="mb-6">
+                    <h3 class="text-xs font-bold text-gray-500 uppercase mb-3">Soundboard</h3>
+                    <div class="grid grid-cols-4 gap-2">
+                        <button onclick="playSfx('horn')" class="aspect-square bg-white/5 rounded-lg flex items-center justify-center text-xl">📢</button>
+                        <button onclick="playSfx('laugh')" class="aspect-square bg-white/5 rounded-lg flex items-center justify-center text-xl">😂</button>
+                        <button onclick="playSfx('clap')" class="aspect-square bg-white/5 rounded-lg flex items-center justify-center text-xl">👏</button>
+                        <button onclick="playSfx('cricket')" class="aspect-square bg-white/5 rounded-lg flex items-center justify-center text-xl">🦗</button>
                     </div>
                 </div>
+
+                <div class="mb-6">
+                    <h3 class="text-xs font-bold text-gray-500 uppercase mb-3">Live Chat</h3>
+                    <div id="mobileChatFeed" class="h-40 bg-black/50 rounded-lg p-3 border border-white/5 overflow-y-auto text-xs font-mono mb-2"></div>
+                    <form onsubmit="sendHostMessage(event)" class="flex gap-2">
+                        <input id="mobileHostMsg" class="flex-1 bg-black border border-white/10 rounded px-3 py-2 text-xs text-white" placeholder="Send message...">
+                        <button class="bg-airvibe-primary text-white px-3 rounded text-xs font-bold">Send</button>
+                    </form>
+                </div>
+                
+                <button onclick="endStream()" class="w-full bg-red-900/30 border border-red-500/50 text-red-500 py-3 rounded-xl font-bold mt-4">END BROADCAST</button>
             </div>
         </div>
+
     </div>
 
-    <!-- Toast Notification -->
-    <div id="toast" class="fixed top-6 left-1/2 -translate-x-1/2 bg-gradient-to-r from-airvibe-primary to-airvibe-secondary text-white px-6 py-3 rounded-full text-sm font-medium shadow-2xl z-[2000] hidden animate-slide-up">
-        <i class="fas fa-check-circle mr-2"></i>
-        <span id="toastMessage">Notification message</span>
-    </div>
-
-    <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="fixed inset-0 bg-black/90 z-[1000] flex items-center justify-center hidden safe-area-inset-top safe-area-inset-bottom">
-        <div class="text-center">
-            <div class="w-16 h-16 border-4 border-airvibe-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <div class="text-xl font-bold mb-2" id="loadingText">Initializing Audio Engine</div>
-            <div class="text-airvibe-text-light">Please wait...</div>
-        </div>
+    <div id="toast" class="fixed top-6 left-1/2 -translate-x-1/2 bg-white text-black px-6 py-3 rounded-full text-xs font-bold shadow-xl translate-y-[-150%] transition duration-300 z-[2000] flex items-center gap-2">
+        <i class="fas fa-info-circle text-indigo-600"></i> <span id="toastMsg">Notification</span>
     </div>
 
     <script>
-        // ========== GLOBAL VARIABLES ==========
-        let socket = null;
-        let peer = null;
-        let myPeerId = null;
-        let audioContext = null;
-        let mediaStream = null;
-        let mediaRecorder = null;
-        let audioAnalyser = null;
-        let micGainNode = null;
-        let musicGainNode = null;
-        let sfxGainNode = null;
-        let bgGainNode = null;
-        let masterGainNode = null;
-        let compressorNode = null;
-        let isStreaming = false;
-        let isRecording = false;
-        let isMuted = false;
-        let isTalkover = false;
-        let broadcastStartTime = null;
-        let recordingStartTime = null;
-        let timerInterval = null;
-        let recordingInterval = null;
-        let listenerCount = 0;
-        let soundEffects = {};
-        let backgroundSounds = {};
-        let playlist = [];
-        let uploadedFiles = [];
-        let recordings = [];
-        let currentTrack = -1;
-        let currentSound = null;
-        let currentPlayerSound = null;
-        let activeCalls = new Map();
-        let analysers = {
-            mic: null,
-            music: null,
-            sfx: null,
-            bg: null,
-            master: null
-        };
-        let meterData = {
-            mic: -60,
-            music: -60,
-            sfx: -60,
-            bg: -60,
-            master: -60
-        };
-        let faderValues = {
-            mic: 50,
-            music: 50,
-            sfx: 50,
-            master: 50
-        };
+        const socket = io();
+        let peer, peerId, audioCtx, masterDest, masterGain, micNode, micGain, musicNode, musicGain, musicEl, analyser, startTime, timerInt, activeCalls = new Map(), listenerCount = 0;
+        let stationData = { name: "Unknown", dj: "Anon" };
 
-        // ========== INITIALIZATION ==========
-        document.addEventListener('DOMContentLoaded', async () => {
-            await initializeAudioDevices();
-            setupEventListeners();
-            updateCurrentTime();
-            setInterval(updateCurrentTime, 1000);
-            
-            // Generate spectrum bars
-            generateSpectrumBars();
-            
-            // Setup drag and drop
-            setupDragAndDrop();
-            
-            console.log('🎚️ Airvibe Studio 4000 initialized');
+        // --- 1. INITIALIZATION ---
+        
+        // Populate Mics
+        navigator.mediaDevices.enumerateDevices().then(devices => {
+            const sel = document.getElementById('audioInput');
+            sel.innerHTML = '';
+            devices.filter(d => d.kind === 'audioinput').forEach((d, i) => {
+                const opt = document.createElement('option');
+                opt.value = d.deviceId;
+                opt.text = d.label || `Mic ${i + 1}`;
+                sel.appendChild(opt);
+            });
         });
 
-        async function initializeAudioDevices() {
-            try {
-                const devices = await navigator.mediaDevices.enumerateDevices();
-                const audioInputs = devices.filter(d => d.kind === 'audioinput');
-                const select = document.getElementById('audioInput');
-                
-                select.innerHTML = '';
-                audioInputs.forEach((device, index) => {
-                    const option = document.createElement('option');
-                    option.value = device.deviceId;
-                    option.textContent = device.label || `Microphone ${index + 1}`;
-                    select.appendChild(option);
-                });
-            } catch (error) {
-                console.error('Error enumerating devices:', error);
+        function initializeStudio() {
+            const sName = document.getElementById('studioName').value;
+            const dName = document.getElementById('hostName').value;
+            if(!sName) return showToast("Station Name Required");
+            
+            stationData = { name: sName, dj: dName || "Host" };
+            
+            // UI Transition
+            document.getElementById('setupModal').classList.add('opacity-0', 'pointer-events-none');
+            setTimeout(() => document.getElementById('setupModal').style.display = 'none', 500);
+            
+            const main = document.getElementById('studioInterface');
+            main.classList.remove('hidden');
+            setTimeout(() => main.classList.remove('opacity-0'), 100);
+            
+            showToast("System Initialized");
+        }
+
+        function toggleMobileMenu() {
+            const drawer = document.getElementById('mobileDrawer');
+            if (drawer.classList.contains('translate-y-full')) {
+                drawer.classList.remove('translate-y-full');
+            } else {
+                drawer.classList.add('translate-y-full');
             }
         }
 
-        async function initializeStudio() {
-            const studioName = document.getElementById('studioName').value.trim();
-            const hostName = document.getElementById('hostName').value.trim();
-            const description = document.getElementById('streamDescription').value;
-            const audioInput = document.getElementById('audioInput').value;
-            
-            if (!studioName) {
-                showToast('Please enter a studio name');
-                return;
-            }
-            
-            showLoading('Initializing audio engine...');
+        // --- 2. AUDIO ENGINE (Mirinda 4000 Core) ---
+        async function startEngine() {
+            if(audioCtx) return true;
             
             try {
-                await setupAudioEngine(audioInput);
+                // 48kHz Stereo Context
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContext({ sampleRate: 48000, latencyHint: 'interactive' });
                 
-                // Set up the rest after audio engine is ready
-                setTimeout(() => {
-                    setupSocketConnection();
-                    setupPeerConnection();
-                    
-                    document.getElementById('setupModal').classList.add('hidden');
-                    document.getElementById('studioInterface').classList.remove('hidden');
-                    
-                    hideLoading();
-                    showToast('Studio initialized successfully');
-                    
-                    // Update UI
-                    document.getElementById('chatRoomName').textContent = studioName;
-                    startBroadcastTimer();
-                    
-                    // Start meter updates
-                    requestAnimationFrame(updateMeters);
-                    
-                    // Load default background sounds
-                    loadDefaultBackgroundSounds();
-                    
-                    // Setup fader controls
-                    setupFaderControls();
-                }, 500);
-            } catch (error) {
-                console.error('Initialization error:', error);
-                hideLoading();
-                showToast('Failed to initialize studio. Please check your microphone permissions.');
-            }
-        }
+                // Master Bus
+                masterGain = audioCtx.createGain();
+                masterDest = audioCtx.createMediaStreamDestination();
+                analyser = audioCtx.createAnalyser(); 
+                analyser.fftSize = 1024;
+                
+                // Limiter/Compressor (Pro Sound)
+                const comp = audioCtx.createDynamicsCompressor();
+                comp.threshold.value = -12;
+                comp.ratio.value = 12;
+                comp.attack.value = 0.003;
+                comp.release.value = 0.25;
 
-        // ========== AUDIO ENGINE ==========
-        async function setupAudioEngine(deviceId) {
-            try {
-                // Create audio context
-                audioContext = new (window.AudioContext || window.webkitAudioContext)({
-                    sampleRate: 48000,
-                    latencyHint: 'interactive'
-                });
+                // Routing
+                masterGain.connect(comp);
+                comp.connect(masterDest);
+                comp.connect(analyser);
+                masterGain.connect(audioCtx.destination); // Monitor locally (Mute this if feedback occurs)
+
+                // Inputs
+                micGain = audioCtx.createGain();
+                musicGain = audioCtx.createGain();
+                micGain.connect(masterGain);
+                musicGain.connect(masterGain);
                 
-                // Resume audio context (required for Chrome autoplay policy)
-                if (audioContext.state === 'suspended') {
-                    await audioContext.resume();
-                }
-                
-                // Create audio nodes
-                micGainNode = audioContext.createGain();
-                musicGainNode = audioContext.createGain();
-                sfxGainNode = audioContext.createGain();
-                bgGainNode = audioContext.createGain();
-                masterGainNode = audioContext.createGain();
-                
-                // Setup analysers for each channel
-                analysers.mic = audioContext.createAnalyser();
-                analysers.music = audioContext.createAnalyser();
-                analysers.sfx = audioContext.createAnalyser();
-                analysers.bg = audioContext.createAnalyser();
-                analysers.master = audioContext.createAnalyser();
-                
-                analysers.mic.fftSize = 256;
-                analysers.music.fftSize = 256;
-                analysers.sfx.fftSize = 256;
-                analysers.bg.fftSize = 256;
-                analysers.master.fftSize = 2048;
-                
-                // Create compressor
-                compressorNode = audioContext.createDynamicsCompressor();
-                compressorNode.threshold.value = -24;
-                compressorNode.knee.value = 30;
-                compressorNode.ratio.value = 12;
-                compressorNode.attack.value = 0.003;
-                compressorNode.release.value = 0.25;
-                
-                // Connect nodes: Mic -> Analyser -> Compressor -> Master -> Destination
-                micGainNode.connect(analysers.mic);
-                analysers.mic.connect(compressorNode);
-                
-                // Connect other channels directly to compressor
-                musicGainNode.connect(compressorNode);
-                sfxGainNode.connect(compressorNode);
-                bgGainNode.connect(compressorNode);
-                
-                // Compressor to master to destination
-                compressorNode.connect(masterGainNode);
-                masterGainNode.connect(analysers.master);
-                
-                // IMPORTANT: Only connect master to destination for monitoring
-                // This allows host to hear everything
-                masterGainNode.connect(audioContext.destination);
-                
-                // Setup microphone input
-                const constraints = {
-                    audio: {
-                        deviceId: deviceId ? { exact: deviceId } : undefined,
-                        echoCancellation: false,
-                        noiseSuppression: false,
+                // Defaults
+                musicGain.gain.value = 0.5;
+
+                // Load Mic
+                const micId = document.getElementById('audioInput').value;
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: { 
+                        deviceId: micId ? { exact: micId } : undefined,
+                        echoCancellation: false, 
+                        noiseSuppression: false, 
                         autoGainControl: false,
-                        channelCount: 2
-                    }
-                };
+                        channelCount: 2 
+                    } 
+                });
+                micNode = audioCtx.createMediaStreamSource(stream);
+                micNode.connect(micGain);
                 
-                mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-                const micSource = audioContext.createMediaStreamSource(mediaStream);
-                micSource.connect(micGainNode);
-                
-                // Set initial gains
-                micGainNode.gain.value = 1.0;
-                musicGainNode.gain.value = 0.5;
-                sfxGainNode.gain.value = 0.7;
-                bgGainNode.gain.value = 0.3;
-                masterGainNode.gain.value = 0.8;
-                
-                console.log('✅ Audio engine initialized');
+                drawScope();
                 return true;
-            } catch (error) {
-                console.error('Audio engine error:', error);
-                showToast('Failed to access microphone. Please check permissions.');
+            } catch(e) {
+                showToast("Audio Init Failed: " + e.message);
                 return false;
             }
         }
 
-        // ========== METER FUNCTIONS ==========
-        function updateMeters() {
-            if (!audioContext || audioContext.state !== 'running') {
-                requestAnimationFrame(updateMeters);
-                return;
-            }
+        // --- 3. BROADCAST LOGIC ---
+        document.getElementById('startBtn').onclick = async () => {
+            if(peerId) return; // Already live
             
-            // Update each meter
-            updateMeter('mic', analysers.mic);
-            updateMeter('music', analysers.music);
-            updateMeter('sfx', analysers.sfx);
-            updateMeter('master', analysers.master);
-            
-            // Update spectrum analyzer
-            updateSpectrumAnalyzer();
-            
-            // Update recording level if recording
-            if (isRecording) {
-                updateRecordingLevel();
-            }
-            
-            requestAnimationFrame(updateMeters);
-        }
+            const success = await startEngine();
+            if(!success) return;
 
-        function updateMeter(channel, analyser) {
-            if (!analyser) return;
+            if(audioCtx.state === 'suspended') await audioCtx.resume();
             
-            const dataArray = new Uint8Array(analyser.frequencyBinCount);
-            analyser.getByteFrequencyData(dataArray);
+            // UI Update
+            const btn = document.getElementById('startBtn');
+            btn.innerHTML = '<span class="text-red-500 font-bold animate-pulse text-xs">TRANSMITTING...</span>';
+            btn.classList.add('border-red-500/50', 'bg-red-900/10');
             
-            // Calculate RMS
-            let sum = 0;
-            const samples = Math.min(100, dataArray.length);
-            for (let i = 0; i < samples; i++) {
-                const value = (dataArray[i] - 128) / 128;
-                sum += value * value;
-            }
-            const rms = Math.sqrt(sum / samples);
-            const dB = rms > 0 ? 20 * Math.log10(rms) : -60;
-            
-            // Store meter data
-            meterData[channel] = dB;
-            
-            // Update UI
-            updateMeterUI(channel, dB);
-        }
+            const light = document.getElementById('onAirLight');
+            light.className = "bg-red-600 text-white px-3 py-1 rounded border border-red-500 text-[10px] font-black tracking-widest shadow-[0_0_15px_#ff0000] animate-pulse";
+            light.innerText = "ON AIR";
 
-        function updateMeterUI(channel, dB) {
-            // Convert dB to percentage (0 to 100)
-            const minDB = -60;
-            const maxDB = 0;
-            const percent = Math.max(0, Math.min(100, ((dB - minDB) / (maxDB - minDB)) * 100));
-            
-            // Update meter bars
-            const meterId = `${channel}Meter`;
-            const meterElement = document.getElementById(meterId);
-            if (meterElement) {
-                meterElement.style.height = `${percent}%`;
-            }
-            
-            // Update level meters
-            const levelMeterId = `${channel}LevelMeter`;
-            const levelMeterElement = document.getElementById(levelMeterId);
-            if (levelMeterElement) {
-                levelMeterElement.style.width = `${percent}%`;
-            }
-            
-            // Update dB display
-            const dbElement = document.getElementById(`${channel}LevelDb`);
-            if (dbElement) {
-                dbElement.textContent = `${dB.toFixed(1)} dB`;
-            }
-            
-            // Update peak level
-            if (channel === 'master') {
-                const peakElement = document.getElementById('peakLevel');
-                if (peakElement) {
-                    peakElement.textContent = `${dB.toFixed(1)} dB`;
-                }
-            }
-        }
-
-        function updateSpectrumAnalyzer() {
-            if (!analysers.master) return;
-            
-            const dataArray = new Uint8Array(analysers.master.frequencyBinCount);
-            analysers.master.getByteFrequencyData(dataArray);
-            
-            const bars = document.querySelectorAll('#spectrumBars .frequency-band');
-            const length = Math.min(bars.length, 64);
-            
-            for (let i = 0; i < length; i++) {
-                const index = Math.floor(i * (dataArray.length / length));
-                const value = dataArray[index] / 255;
-                const height = Math.max(1, value * 100);
-                
-                if (bars[i]) {
-                    bars[i].style.height = `${height}%`;
-                    
-                    // Color based on frequency and intensity
-                    const hue = (i / length) * 240 + 180;
-                    const saturation = 80 + (value * 20);
-                    const lightness = 40 + (value * 30);
-                    bars[i].style.background = `linear-gradient(to top, hsl(${hue}, ${saturation}%, ${lightness}%), hsl(${hue + 30}, ${saturation}%, ${lightness - 10}%))`;
-                }
-            }
-        }
-
-        function generateSpectrumBars() {
-            const container = document.getElementById('spectrumBars');
-            if (!container) return;
-            
-            container.innerHTML = '';
-            
-            for (let i = 0; i < 32; i++) { // Reduced for mobile
-                const bar = document.createElement('div');
-                bar.className = 'frequency-band flex-1 rounded-t-sm';
-                bar.style.height = '1px';
-                container.appendChild(bar);
-            }
-        }
-
-        // ========== FADER CONTROLS ==========
-        function setupFaderControls() {
-            setupFaderControl('micFader', micGainNode, 'mic');
-            setupFaderControl('musicFader', musicGainNode, 'music');
-            setupFaderControl('sfxFader', sfxGainNode, 'sfx');
-            setupFaderControl('masterFader', masterGainNode, 'master');
-        }
-
-        function setupFaderControl(faderId, gainNode, channel) {
-            const fader = document.getElementById(faderId);
-            if (!fader) return;
-            
-            let isDragging = false;
-            
-            // Set initial position based on stored value
-            const container = fader.parentElement;
-            const percent = faderValues[channel];
-            const y = container.clientHeight * (1 - (percent / 100));
-            fader.style.top = `${y}px`;
-            
-            // Set initial gain
-            updateGainFromFaderPosition(gainNode, percent);
-            
-            // Mouse/touch events
-            fader.addEventListener('mousedown', startDrag);
-            fader.addEventListener('touchstart', startDrag);
-            
-            function startDrag(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                isDragging = true;
-                document.addEventListener('mousemove', onDrag);
-                document.addEventListener('touchmove', onDrag);
-                document.addEventListener('mouseup', stopDrag);
-                document.addEventListener('touchend', stopDrag);
-                
-                // Add active class
-                fader.classList.add('scale-110');
-            }
-            
-            function onDrag(e) {
-                if (!isDragging) return;
-                
-                const container = fader.parentElement;
-                const rect = container.getBoundingClientRect();
-                let clientY;
-                
-                if (e.type.includes('touch')) {
-                    clientY = e.touches[0].clientY;
-                } else {
-                    clientY = e.clientY;
-                }
-                
-                if (clientY) {
-                    let y = clientY - rect.top;
-                    y = Math.max(0, Math.min(y, rect.height));
-                    
-                    // Calculate percentage (0 at bottom, 100 at top)
-                    const percent = 100 - (y / rect.height) * 100;
-                    
-                    // Update position
-                    fader.style.top = `${y}px`;
-                    
-                    // Update gain
-                    updateGainFromFaderPosition(gainNode, percent);
-                    
-                    // Store value
-                    faderValues[channel] = percent;
-                }
-            }
-            
-            function stopDrag() {
-                isDragging = false;
-                document.removeEventListener('mousemove', onDrag);
-                document.removeEventListener('touchmove', onDrag);
-                document.removeEventListener('mouseup', stopDrag);
-                document.removeEventListener('touchend', stopDrag);
-                
-                // Remove active class
-                fader.classList.remove('scale-110');
-            }
-            
-            // Prevent parent scrolling when dragging
-            fader.addEventListener('touchstart', (e) => {
-                e.stopPropagation();
-            });
-        }
-
-        function updateGainFromFaderPosition(gainNode, percent) {
-            if (!gainNode) return;
-            
-            // Convert percentage to gain value (logarithmic scale)
-            // 0% = 0.0 gain, 50% = 0.5 gain, 100% = 2.0 gain
-            const minGain = 0.0;
-            const maxGain = 2.0;
-            
-            // Use logarithmic scale for more natural feel
-            const logPercent = percent / 100;
-            const gain = minGain + (maxGain - minGain) * Math.pow(logPercent, 2);
-            
-            gainNode.gain.value = gain;
-        }
-
-        // ========== RECORDING FUNCTIONS ==========
-        function startRecording() {
-            if (!audioContext || isRecording) return;
-            
-            try {
-                // Create media stream destination
-                const destination = audioContext.createMediaStreamDestination();
-                masterGainNode.connect(destination);
-                
-                // Get the stream
-                const stream = destination.stream;
-                
-                // Create MediaRecorder
-                const options = { mimeType: 'audio/webm;codecs=opus' };
-                mediaRecorder = new MediaRecorder(stream, options);
-                
-                const chunks = [];
-                
-                mediaRecorder.ondataavailable = (event) => {
-                    if (event.data.size > 0) {
-                        chunks.push(event.data);
-                    }
-                };
-                
-                mediaRecorder.onstop = () => {
-                    const blob = new Blob(chunks, { type: 'audio/webm' });
-                    saveRecording(blob);
-                };
-                
-                // Start recording
-                mediaRecorder.start(1000);
-                isRecording = true;
-                recordingStartTime = Date.now();
-                
-                // Update UI
-                document.getElementById('recordStartBtn').disabled = true;
-                document.getElementById('recordStopBtn').disabled = false;
-                document.getElementById('recordingStatus').textContent = 'Recording...';
-                document.getElementById('recordingStatus').className = 'text-airvibe-danger';
-                
-                // Start timer
-                recordingInterval = setInterval(updateRecordingTimer, 1000);
-                
-                showToast('Recording started');
-            } catch (error) {
-                console.error('Recording error:', error);
-                showToast('Failed to start recording');
-            }
-        }
-
-        function stopRecording() {
-            if (!mediaRecorder || !isRecording) return;
-            
-            mediaRecorder.stop();
-            isRecording = false;
-            
-            // Update UI
-            document.getElementById('recordStartBtn').disabled = false;
-            document.getElementById('recordStopBtn').disabled = true;
-            document.getElementById('recordingStatus').textContent = 'Recording saved';
-            document.getElementById('recordingStatus').className = 'text-airvibe-success';
-            
-            // Clear timer
-            if (recordingInterval) {
-                clearInterval(recordingInterval);
-                recordingInterval = null;
-            }
-            
-            showToast('Recording stopped');
-        }
-
-        function updateRecordingTimer() {
-            if (!recordingStartTime) return;
-            
-            const elapsed = Date.now() - recordingStartTime;
-            const hours = Math.floor(elapsed / 3600000);
-            const minutes = Math.floor((elapsed % 3600000) / 60000);
-            const seconds = Math.floor((elapsed % 60000) / 1000);
-            
-            const timerText = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            document.getElementById('recordingTimer').textContent = timerText;
-            document.getElementById('mobileRecordingTimer').textContent = timerText;
-            
-            // Update file size estimate
-            const sizeMB = (elapsed * 0.064 / 1000).toFixed(2); // Approximate 64kbps
-            document.getElementById('recordingSize').textContent = `${sizeMB} MB`;
-        }
-
-        function updateRecordingLevel() {
-            const dB = meterData.master;
-            const percent = Math.max(0, Math.min(100, ((dB + 60) / 60) * 100));
-            
-            document.getElementById('recordingLevel').style.width = `${percent}%`;
-            document.getElementById('recordingLevelDb').textContent = `${dB.toFixed(1)} dB`;
-        }
-
-        function saveRecording(blob) {
-            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-            const filename = `recording-${timestamp}.webm`;
-            
-            // Create download link
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            
-            // Add to recordings list
-            recordings.unshift({
-                name: filename,
-                url: url,
-                size: blob.size,
-                date: new Date(),
-                format: 'webm'
-            });
-            
-            // Auto-download
-            a.click();
-            URL.revokeObjectURL(url);
-            
-            showToast(`Recording saved: ${filename}`);
-        }
-
-        // ========== FILE UPLOAD FUNCTIONS ==========
-        function setupDragAndDrop() {
-            const uploadZone = document.getElementById('uploadZone');
-            const fileInput = document.getElementById('audioUpload');
-            
-            if (!uploadZone || !fileInput) return;
-            
-            // Click to browse
-            uploadZone.addEventListener('click', () => {
-                fileInput.click();
-            });
-            
-            // Handle file input change
-            fileInput.addEventListener('change', (e) => {
-                handleFiles(e.target.files);
-            });
-            
-            // Mobile upload
-            const mobileUpload = document.getElementById('mobileAudioUpload');
-            if (mobileUpload) {
-                mobileUpload.addEventListener('change', (e) => {
-                    handleFiles(e.target.files);
-                });
-            }
-        }
-
-        function handleFiles(files) {
-            if (!files.length) return;
-            
-            Array.from(files).forEach((file, index) => {
-                if (!file.type.startsWith('audio/')) {
-                    showToast(`${file.name} is not an audio file`);
-                    return;
-                }
-                
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const url = e.target.result;
-                    
-                    uploadedFiles.push({
-                        id: Date.now() + index,
-                        name: file.name,
-                        url: url,
-                        size: file.size,
-                        type: file.type
-                    });
-                    
-                    updateAudioFilesList();
-                    showToast(`Added ${file.name}`);
-                };
-                
-                reader.readAsDataURL(file);
-            });
-        }
-
-        function updateAudioFilesList() {
-            const container = document.getElementById('audioFilesList');
-            const countElement = document.getElementById('audioFileCount');
-            const mobileCountElement = document.getElementById('mobileFileCount');
-            
-            if (!container) return;
-            
-            const count = uploadedFiles.length;
-            const countText = `${count} file${count !== 1 ? 's' : ''}`;
-            
-            if (countElement) countElement.textContent = countText;
-            if (mobileCountElement) mobileCountElement.textContent = countText;
-            
-            if (uploadedFiles.length === 0) {
-                container.innerHTML = `
-                    <div class="text-xs text-airvibe-text-light text-center py-4">
-                        Upload audio files to get started
-                    </div>
-                `;
-                return;
-            }
-            
-            container.innerHTML = '';
-            
-            uploadedFiles.forEach((file, index) => {
-                const div = document.createElement('div');
-                div.className = 'audio-file-item p-3 rounded-lg bg-white/5 hover:bg-white/10 cursor-pointer';
-                div.onclick = () => playAudioFile(file);
-                
-                const sizeMB = (file.size / 1024 / 1024).toFixed(2);
-                const format = file.type.split('/')[1].toUpperCase();
-                
-                div.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-airvibe-primary/20 to-airvibe-secondary/10 flex items-center justify-center">
-                            <i class="fas fa-file-audio text-airvibe-primary text-sm"></i>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <div class="text-sm truncate">${file.name}</div>
-                            <div class="text-xs text-airvibe-text-light">
-                                ${format} • ${sizeMB} MB
-                            </div>
-                        </div>
-                    </div>
-                `;
-                
-                container.appendChild(div);
-            });
-        }
-
-        function playAudioFile(file) {
-            if (currentPlayerSound) {
-                currentPlayerSound.stop();
-            }
-            
-            currentPlayerSound = new Howl({
-                src: [file.url],
-                format: file.type.split('/')[1],
-                volume: 0.5,
-                onplay: () => {
-                    showToast(`Playing ${file.name}`);
-                }
-            });
-            
-            currentPlayerSound.play();
-        }
-
-        // ========== BACKGROUND SOUNDS ==========
-        function loadDefaultBackgroundSounds() {
-            // These are sample sounds - you can replace with actual URLs
-            backgroundSounds = {
-                rain: {
-                    name: 'Rain',
-                    icon: '🌧️',
-                    url: 'https://assets.mixkit.co/music/preview/mixkit-rain-03-2053.mp3',
-                    volume: 0.3,
-                    howl: null
-                },
-                cafe: {
-                    name: 'Coffee Shop',
-                    icon: '☕',
-                    url: 'https://assets.mixkit.co/music/preview/mixkit-coffee-shop-ambience-170.mp3',
-                    volume: 0.4,
-                    howl: null
-                },
-                fire: {
-                    name: 'Fireplace',
-                    icon: '🔥',
-                    url: 'https://assets.mixkit.co/music/preview/mixkit-crackling-fireplace-1997.mp3',
-                    volume: 0.3,
-                    howl: null
-                },
-                waves: {
-                    name: 'Ocean Waves',
-                    icon: '🌊',
-                    url: 'https://assets.mixkit.co/music/preview/mixkit-ocean-waves-2014.mp3',
-                    volume: 0.4,
-                    howl: null
-                },
-                forest: {
-                    name: 'Forest',
-                    icon: '🌲',
-                    url: 'https://assets.mixkit.co/music/preview/mixkit-forest-ambience-443.mp3',
-                    volume: 0.3,
-                    howl: null
-                },
-                white: {
-                    name: 'White Noise',
-                    icon: '📻',
-                    url: 'https://assets.mixkit.co/music/preview/mixkit-white-noise-ambience-235.mp3',
-                    volume: 0.2,
-                    howl: null
-                }
-            };
-            
-            // Set volume from slider
-            const volumeSlider = document.getElementById('bgVolume');
-            if (volumeSlider) {
-                const volume = volumeSlider.value / 100;
-                Object.values(backgroundSounds).forEach(sound => {
-                    sound.volume = volume;
-                });
-            }
-        }
-
-        function playBackgroundSound(type) {
-            if (!backgroundSounds[type]) return;
-            
-            const sound = backgroundSounds[type];
-            
-            // Stop if already playing
-            if (sound.howl && sound.howl.playing()) {
-                sound.howl.stop();
-                sound.howl = null;
-                showToast(`Stopped ${sound.name}`);
-                return;
-            }
-            
-            // Create and play sound
-            sound.howl = new Howl({
-                src: [sound.url],
-                volume: sound.volume,
-                loop: true,
-                onplay: () => {
-                    showToast(`Playing ${sound.name}`);
-                },
-                onloaderror: () => {
-                    showToast(`Failed to load ${sound.name}`);
-                }
-            });
-            
-            sound.howl.play();
-            
-            // Connect to audio graph
-            if (bgGainNode && audioContext) {
-                // Create a source from the Howl instance
-                const source = audioContext.createMediaElementSource(sound.howl._sounds[0]._node);
-                source.connect(bgGainNode);
-            }
-        }
-
-        function stopAllBackgroundSounds() {
-            Object.values(backgroundSounds).forEach(sound => {
-                if (sound.howl) {
-                    sound.howl.stop();
-                    sound.howl = null;
-                }
-            });
-            showToast('All background sounds stopped');
-        }
-
-        // ========== BROADCAST FUNCTIONS ==========
-        function startBroadcasting() {
-            if (!audioContext || !mediaStream) {
-                showToast('Audio engine not ready');
-                return;
-            }
-            
-            if (!peer) {
-                setupPeerConnection();
-                return;
-            }
-            
-            // Wait for peer to be ready
-            if (!myPeerId) {
-                showToast('Connecting to broadcast server...');
-                return;
-            }
-            
-            // Create a stream destination for broadcasting
-            const streamDestination = audioContext.createMediaStreamDestination();
-            masterGainNode.connect(streamDestination);
-            
-            // Send broadcast stream to listeners
-            if (peer) {
-                // The host does NOT call himself - only listeners call the host
-                console.log('🎙️ Host ready for listeners');
-            }
-            
-            isStreaming = true;
-            broadcastStartTime = Date.now();
-            
-            // Update UI
-            document.getElementById('onAirIndicator').classList.remove('hidden');
-            document.getElementById('startBroadcastBtn').innerHTML = '<i class="fas fa-broadcast-tower mr-2"></i> Live';
-            document.getElementById('startBroadcastBtn').classList.remove('bg-airvibe-success/20');
-            document.getElementById('startBroadcastBtn').classList.add('bg-red-500/20', 'text-red-400');
-            
-            showToast('Broadcast started! Listeners can now join.');
-        }
-
-        function setupPeerConnection() {
-            peer = new Peer(undefined, {
-                host: window.location.hostname,
-                port: window.location.port || (window.location.protocol === 'https:' ? 443 : 80),
-                path: '/peerjs/peerjs',
-                secure: window.location.protocol === 'https:',
-                debug: 1
-            });
-
-            peer.on('open', (id) => {
-                myPeerId = id;
-                console.log('🎧 PeerJS ID:', id);
-                
-                // Now we can start broadcasting
-                startBroadcasting();
-            });
-
-            peer.on('call', (call) => {
-                // A listener is calling to receive audio
-                console.log('📞 Incoming call from listener:', call.peer);
-                
-                // Create stream destination for broadcasting
-                const streamDestination = audioContext.createMediaStreamDestination();
-                masterGainNode.connect(streamDestination);
-                
-                // Answer the call with our audio stream
-                call.answer(streamDestination.stream);
-                
-                call.on('stream', (remoteStream) => {
-                    // We don't need to do anything with the listener's stream
-                    // since the host shouldn't hear listeners
-                    console.log('✅ Listener connected');
-                    
-                    // Update listener count
-                    listenerCount++;
-                    updateListenerCount();
-                });
-                
-                call.on('close', () => {
-                    console.log('❌ Listener disconnected');
-                    listenerCount--;
-                    updateListenerCount();
-                });
-                
-                call.on('error', (err) => {
-                    console.error('Call error:', err);
-                });
-                
-                activeCalls.set(call.peer, call);
-            });
-
-            peer.on('error', (err) => {
-                console.error('PeerJS error:', err);
-                showToast('Connection error');
-            });
-        }
-
-        function setupSocketConnection() {
-            socket = io({
-                reconnection: true,
-                reconnectionAttempts: 5,
-                reconnectionDelay: 1000
-            });
-
-            socket.on('connect', () => {
-                console.log('✅ Connected to server');
-            });
-
-            socket.on('disconnect', () => {
-                console.log('🔌 Disconnected from server');
-            });
-
-            socket.on('chat-message', (message) => {
-                addChatMessage(message.user, message.message, false);
-            });
-        }
-
-        // ========== CHAT FUNCTIONS ==========
-        function addChatMessage(user, message, isSystem) {
-            const container = document.getElementById('chatMessages');
-            if (!container) return;
-            
-            const div = document.createElement('div');
-            div.className = 'animate-slide-up';
-            
-            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            
-            if (isSystem) {
-                div.innerHTML = `
-                    <div class="text-center">
-                        <span class="text-xs px-3 py-1 rounded-full bg-yellow-500/20 text-yellow-400 inline-block">
-                            ${message}
-                        </span>
-                    </div>
-                `;
-            } else {
-                div.innerHTML = `
-                    <div class="flex items-start gap-3">
-                        <div class="w-6 h-6 rounded-full bg-gradient-to-br from-airvibe-primary/20 to-airvibe-secondary/20 flex items-center justify-center">
-                            <i class="fas fa-user text-xs"></i>
-                        </div>
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-1">
-                                <span class="font-bold text-sm">${user}</span>
-                                <span class="text-xs text-airvibe-text-light">${time}</span>
-                            </div>
-                            <p class="text-sm">${message}</p>
-                        </div>
-                    </div>
-                `;
-            }
-            
-            container.appendChild(div);
-            container.scrollTop = container.scrollHeight;
-        }
-
-        function sendChatMessage() {
-            if (!socket || !socket.connected) return;
-            
-            const input = document.getElementById('chatInput');
-            const message = input.value.trim();
-            
-            if (!message) return;
-            
-            const hostName = document.getElementById('hostName').value.trim() || 'Host';
-            
-            socket.emit('chat-message', {
-                streamId: myPeerId,
-                message: message,
-                user: hostName
-            });
-            
-            addChatMessage(hostName, message, false);
-            input.value = '';
-        }
-
-        // ========== UI CONTROLS ==========
-        function toggleTalkover() {
-            if (!musicGainNode) return;
-            
-            isTalkover = !isTalkover;
-            const newVolume = isTalkover ? 0.2 : 0.5;
-            musicGainNode.gain.value = newVolume;
-            
-            const btn = document.getElementById('talkoverBtn');
-            btn.classList.toggle('bg-airvibe-accent/30', isTalkover);
-            btn.classList.toggle('text-white', isTalkover);
-            
-            showToast(isTalkover ? 'Talkover enabled' : 'Talkover disabled');
-        }
-
-        function updateCurrentTime() {
-            const now = new Date();
-            document.getElementById('currentTime').textContent = 
-                now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        }
-
-        function startBroadcastTimer() {
-            if (timerInterval) clearInterval(timerInterval);
-            
-            broadcastStartTime = Date.now();
-            
-            timerInterval = setInterval(() => {
-                if (!broadcastStartTime) return;
-                
-                const elapsed = Date.now() - broadcastStartTime;
-                const hours = Math.floor(elapsed / 3600000);
-                const minutes = Math.floor((elapsed % 3600000) / 60000);
-                const seconds = Math.floor((elapsed % 60000) / 1000);
-                
-                document.getElementById('broadcastTimer').textContent = 
-                    `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            // Timer
+            startTime = Date.now();
+            timerInt = setInterval(() => {
+                const diff = Math.floor((Date.now() - startTime)/1000);
+                const h = Math.floor(diff/3600).toString().padStart(2,'0');
+                const m = Math.floor((diff%3600)/60).toString().padStart(2,'0');
+                const s = (diff%60).toString().padStart(2,'0');
+                document.getElementById('broadcastTimer').innerText = `${h}:${m}:${s}`;
             }, 1000);
-        }
 
-        function updateListenerCount() {
-            document.getElementById('listenerCount').textContent = listenerCount;
-            document.getElementById('mobileListenerCount').textContent = listenerCount;
+            // PeerJS
+            peer = new Peer(undefined, { 
+                host: location.hostname, 
+                port: location.port || 443, 
+                path: "/peerjs", 
+                secure: location.protocol === "https:" 
+            });
             
-            // Update other stats
-            updateSystemStats();
-        }
+            peer.on('open', (id) => {
+                peerId = id;
+                document.getElementById('peer-display').innerText = `PID: ${id}`;
+                socket.emit('host-ready', { peerId: id, title: stationData.name, hostName: stationData.dj });
+                addLog("SYSTEM", "Uplink Established. You are live.");
+            });
 
-        function updateSystemStats() {
-            // Simulate stats for demo
-            const bitrate = Math.floor(Math.random() * 256 + 128);
-            const latency = Math.floor(Math.random() * 50 + 20);
-            const cpu = Math.min(100, Math.floor(Math.random() * 40 + 10));
-            
-            document.getElementById('bitrateDisplay').textContent = bitrate;
-            document.getElementById('latencyDisplay').textContent = latency;
-            document.getElementById('mobileLatency').textContent = latency;
-            document.getElementById('cpuUsage').textContent = `${cpu}%`;
-        }
+            peer.on('error', err => showToast("Network Error: " + err.type));
 
-        function showMobileMenu() {
-            document.getElementById('mobileMenuModal').classList.remove('hidden');
-        }
-
-        function hideMobileMenu() {
-            document.getElementById('mobileMenuModal').classList.add('hidden');
-        }
-
-        function showEffectsModal() {
-            document.getElementById('effectsModal').classList.remove('hidden');
-        }
-
-        function hideEffectsModal() {
-            document.getElementById('effectsModal').classList.add('hidden');
-        }
-
-        function showLoading(text) {
-            document.getElementById('loadingText').textContent = text;
-            document.getElementById('loadingOverlay').classList.remove('hidden');
-        }
-
-        function hideLoading() {
-            document.getElementById('loadingOverlay').classList.add('hidden');
-        }
-
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            const toastMessage = document.getElementById('toastMessage');
-            
-            toastMessage.textContent = message;
-            toast.classList.remove('hidden');
-            
-            setTimeout(() => {
-                toast.classList.add('hidden');
-            }, 3000);
-        }
+            socket.on('new-listener', (id) => {
+                if(!activeCalls.has(id)) {
+                    const call = peer.call(id, masterDest.stream);
+                    activeCalls.set(id, call);
+                    listenerCount++;
+                    document.getElementById('listenerCount').innerText = `${listenerCount} LIS`;
+                    call.on('close', () => { 
+                        activeCalls.delete(id); 
+                        listenerCount--; 
+                        document.getElementById('listenerCount').innerText = `${listenerCount} LIS`; 
+                    });
+                }
+            });
+        };
 
         function endStream() {
-            if (confirm('Are you sure you want to end the broadcast?')) {
-                // Close all peer connections
-                activeCalls.forEach(call => call.close());
-                activeCalls.clear();
-                
-                if (peer) {
-                    peer.destroy();
-                    peer = null;
-                }
-                
-                // Reset streaming state
-                isStreaming = false;
-                listenerCount = 0;
-                
-                // Update UI
-                document.getElementById('onAirIndicator').classList.add('hidden');
-                document.getElementById('startBroadcastBtn').innerHTML = '<i class="fas fa-broadcast-tower mr-2"></i> Go Live';
-                document.getElementById('startBroadcastBtn').classList.remove('bg-red-500/20', 'text-red-400');
-                document.getElementById('startBroadcastBtn').classList.add('bg-airvibe-success/20', 'text-airvibe-success');
-                
-                updateListenerCount();
-                showToast('Broadcast ended');
-            }
+            if(confirm("Stop Broadcast?")) location.reload();
         }
 
-        // ========== EVENT LISTENERS ==========
-        function setupEventListeners() {
-            // Recording controls
-            const recordStartBtn = document.getElementById('recordStartBtn');
-            const recordStopBtn = document.getElementById('recordStopBtn');
-            if (recordStartBtn) recordStartBtn.addEventListener('click', startRecording);
-            if (recordStopBtn) recordStopBtn.addEventListener('click', stopRecording);
+        // --- 4. MIXER CONTROLS ---
+        // Mic Volume
+        const setMicVol = (val) => { if(micGain) micGain.gain.value = val/100; };
+        document.getElementById('micVol').oninput = (e) => setMicVol(e.target.value);
+        document.getElementById('micVolMobile').oninput = (e) => setMicVol(e.target.value);
+        
+        // Music Volume
+        const setMusicVol = (val) => { if(musicGain) musicGain.gain.value = val/100; };
+        document.getElementById('musicVol').oninput = (e) => setMusicVol(e.target.value);
+        document.getElementById('musicVolMobile').oninput = (e) => setMusicVol(e.target.value);
+
+        // Music Player
+        document.getElementById('musicFile').onchange = (e) => { 
+            const f=e.target.files[0]; if(!f) return; 
+            const u=URL.createObjectURL(f); 
+            musicEl=new Audio(u); 
+            musicEl.crossOrigin='anonymous'; 
+            document.getElementById('trackName').innerText=f.name; 
+            document.getElementById('playBtn').disabled=false; 
+            document.getElementById('playBtn').innerText = "PLAY";
             
-            // Background sounds volume
-            const bgVolume = document.getElementById('bgVolume');
-            if (bgVolume) {
-                bgVolume.addEventListener('input', (e) => {
-                    const value = e.target.value;
-                    document.getElementById('bgVolumeValue').textContent = `${value}%`;
-                    
-                    // Update background sound volumes
-                    Object.values(backgroundSounds).forEach(sound => {
-                        sound.volume = value / 100;
-                        if (sound.howl) {
-                            sound.howl.volume(sound.volume);
-                        }
-                    });
-                });
+            if(!musicNode && audioCtx) { 
+                musicNode=audioCtx.createMediaElementSource(musicEl); 
+                musicNode.connect(musicGain); 
             }
             
-            // Stop all background sounds
-            const stopAllBgBtn = document.getElementById('stopAllBgBtn');
-            if (stopAllBgBtn) stopAllBgBtn.addEventListener('click', stopAllBackgroundSounds);
-            
-            // Talkover button
-            const talkoverBtn = document.getElementById('talkoverBtn');
-            if (talkoverBtn) talkoverBtn.addEventListener('click', toggleTalkover);
-            
-            // Start broadcast button
-            const startBroadcastBtn = document.getElementById('startBroadcastBtn');
-            if (startBroadcastBtn) startBroadcastBtn.addEventListener('click', startBroadcasting);
-            
-            // End stream button
-            const endStreamBtn = document.getElementById('endStreamBtn');
-            if (endStreamBtn) endStreamBtn.addEventListener('click', endStream);
-            
-            // Chat
-            const sendChatBtn = document.getElementById('sendChatBtn');
-            const chatInput = document.getElementById('chatInput');
-            if (sendChatBtn) sendChatBtn.addEventListener('click', sendChatMessage);
-            if (chatInput) chatInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') sendChatMessage();
-            });
-            
-            // Mobile menu
-            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-            if (mobileMenuBtn) mobileMenuBtn.addEventListener('click', showMobileMenu);
-            
-            // Effects
-            const effectsControls = ['compressorAmount', 'reverbAmount', 'delayAmount', 'chorusAmount', 'pitchAmount', 'distortionAmount'];
-            effectsControls.forEach(id => {
-                const element = document.getElementById(id);
-                if (element) {
-                    element.addEventListener('input', (e) => {
-                        // Update effects in real-time
-                        const value = e.target.value;
-                        console.log(`${id}: ${value}`);
-                    });
-                }
-            });
-            
-            // Window resize
-            window.addEventListener('resize', handleResize);
-            handleResize(); // Initial call
+            musicEl.ontimeupdate = () => {
+                const m = Math.floor(musicEl.currentTime / 60).toString().padStart(2,'0');
+                const s = Math.floor(musicEl.currentTime % 60).toString().padStart(2,'0');
+                document.getElementById('trackTime').innerText = `${m}:${s}`;
+            };
+        };
+        
+        document.getElementById('playBtn').onclick = async () => { 
+            if(audioCtx?.state==='suspended') await audioCtx.resume(); 
+            if(musicEl.paused) { 
+                musicEl.play(); 
+                document.getElementById('playBtn').innerText = 'PAUSE'; 
+                document.getElementById('playBtn').classList.add('text-green-400');
+            } else { 
+                musicEl.pause(); 
+                document.getElementById('playBtn').innerText = 'PLAY';
+                document.getElementById('playBtn').classList.remove('text-green-400');
+            } 
+        };
+
+        // Talkover
+        const talkBtn = document.getElementById('talkoverBtn');
+        const triggerTalkover = (active) => {
+            if(musicGain && audioCtx) {
+                const target = active ? 0.2 : 0.5;
+                musicGain.gain.setTargetAtTime(target, audioCtx.currentTime, 0.1);
+                talkBtn.classList.toggle('bg-white', active);
+                talkBtn.classList.toggle('text-black', active);
+            }
+        };
+        talkBtn.onmousedown = () => triggerTalkover(true);
+        talkBtn.onmouseup = () => triggerTalkover(false);
+        talkBtn.ontouchstart = (e) => { e.preventDefault(); triggerTalkover(true); };
+        talkBtn.ontouchend = (e) => { e.preventDefault(); triggerTalkover(false); };
+
+        // --- 5. CHAT & UTILS ---
+        socket.on('chatMessage', (data) => addLog(data.user, data.msg));
+        
+        function sendHostMessage(e) { 
+            e.preventDefault(); 
+            const inp = document.getElementById('hostMsg') || document.getElementById('mobileHostMsg'); 
+            const txt = inp.value.trim(); 
+            if(!txt) return; 
+            socket.emit('chatMessage', { room: peerId, user: 'HOST', msg: txt }); 
+            addLog('HOST', txt, true); 
+            inp.value = ''; 
         }
 
-        function handleResize() {
-            const isMobile = window.innerWidth <= 768;
+        function addLog(user, msg, isMe=false) { 
+            const feed = document.getElementById('chatFeed'); 
+            const mobileFeed = document.getElementById('mobileChatFeed');
+            const d = document.createElement('div'); 
+            d.className = `break-words ${isMe ? 'text-right' : 'text-left'}`;
+            d.innerHTML = `<span class="${isMe?'text-indigo-400':'text-gray-500'} font-bold text-[10px] uppercase">${user}</span> <span class="text-gray-300">${msg}</span>`; 
             
-            // Update mobile-specific UI
-            if (isMobile) {
-                // Hide sidebars on mobile
-                document.getElementById('leftSidebar')?.classList.add('hidden');
-                document.getElementById('rightSidebar')?.classList.add('hidden');
+            feed.appendChild(d.cloneNode(true)); 
+            feed.scrollTop = feed.scrollHeight;
+            
+            mobileFeed.appendChild(d);
+            mobileFeed.scrollTop = mobileFeed.scrollHeight;
+        }
+
+        function playSfx(type) {
+            if(!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            osc.connect(g); g.connect(masterGain);
+            const t = audioCtx.currentTime;
+            
+            // Simple synth sfx for demo
+            if(type==='horn') {
+                osc.frequency.setValueAtTime(200, t);
+                osc.frequency.exponentialRampToValueAtTime(400, t+0.1);
+                g.gain.setValueAtTime(0.5, t);
+                g.gain.exponentialRampToValueAtTime(0.01, t+0.5);
+                osc.start(t); osc.stop(t+0.5);
             } else {
-                // Show sidebars on desktop
-                document.getElementById('leftSidebar')?.classList.remove('hidden');
-                document.getElementById('rightSidebar')?.classList.remove('hidden');
+                osc.frequency.value = 800;
+                g.gain.value = 0.2;
+                osc.start(t); osc.stop(t+0.1);
             }
         }
 
-        // Clean up on page unload
-        window.addEventListener('beforeunload', () => {
-            if (isStreaming && socket && myPeerId) {
-                socket.emit('end-stream', { streamId: myPeerId });
-            }
-            
-            if (peer) {
-                peer.destroy();
-            }
-        });
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = msg;
+            t.style.transform = "translate(-50%, 0)";
+            setTimeout(() => t.style.transform = "translate(-50%, -150%)", 3000);
+        }
 
-        console.log('🎚️ Airvibe Studio 4000 loaded - Mobile Ready!');
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('currentTime').innerText = now.toLocaleTimeString();
+        }
+        setInterval(updateTime, 1000);
+
+        function drawScope() { 
+            const c=document.getElementById('scope'); 
+            const x=c.getContext('2d'); 
+            const b=analyser.frequencyBinCount; 
+            const d=new Uint8Array(b); 
+            
+            const resize = () => { c.width = c.clientWidth; c.height = c.clientHeight; };
+            window.addEventListener('resize', resize);
+            resize();
+
+            function l(){ 
+                requestAnimationFrame(l); 
+                analyser.getByteTimeDomainData(d); 
+                x.fillStyle='#000'; x.fillRect(0,0,c.width,c.height); 
+                x.lineWidth=1; x.strokeStyle='#4f46e5'; x.beginPath(); 
+                const s=c.width*1.0/b; let p=0; 
+                for(let i=0;i<b;i++){ const v=d[i]/128.0; const y=v*c.height/2; if(i===0) x.moveTo(p,y); else x.lineTo(p,y); p+=s; } 
+                x.stroke(); 
+            } l(); 
+        }
     </script>
 </body>
 </html>
